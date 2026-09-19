@@ -1,0 +1,326 @@
+{
+  "opening": "Evening. Warehouse is closed. What do you want?",
+  "actions": {
+    "ANSWER_QUESTION": {
+      "neutral": [
+        "Night shift. I watch the door, and the door stays shut unless someone belongs here.",
+        "The warehouse is closed until morning. My job is to make sure it stays that way."
+      ],
+      "name": [
+        "Arthur. I'm the night guard here. What do you need?",
+        "Name's Arthur. I keep watch here after dark. Who are you?"
+      ],
+      "friendly": "Just keeping an eye on the place. Quiet night, mostly — and I'd like to keep it that way.",
+      "irritated": "You can ask questions all night. It won't make the warehouse open.",
+      "hostile": "I'm not here to satisfy your curiosity. Move along."
+    },
+    "REFUSE_ENTRY": {
+      "neutral": {
+        "template": "{acknowledgement} {boundary}",
+        "slots": {
+          "acknowledgement": [
+            "I understand what you're asking.",
+            "I've heard you.",
+            "Sorry."
+          ],
+          "boundary": [
+            "I can't let you in without authorisation.",
+            "That still isn't enough for me to open the door.",
+            "You'll need to come back when the warehouse is open."
+          ]
+        },
+        "branches": [
+          {
+            "when": {
+              "playerContains": ["phone", "bag", "friend", "personal item"]
+            },
+            "template": "{acknowledgement} {personalBoundary}",
+            "slots": {
+              "acknowledgement": [
+                "I believe the item may be yours.",
+                "I understand it's inconvenient."
+              ],
+              "personalBoundary": [
+                "A personal errand still doesn't justify opening a closed warehouse.",
+                "You'll have to retrieve it when the site reopens.",
+                "I can't risk the building over something left inside."
+              ]
+            }
+          }
+        ]
+      },
+      "friendly": "I'd help if I could, but I can't risk letting you through.",
+      "irritated": "I've already told you. You're not getting in.",
+      "hostile": "No. You're not going through that door."
+    },
+    "ASK_FOR_REASON": {
+      "neutral": {
+        "template": "{opening} {question}",
+        "slots": {
+          "opening": [
+            "Let's start at the beginning.",
+            "Before we go any further,",
+            "All right."
+          ],
+          "question": [
+            "Why are you here at this hour?",
+            "Tell me what you need inside.",
+            "What business do you have with the warehouse?"
+          ]
+        }
+      },
+      "friendly": [
+        "All right. Tell me what brings you here this late.",
+        "I'm listening. What is it you need from the warehouse?"
+      ],
+      "irritated": "Then give me one good reason you're still standing here.",
+      "hostile": "Last chance. Why are you here?"
+    },
+    "ASK_FOR_PROOF": {
+      "neutral": {
+        "template": "{opening} {evidence} {close}",
+        "slots": {
+          "opening": [
+            "If that's true,",
+            "That sounds official,",
+            "I understand, but"
+          ],
+          "evidence": [
+            "you'll have something to prove it.",
+            "I need something I can verify before that door opens."
+          ],
+          "close": [
+            "Identification. A work order. Anything.",
+            "What have you got?",
+            "Give me a pass, a reference, or a document."
+          ]
+        },
+        "branches": [
+          {
+            "when": { "memoryTag": "repair" },
+            "template": "{opening} {evidence} {close}",
+            "slots": {
+              "opening": [
+                "You've explained that more clearly now, so",
+                "All right. To move forward,"
+              ],
+              "evidence": [
+                "show me what supports the work you described.",
+                "I still need something I can verify."
+              ],
+              "close": [
+                "Your ID, a work order, or a reference will do.",
+                "What can you show me?"
+              ]
+            }
+          }
+        ]
+      },
+      "friendly": [
+        "Show me something official and I may be able to help you.",
+        "Give me a name, a pass, or a reference I can check and we'll take it from there."
+      ],
+      "irritated": "A story isn't authorisation. Show me proof.",
+      "hostile": "Proof. Now. Or this conversation is over."
+    },
+    "ALLOW_ENTRY": {
+      "neutral": "That checks out. Stay where I can see you and don't touch anything you haven't mentioned.",
+      "friendly": "All right. You've been straight with me. I'll let you through.",
+      "irritated": "Fine. In, do the job, and come straight back out.",
+      "hostile": "You're going in under my watch. One wrong move and you're back outside."
+    },
+    "WARN_PLAYER": {
+      "neutral": {
+        "template": "{warning} {boundary}",
+        "slots": {
+          "warning": [
+            "Careful.",
+            "That's enough pressure.",
+            "Mind how you speak to me."
+          ],
+          "boundary": [
+            "Keep this civil and we won't have a problem.",
+            "Step back and talk properly.",
+            "One more push like that and this conversation ends."
+          ]
+        },
+        "branches": [
+          {
+            "when": {
+              "playerContains": ["idiot", "stupid", "useless", "moron", "pathetic"]
+            },
+            "template": "{warning} {boundary}",
+            "slots": {
+              "warning": [
+                "The insult doesn't help you.",
+                "You can leave the name-calling there."
+              ],
+              "boundary": [
+                "Speak civilly if you want me to keep listening.",
+                "Try that tone again and we're finished."
+              ]
+            }
+          }
+        ]
+      },
+      "friendly": "Let's not make this harder than it needs to be. Just be straight with me.",
+      "irritated": "Watch your tone. This is your only warning.",
+      "hostile": "Back up. Say one more thing like that and we're done.",
+      "weapon": [
+        "Put the gun down. Now. I won't argue with someone pointing a weapon at me.",
+        "Lower the weapon and step back from the door. We can talk when nobody's life is at risk."
+      ]
+    },
+    "DEESCALATE_THREAT": {
+      "neutral": "Keep the weapon pointed at the ground. I'm not going to make any sudden moves. Tell me what you need.",
+      "friendly": "All right. Keep the gun lowered and take a breath. Nobody needs to get hurt; tell me what brought you here.",
+      "irritated": "I hear you. Keep the weapon down and stay where you are. We can sort this out if you tell me what you need.",
+      "hostile": "Easy. Keep the gun down and don't move closer. Tell me what you want and we'll take this one step at a time.",
+      "weapon": [
+        "Keep the weapon pointed at the ground. I'm not going to make any sudden moves. Tell me what you need.",
+        "All right. Keep the gun lowered and take a breath. Nobody needs to get hurt; tell me what brought you here.",
+        "I hear you. Keep the weapon down and stay where you are. We can sort this out if you tell me what you need."
+      ]
+    },
+    "THREATEN_PLAYER": {
+      "neutral": "If you try that door, I'll call the police.",
+      "friendly": "Don't force my hand. I will have to call this in.",
+      "irritated": "Take another step and I'm calling the police.",
+      "hostile": "Try me. The police are one button away.",
+      "weapon": [
+        "Stop. Keep the weapon pointed down and move away from the door. I won't make any sudden moves.",
+        "Back away from the entrance and keep the gun lowered. We can end this without anybody getting hurt."
+      ]
+    },
+    "SHOW_SYMPATHY": {
+      "neutral": {
+        "template": "{acknowledgement} {boundary}",
+        "slots": {
+          "acknowledgement": [
+            "I understand you're in a difficult spot.",
+            "I hear you.",
+            "I don't want this to cost you your job."
+          ],
+          "boundary": [
+            "I still have a duty to protect this place.",
+            "That alone doesn't give me grounds to unlock the warehouse.",
+            "Give me something concrete and I'll listen."
+          ]
+        }
+      },
+      "friendly": [
+        "I do understand. Give me something I can verify and I'll see what I can do.",
+        "You've been decent with me. Help me justify it and I'll try to help you."
+      ],
+      "irritated": "I understand your problem. That doesn't make it mine.",
+      "hostile": "Save the story. It isn't opening that door."
+    },
+    "BECOME_SUSPICIOUS": {
+      "neutral": {
+        "template": "{challenge} {request}",
+        "slots": {
+          "challenge": [
+            "Something about that doesn't add up.",
+            "Hold on. Your account has changed.",
+            "That's not the reason you gave me before."
+          ],
+          "request": [
+            "Explain it again.",
+            "What are you really doing here?",
+            "Give me the honest version."
+          ]
+        },
+        "branches": [
+          {
+            "when": {
+              "playerContains": ["bribe", "cash", "money", "pay you", "quid", "reward"]
+            },
+            "template": "{challenge} {boundary}",
+            "slots": {
+              "challenge": [
+                "Offering me something makes this look worse.",
+                "You don't buy your way through this door."
+              ],
+              "boundary": [
+                "Keep your money and explain why you're really here.",
+                "Try to bribe me again and we're done."
+              ]
+            }
+          }
+        ]
+      },
+      "friendly": "Maybe I've misunderstood, but your story isn't quite lining up.",
+      "irritated": "Now you're changing your story. What are you really doing here?",
+      "hostile": "I knew it. You've been lying to me."
+    },
+    "REPAIR_CONVERSATION": {
+      "neutral": {
+        "template": "{acknowledgement} {nextStep}",
+        "slots": {
+          "acknowledgement": [
+            "All right. I hear you.",
+            "Thank you for saying that."
+          ],
+          "nextStep": [
+            "We can start again, but be straight with me this time. What do you need inside?",
+            "I'm still cautious, but you have a chance to explain yourself clearly."
+          ]
+        },
+        "branches": [
+          {
+            "when": { "lastAction": "BECOME_SUSPICIOUS" },
+            "template": "{acknowledgement} {boundary} {nextStep}",
+            "slots": {
+              "acknowledgement": [
+                "All right. I hear you.",
+                "Thank you for being honest."
+              ],
+              "boundary": [
+                "The story still needs to be straight from here.",
+                "That does not erase the contradiction, but it gives us a way forward."
+              ],
+              "nextStep": [
+                "Tell me what you really need inside.",
+                "Start again and give me the clear version."
+              ]
+            }
+          },
+          {
+            "when": { "lastAction": "WARN_PLAYER" },
+            "template": "{acknowledgement} {boundary} {nextStep}",
+            "slots": {
+              "acknowledgement": [
+                "I appreciate the apology.",
+                "All right. I hear you."
+              ],
+              "boundary": [
+                "Keep it civil and we can continue.",
+                "Let's leave the shouting there."
+              ],
+              "nextStep": [
+                "What is it you need from the warehouse?",
+                "Explain what brought you here."
+              ]
+            }
+          }
+        ]
+      },
+      "friendly": [
+        "I appreciate the honesty. Let's start over and work out what you actually need.",
+        "All right, we can reset this. Give me the clear version and I'll listen."
+      ],
+      "irritated": [
+        "That helps, but it doesn't erase what happened. Start again and tell me the truth.",
+        "I'll give you one chance to straighten this out. What is your real reason for being here?"
+      ],
+      "hostile": "I hear the apology. Keep your distance and explain yourself carefully."
+    },
+    "END_CONVERSATION": {
+      "neutral": "We're done here. Leave.",
+      "friendly": "I can't help you. Please go home.",
+      "irritated": "That's enough. We're done. Leave the property.",
+      "hostile": "Conversation over. Get off the property before I call the police.",
+      "weapon": "Keep the weapon lowered and step away from the door. I'm ending this conversation so nobody gets hurt."
+    }
+  }
+}

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A small authored-dialogue NPC decision prototype featuring Arthur, a warehouse security guard."
+    />
+    <title>Warehouse Entrance — NPC Decision Prototype</title>
+    <link rel="preload" href="assets/arthur-speaking.gif" as="image" />
+    <link rel="preload" href="assets/player-shadow.jpg" as="image" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient--one" aria-hidden="true"></div>
+    <div class="ambient ambient--two" aria-hidden="true"></div>
+
+    <main class="app-shell">
+      <section class="game-panel" aria-labelledby="location-title">
+        <header class="scene-header">
+          <div>
+            <p class="eyebrow">Docklands · Perimeter 04</p>
+            <h1 id="location-title">Warehouse Entrance</h1>
+          </div>
+          <div class="scene-meta" aria-label="Scene information">
+            <time datetime="02:13">02:13</time>
+            <span><i aria-hidden="true"></i> Closed</span>
+          </div>
+        </header>
+
+        <div class="scene-art" aria-hidden="true">
+          <div class="lamp"></div>
+          <div class="warehouse-door">
+            <span>AUTHORIZED<br />PERSONNEL ONLY</span>
+          </div>
+        </div>
+
+        <p class="scene-description">
+          Rain ticks against the corrugated roof. Arthur watches you from beneath
+          the security lamp, one hand resting beside the locked door.
+        </p>
+
+        <div
+          id="conversation"
+          class="conversation"
+          role="log"
+          aria-live="polite"
+          aria-label="Conversation with Arthur"
+        ></div>
+
+        <div id="outcome" class="outcome" hidden></div>
+
+        <form id="player-form" class="player-form">
+          <label for="player-input">What do you say?</label>
+          <div class="input-row">
+            <input
+              id="player-input"
+              name="player-input"
+              type="text"
+              autocomplete="off"
+              maxlength="280"
+              placeholder="Type anything…"
+              required
+            />
+            <button id="send-button" type="submit">
+              <span>Speak</span>
+              <span aria-hidden="true">↵</span>
+            </button>
+          </div>
+          <p id="input-hint" class="input-hint">Enter to send · 280 characters maximum</p>
+        </form>
+      </section>
+
+      <aside class="debug-panel" aria-labelledby="debug-title">
+        <header class="debug-header">
+          <div>
+            <p class="eyebrow">NPC internal state</p>
+            <h2 id="debug-title">Arthur</h2>
+            <p class="npc-role">Night security guard</p>
+          </div>
+          <span class="live-badge"><i aria-hidden="true"></i> Live</span>
+        </header>
+
+        <section class="debug-section" aria-labelledby="state-title">
+          <div class="section-heading">
+            <h3 id="state-title">Emotional state</h3>
+            <span id="turn-count">Turn 0</span>
+          </div>
+          <div id="state-values" class="state-values"></div>
+        </section>
+
+        <section class="debug-section decision-section" aria-labelledby="decision-title">
+          <h3 id="decision-title">Latest decision</h3>
+          <dl class="decision-grid">
+            <div>
+              <dt>Current goal</dt>
+              <dd id="current-goal">Protect warehouse</dd>
+            </div>
+            <div>
+              <dt>Action</dt>
+              <dd id="last-action" class="code-value">WAITING</dd>
+            </div>
+            <div>
+              <dt>Confidence</dt>
+              <dd id="confidence">—</dd>
+            </div>
+            <div>
+              <dt>Tone</dt>
+              <dd id="tone">Neutral</dd>
+            </div>
+            <div>
+              <dt>Provider</dt>
+              <dd id="decision-provider">Mock</dd>
+            </div>
+            <div>
+              <dt>Validation</dt>
+              <dd id="validation-status">Waiting</dd>
+            </div>
+          </dl>
+          <div class="reason-block">
+            <span>Reason</span>
+            <p id="decision-reason">Waiting for the player to speak.</p>
+          </div>
+          <p id="fallback-notice" class="fallback-notice" hidden></p>
+        </section>
+
+        <section class="debug-section" aria-labelledby="memory-title">
+          <div class="section-heading">
+            <h3 id="memory-title">Memories</h3>
+            <span id="memory-count">0 / 8</span>
+          </div>
+          <ul id="memory-list" class="memory-list">
+            <li class="empty-memory">Nothing important recorded yet.</li>
+          </ul>
+        </section>
+
+        <section class="debug-section inspection-section" aria-label="Provider inspection">
+          <details>
+            <summary>Decision context</summary>
+            <pre id="context-json">No request sent yet.</pre>
+          </details>
+          <details>
+            <summary>Raw provider response</summary>
+            <pre id="response-json">No response received yet.</pre>
+          </details>
+        </section>
+
+        <footer class="debug-controls">
+          <label for="provider-select">Provider</label>
+          <select id="provider-select" aria-describedby="provider-note">
+            <option value="mock">Mock</option>
+            <option value="jev">Jev — checking server</option>
+          </select>
+          <p id="provider-note">Offline deterministic decision model</p>
+          <p id="provider-status" class="provider-status" role="status" hidden></p>
+          <button id="reset-button" class="reset-button" type="button">
+            Reset conversation
+          </button>
+        </footer>
+      </aside>
+    </main>
+
+    <script type="module" src="js/app.js?phase=4"></script>
+  </body>
+</html>

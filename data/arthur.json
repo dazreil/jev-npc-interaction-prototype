@@ -1,0 +1,35 @@
+{
+  "id": "arthur",
+  "name": "Arthur",
+  "role": "Night security guard",
+  "personality": {
+    "patience": 35,
+    "greed": 25,
+    "courage": 70,
+    "sympathy": 55,
+    "ruleFollowing": 80
+  },
+  "state": {
+    "trust": 20,
+    "suspicion": 40,
+    "irritation": 10,
+    "fear": 5
+  },
+  "goals": [
+    {
+      "id": "protect_warehouse",
+      "label": "Protect warehouse",
+      "priority": 100
+    },
+    {
+      "id": "keep_job",
+      "label": "Keep his job",
+      "priority": 90
+    },
+    {
+      "id": "avoid_trouble",
+      "label": "Avoid trouble",
+      "priority": 60
+    }
+  ]
+}
