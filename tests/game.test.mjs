@@ -221,7 +221,7 @@ test("ordinary repair language gets a contextual human proof request", async () 
 
   assert.equal(
     game.getOpeningDialogue(),
-    "Good evening, sir. Sorry, we're closed up for the night. What brings you out here?"
+    "Good evening, sir. You're outside at the south-gate intercom; I'm inside the locked gatehouse. We're closed for the night, so what brings you here?"
   );
 
   const purpose = await game.takeTurn(
@@ -346,9 +346,9 @@ test("authored performance metadata resolves by action and tone with safe defaul
 });
 
 test("a first gun threat uses an authored de-escalation response and serious memory", async () => {
-  const weaponDialogueData = structuredClone(dialogueData);
-  weaponDialogueData.actions.DEESCALATE_THREAT.weapon =
-    "Keep the gun pointed at the ground. Tell me what you need.";
+  const weaponDialogueData = JSON.parse(
+    await readFile(new URL("../data/dialogue.json", import.meta.url), "utf8")
+  );
   const game = new Game({
     npcTemplate,
     dialogueData: weaponDialogueData,
@@ -359,7 +359,11 @@ test("a first gun threat uses an authored de-escalation response and serious mem
 
   assert.equal(isWeaponThreat(turn.playerInput), true);
   assert.equal(turn.decision.action, "DEESCALATE_THREAT");
-  assert.match(turn.dialogue, /lower|ground|hurt|need/i);
+  assert.match(turn.dialogue, /outside camera|outside the south gate/i);
+  assert.match(turn.dialogue, /inside a locked gatehouse|behind the security door/i);
+  assert.match(turn.dialogue, /won't open this door|can't make this intercom unlock/i);
+  assert.equal(game.getSnapshot().lastContext.world.playerLocation, "outside the locked south gate");
+  assert.match(game.getSnapshot().lastContext.world.physicalSeparation, /locked security door/i);
   assert.ok(game.memories[0].tags.includes("weapon"));
 });
 

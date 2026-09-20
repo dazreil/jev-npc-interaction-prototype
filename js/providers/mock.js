@@ -132,10 +132,10 @@ function chooseRawDecision(context) {
       return decide(
         "DEESCALATE_THREAT",
         0.96,
-        "Arthur keeps his voice calm, avoids sudden movement, and asks the armed player what they need so nobody is hurt.",
-        { trust: -2, suspicion: 12, irritation: 4, fear: 8 },
+        "Arthur sees the weapon on the exterior camera. He remains inside the locked gatehouse, makes clear that threatening the intercom cannot open the secured entrance, and calmly asks the player to lower it.",
+        { trust: -2, suspicion: 12, irritation: 4, fear: 4 },
         {
-          fact: "Player threatened Arthur with a weapon",
+          fact: "Player displayed a weapon outside the locked gatehouse and threatened Arthur over the intercom",
           importance: 95,
           tags: ["threat", "weapon", "hostility"]
         }

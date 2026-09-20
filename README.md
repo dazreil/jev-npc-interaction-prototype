@@ -4,7 +4,7 @@ A small browser-based text game that explores whether a decision model can make 
 
 Arthur's spoken lines all come from `data/dialogue.json`. The Mock and Jev providers select only a structured action and return developer-facing decision metadata. The game validates the action before selecting an authored line.
 
-The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. A short hardline boot sequence opens the encounter; Arthur occupies the gatehouse feed while a shadowed external feed represents the player. Each participant has one current message, avoiding a duplicated subtitle-and-transcript view, and developer telemetry remains available through the **Developer** control or <kbd>F2</kbd>. Arthur's default voice is generated locally by eSpeak NG running through WebAssembly, with replay, mute, volume, skip, ambience, and authored interface sounds behind replaceable presentation adapters. The current incoming message and deterministic timing remain available when browser media APIs are missing.
+The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. A short hardline boot sequence opens a two-way intercom: Arthur is inside the locked gatehouse within the warehouse perimeter, while the player remains outside at the south gate and appears through an external camera. Each participant has one current message, avoiding a duplicated subtitle-and-transcript view, and developer telemetry remains available through the **Developer** control or <kbd>F2</kbd>. Arthur's default voice is generated locally by eSpeak NG running through WebAssembly, with replay, mute, volume, skip, ambience, and authored interface sounds behind replaceable presentation adapters. The current incoming message and deterministic timing remain available when browser media APIs are missing.
 
 ## Run locally
 
@@ -88,7 +88,7 @@ This runs all 57 automated tests, dialogue lint, and the offline release audit. 
 - Ask Arthur a question.
 - Offer a bribe.
 - Insult or threaten Arthur repeatedly.
-- Threaten Arthur with a gun or other weapon and enter a calm, authored de-escalation exchange.
+- Display a gun or other weapon outside the gate and hear Arthur point out that threatening an intercom cannot open the locked entrance before he tries to de-escalate.
 - Type `[[invalid]]` to make the mock provider deliberately return an invalid action and verify the safe fallback in the debug panel.
 
 The expandable debug views show the exact decision context and raw provider response. Provider reasons are diagnostic data only and are never displayed as Arthur's dialogue.
@@ -106,7 +106,7 @@ Arthur keeps up to eight important memories separately from the latest six conve
 | `mate` | Talkative Irish American; patient, sympathetic, and inclined to hear the player out. |
 | `friend` | Terse Eastern European English learner; reserved, direct, and economical with words. |
 
-The profile changes Arthur's starting mood, personality values, trust threshold, authored phrasing, speech rate, pitch, and pre-delay. Jev receives the same profile in its structured decision context. Claims record a purpose, contradictions and admitted lies sharply increase suspicion, and unrepaired serious memories can remove `ALLOW_ENTRY` from the actions sent to the provider. Arthur asks for the player's purpose once per conversational attempt; if the player stays vague, he holds the boundary instead of asking a reworded version of the same question. A sincere apology or clarification selects `REPAIR_CONVERSATION`, lowers tension, and marks the earlier damage as repaired so a later credible proof can reopen entry. Message effort also nudges mood: terse replies add a small amount of irritation, while considered explanations can slightly improve trust. A first weapon threat selects `DEESCALATE_THREAT`, giving Arthur a calm response that asks what the player needs without provoking them.
+The profile changes Arthur's starting mood, personality values, trust threshold, authored phrasing, speech rate, pitch, and pre-delay. Jev receives the same profile and the fixed intercom layout in its structured decision context. Claims record a purpose, contradictions and admitted lies sharply increase suspicion, and unrepaired serious memories can remove `ALLOW_ENTRY` from the actions sent to the provider. Arthur asks for the player's purpose once per conversational attempt; if the player stays vague, he holds the boundary instead of asking a reworded version of the same question. A sincere apology or clarification selects `REPAIR_CONVERSATION`, lowers tension, and marks the earlier damage as repaired so a later credible proof can reopen entry. Message effort also nudges mood: terse replies add a small amount of irritation, while considered explanations can slightly improve trust. A first weapon threat selects `DEESCALATE_THREAT`: Arthur reminds the player that he is inside the locked gatehouse and they are outside on camera, then calmly asks them to lower the weapon and explain what they need.
 
 ## Authored dialogue branches
 

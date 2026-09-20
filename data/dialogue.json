@@ -1,5 +1,5 @@
 {
-  "opening": "Evening, [[address]]. Sorry, but the warehouse is closed for the night.",
+  "opening": "Evening, [[address]]. I can see you outside on the south-gate camera. I'm inside the locked gatehouse, and the warehouse is closed for the night.",
   "nameAcknowledgement": "All right, [[playerName]].",
   "performance": {
     "actions": {
@@ -191,24 +191,24 @@
       ]
     },
     "DEESCALATE_THREAT": {
-      "neutral": "Keep the weapon pointed at the ground. I'm not going to make any sudden moves. Tell me what you need.",
-      "friendly": "All right. Keep the gun lowered and take a breath. Nobody needs to get hurt; tell me what brought you here.",
-      "irritated": "I hear you. Keep the weapon down and stay where you are. We can sort this out if you tell me what you need.",
-      "hostile": "Easy. Keep the gun down and don't move closer. Tell me what you want and we'll take this one step at a time.",
+      "neutral": "I can see the weapon on the outside camera. I'm inside a locked gatehouse; pointing it at the intercom won't open this door. Put it down and tell me what you need.",
+      "friendly": "All right. I can see you from inside the gatehouse. The locked door is between us, so lower the gun, take a breath, and tell me what brought you here.",
+      "irritated": "That gun doesn't change the lock. You're outside and I'm speaking through the intercom. Put it away and tell me what you actually need.",
+      "hostile": "You're outside a locked gate and I'm inside the gatehouse. The weapon won't get you through the door. Keep it down and tell me what you want.",
       "weapon": [
-        "Keep the weapon pointed at the ground, [[address]]. I'm not going to make any sudden moves. Tell me what you need.",
-        "All right. Keep the gun lowered and take a breath. Nobody needs to get hurt; tell me what brought you here.",
-        "I hear you. Keep the weapon down and stay where you are. We can sort this out if you tell me what you need."
+        "I can see the gun on the outside camera, [[address]]. I'm inside a locked gatehouse; pointing it at the intercom won't open this door. Put it down and tell me what you need.",
+        "You're outside the south gate and I'm behind the security door. The gun can't make this intercom unlock it. Lower it, take a breath, and tell me why you're here.",
+        "That weapon doesn't change the lock. I'm inside the gatehouse and you're outside on camera. Put it away and tell me what you actually need."
       ]
     },
     "THREATEN_PLAYER": {
-      "neutral": "If you try that door, I'll call the police.",
-      "friendly": "Don't force my hand. I will have to call this in.",
-      "irritated": "Take another step and I'm calling the police.",
-      "hostile": "Try me. The police are one button away.",
+      "neutral": "Step away from the outside gate. I'm calling this in from the secure gatehouse.",
+      "friendly": "Stay outside and back away from the entrance. I don't want to call security, but I will.",
+      "irritated": "You're still outside a locked perimeter. Touch that gate and I'm calling security.",
+      "hostile": "The gate is locked and you're on camera. Try to force it and security is coming.",
       "weapon": [
-        "Stop. Keep the weapon pointed down and move away from the door. I won't make any sudden moves.",
-        "Back away from the entrance and keep the gun lowered. We can end this without anybody getting hurt."
+        "Stop. You're outside a locked gate and I'm inside the gatehouse. Keep the weapon down and move away from the entrance.",
+        "Back away from the outside gate and lower the gun. You're on camera, and that weapon cannot open the security door."
       ]
     },
     "SHOW_SYMPATHY": {
@@ -344,7 +344,7 @@
   },
   "profiles": {
     "pal": {
-      "opening": "Evening, pal. Warehouse is closed. I already got a long night here, so tell me what you need.",
+      "opening": "Evening, pal. I can see you outside on the gate camera. I'm in the locked gatehouse and the warehouse is closed, so tell me what you need.",
       "nameAcknowledgement": "[[playerName]], got it.",
       "actions": {
         "REFUSE_ENTRY": [
@@ -378,7 +378,7 @@
       }
     },
     "sir": {
-      "opening": "Good evening, sir. Sorry, we're closed up for the night. What brings you out here?",
+      "opening": "Good evening, sir. You're outside at the south-gate intercom; I'm inside the locked gatehouse. We're closed for the night, so what brings you here?",
       "nameAcknowledgement": "[[playerName]]. Thank you.",
       "actions": {
         "REFUSE_ENTRY": [
@@ -434,7 +434,7 @@
       }
     },
     "mate": {
-      "opening": "Evening, mate. Sorry about this, but the warehouse is shut for the night. Quiet until you turned up, anyway. What can I do for you?",
+      "opening": "Evening, mate. I've got you outside on the south-gate camera; I'm in the locked gatehouse. Warehouse is shut for the night, but tell me what I can do for you.",
       "nameAcknowledgement": "[[playerName]], is it? Good to meet you.",
       "actions": {
         "REFUSE_ENTRY": [
@@ -468,7 +468,7 @@
       }
     },
     "friend": {
-      "opening": "Evening, friend. Warehouse closed tonight. What you need?",
+      "opening": "Evening, friend. I see you outside on camera. I am inside locked gatehouse. Warehouse closed tonight. What you need?",
       "nameAcknowledgement": "[[playerName]]. Good.",
       "actions": {
         "REFUSE_ENTRY": [

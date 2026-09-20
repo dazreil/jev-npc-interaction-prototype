@@ -20,7 +20,15 @@ const context = {
       decisionStyle: "Formal, restrained, precise, and strongly bound to procedure."
     }
   },
-  world: { location: "warehouse entrance", time: "02:13", warehouseOpen: false },
+  world: {
+    location: "south gate security intercom",
+    time: "02:13",
+    warehouseOpen: false,
+    playerLocation: "outside the locked south gate",
+    npcLocation: "inside the secure gatehouse within the warehouse perimeter",
+    communicationChannel: "two-way audio and camera intercom",
+    physicalSeparation: "locked security door and warehouse perimeter separate the player from Arthur"
+  },
   player: { name: "David" },
   memories: [],
   recentConversation: [],
@@ -60,6 +68,8 @@ test("Jev request contains one Choice over exactly the available actions", () =>
   assert.deepEqual(request.state.npc.currentState, context.npc.state);
   assert.deepEqual(request.state.npc.characterProfile, context.npc.characterProfile);
   assert.deepEqual(request.state.player, { name: "David" });
+  assert.equal(request.state.scene.playerLocation, "outside the locked south gate");
+  assert.match(request.questions.next_action.instructions, /Never reason as though they are standing face to face/);
 });
 
 test("Jev receives an explicit signal when a pronoun answers Arthur's proof request", () => {

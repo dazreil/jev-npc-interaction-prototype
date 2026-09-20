@@ -315,9 +315,13 @@ export class Game {
         }
       },
       world: {
-        location: "warehouse entrance",
+        location: "south gate security intercom",
         time: "02:13",
-        warehouseOpen: false
+        warehouseOpen: false,
+        playerLocation: "outside the locked south gate",
+        npcLocation: "inside the secure gatehouse within the warehouse perimeter",
+        communicationChannel: "two-way audio and camera intercom",
+        physicalSeparation: "locked security door and warehouse perimeter separate the player from Arthur"
       },
       player: {
         name: introducedPlayerName ?? this.playerName

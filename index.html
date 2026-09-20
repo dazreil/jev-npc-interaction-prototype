@@ -31,7 +31,7 @@
             <div class="boot-progress" aria-hidden="true">
               <span id="boot-progress-fill"></span>
             </div>
-            <p class="boot-route">ROUTE: SOUTH GATE / CAMERA 04-A / GATEHOUSE</p>
+            <p class="boot-route">INTERCOM: OUTSIDE SOUTH GATE → SECURE GATEHOUSE</p>
           </div>
         </section>
 
@@ -62,7 +62,7 @@
         <section class="terminal-workspace" aria-label="Security intercom">
           <section class="video-module" aria-labelledby="feed-title">
             <div class="module-heading">
-              <span id="feed-title">Camera 04-A</span>
+              <span id="feed-title">Gatehouse interior / Camera 04-A</span>
               <span id="phase-label">Idle</span>
             </div>
 
@@ -76,7 +76,7 @@
               />
               <div class="video-scan" aria-hidden="true"></div>
               <div class="tracking-corners" aria-hidden="true"></div>
-              <span class="signal-label">Live / Gatehouse</span>
+              <span class="signal-label">Live / Inside secure gatehouse</span>
             </div>
 
             <div class="identity-strip">
@@ -84,7 +84,7 @@
                 <span>Security officer</span>
                 <strong>Arthur</strong>
               </div>
-              <div class="identity-code">ID 04-117<br />Night watch</div>
+              <div class="identity-code">Inside<br />Locked gatehouse</div>
             </div>
 
             <div class="system-lamps" aria-label="Atmospheric system indicators">
@@ -141,7 +141,7 @@
                     alt="Shadowed silhouette representing the player outside the warehouse"
                   />
                   <div class="player-scan" aria-hidden="true"></div>
-                  <span>External feed</span>
+                  <span>Intercom camera / Outside</span>
                 </div>
 
                 <div class="identity-strip player-identity-strip">
@@ -319,7 +319,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=15.3";
+        appScript.src = "js/app.js?phase=15.4";
         document.body.append(appScript);
       }
     </script>
