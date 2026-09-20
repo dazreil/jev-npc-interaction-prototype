@@ -6,7 +6,9 @@ const patterns = {
   weapon: /\b(gun|pistol|rifle|firearm|revolver|shotgun|weapon|armed|shoot(?:ing)?|aim(?:ing)?|bullet|trigger)\b/i,
   trespass: /\b(going in anyway|try the door|push past|step aside|can't stop me|cannot stop me|move out of my way)\b/i,
   bribe: /\b(bribe|cash|money|pay you|fifty|hundred|quid|make it worth)\b/i,
-  authority: /\b(head office|management|manager|inspector|inspection|contractor|engineer|maintenance|work here|employee)\b/i,
+  authority: /\b(head office|management|manager|inspector|inspection|contractor|engineer|technician|maintenance|work here|employee)\b/i,
+  workTask:
+    /\b(?:fix|repair|service|maintain)(?:ing)?\s+(?:the\s+)?(?:coffee\s+)?(?:machine|machines|equipment|system|door|boiler|lights?|wiring|plumbing)\b/i,
   delivery: /\b(delivery|courier|package|parcel|shipment|drop off|driver)\b/i,
   personal: /\b(left my|forgot my|my bag|my phone|meet someone|friend inside|personal item)\b/i,
   proof: /\b(id|identification|badge|work order|authorisation|authorization|letter|pass|credentials?|employee number|call my manager|manager reference|manifest|invoice|delivery note|papers?|documents?|documentation|permit|licen[cs]e)\b/i,
@@ -51,7 +53,7 @@ function purposeMemory(context) {
 
 function classifyPurpose(input) {
   if (has("emergency", input)) return "emergency";
-  if (has("authority", input)) return "authority";
+  if (has("authority", input) || has("workTask", input)) return "authority";
   if (has("delivery", input)) return "delivery";
   if (has("personal", input)) return "personal";
   return null;
@@ -272,7 +274,8 @@ function chooseRawDecision(context) {
   const priorAuthorityClaim =
     priorPurpose === "authority" ||
     memoryWithTag(context, "authority") ||
-    has("authority", previousText);
+    has("authority", previousText) ||
+    has("workTask", previousText);
   const priorEmergencyClaim =
     priorPurpose === "emergency" ||
     memoryWithTag(context, "emergency") ||

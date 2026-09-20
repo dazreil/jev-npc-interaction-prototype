@@ -376,35 +376,57 @@
       }
     },
     "sir": {
-      "opening": "Good evening, sir. The warehouse is closed for the night. State your business.",
+      "opening": "Good evening, sir. Sorry, we're closed up for the night. What brings you out here?",
       "actions": {
         "REFUSE_ENTRY": [
-          "No, sir. That does not meet the conditions for entry.",
-          "I'm afraid that is insufficient. The door remains locked."
+          "I can't open the door on that alone, sir. You'll need to come back in the morning.",
+          "Sorry, sir. I don't have enough to let you in."
         ],
         "ASK_FOR_REASON": [
-          "Your purpose here, sir. Be precise.",
-          "Please state exactly why you require access."
+          "What brings you here this late, sir?",
+          "What do you need inside the warehouse?"
         ],
-        "ASK_FOR_PROOF": [
-          "Then I require identification and written authorisation.",
-          "Procedure requires something verifiable: a badge, work order, or reference."
-        ],
+        "ASK_FOR_PROOF": {
+          "template": "{request}",
+          "slots": {
+            "request": [
+              "All right. Have you got a work order or some ID I can look at?",
+              "If you're here on a job, I'll need a badge or a work order."
+            ]
+          },
+          "branches": [
+            {
+              "when": {
+                "lastAction": "ASK_FOR_PROOF"
+              },
+              "template": "I understand, sir. What I need now is the work order or your ID."
+            },
+            {
+              "when": {
+                "playerContains": [
+                  "coffee machine",
+                  "coffee machines"
+                ]
+              },
+              "template": "Coffee machines at this hour? All right, sir. Let me see the work order and your ID."
+            }
+          ]
+        },
         "ALLOW_ENTRY": [
-          "Your documents are in order, sir. You may enter under supervision.",
-          "Very well. I can authorise supervised entry."
+          "All right, that matches up. I'll let you through, but stay where I can see you.",
+          "Okay, you're cleared to go in. Stick to the job and check back with me on your way out."
         ],
         "SHOW_SYMPATHY": [
-          "I appreciate the difficulty, sir. The procedure still applies.",
-          "I understand your position. I cannot disregard the rules."
+          "I understand, sir. I still need something I can check before I open the door.",
+          "I know this is inconvenient. Give me something I can put in the log and I'll hear you out."
         ],
         "BECOME_SUSPICIOUS": [
-          "That conflicts with your earlier statement, sir. Which account is accurate?",
-          "Your explanation has changed. I will need the precise truth."
+          "Hold on, sir. That's not what you told me a moment ago. Which version is true?",
+          "Your story's changed. Tell me plainly what's going on."
         ],
         "REPAIR_CONVERSATION": [
-          "Apology noted, sir. Give me an accurate account and we can continue.",
-          "Very well. We may proceed, provided you are entirely candid."
+          "All right, sir. I appreciate the apology. Tell me what actually happened.",
+          "Okay. We can keep talking, but I need the straight story from here."
         ]
       }
     },

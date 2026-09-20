@@ -198,6 +198,45 @@ test("Arthur's form of address selects a distinct character profile", async () =
   assert.match(friendTurn.dialogue, /Why|Tell me/i);
 });
 
+test("ordinary repair language gets a contextual human proof request", async () => {
+  const shippedDialogueData = JSON.parse(
+    await readFile(new URL("../data/dialogue.json", import.meta.url), "utf8")
+  );
+  const game = new Game({
+    npcTemplate,
+    dialogueData: shippedDialogueData,
+    provider: chooseNpcAction,
+    random: () => 0.3
+  });
+
+  assert.equal(
+    game.getOpeningDialogue(),
+    "Good evening, sir. Sorry, we're closed up for the night. What brings you out here?"
+  );
+
+  const purpose = await game.takeTurn(
+    "Good evening, I'm David. I'm here to fix the coffee machines."
+  );
+  assert.equal(purpose.decision.action, "ASK_FOR_PROOF");
+  assert.equal(
+    purpose.dialogue,
+    "Coffee machines at this hour? All right, sir. Let me see the work order and your ID."
+  );
+  assert.doesNotMatch(purpose.dialogue, /procedure|requires|state your business/i);
+
+  const repeatedPurpose = await game.takeTurn("To do maintenance.");
+  assert.equal(repeatedPurpose.decision.action, "ASK_FOR_PROOF");
+  assert.equal(
+    repeatedPurpose.dialogue,
+    "I understand, sir. What I need now is the work order or your ID."
+  );
+
+  const proof = await game.takeTurn("I have a work order here.");
+  assert.equal(proof.decision.action, "ALLOW_ENTRY");
+  assert.match(proof.dialogue, /matches up|let you through|cleared to go in/i);
+  assert.doesNotMatch(proof.dialogue, /documents are in order|authorise|supervision/i);
+});
+
 test("Arthur asks for the player's purpose once instead of repeating variations", async () => {
   const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
 
