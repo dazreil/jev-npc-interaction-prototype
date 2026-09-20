@@ -329,21 +329,202 @@ Expand the most common authored responses, verify the complete structured action
 - No missing dialogue or unresolved template slots appear in the report.
 - Human feedback has a repeatable collection format for the next external playtest session.
 
+## Retro CD-ROM Vertical Slice
+
+Phases 9–15 convert the completed simulation into a polished, self-contained encounter inspired by mid-1990s FMV games. The detailed visual, audio, interaction, and architectural direction is recorded in [RETRO_CDROM_DESIGN_SPEC.md](RETRO_CDROM_DESIGN_SPEC.md).
+
+The conversion preserves the core experiment: providers select one bounded action, Arthur speaks only authored dialogue, and deterministic game rules own state, memory, and consequences. The presentation should feel like a lost 1995 security-terminal scene without hiding the existing diagnostic evidence from developers.
+
+The pre-conversion baseline is commit `de767cf`.
+
+## Phase 9 — Presentation Boundary and Regression Lock
+
+**Status:** Complete and verified on 20 September 2026.
+
+Protect the validated simulation before replacing its frontend. Introduce a renderer-facing performance result and a lifecycle controller without changing provider requests, Jev parsing, dialogue selection, memory, or state consequences.
+
+### Deliverables
+
+- An `npcPerformance` result containing the selected action, tone, authored line, portrait cue, and timing defaults.
+- Explicit lifecycle states for idle, player input, provider decision, reaction-in, speech, reaction-out, awaiting input, and ending.
+- A performance controller that owns the existing 920 ms speaking-animation timer.
+- Skip and failure paths that complete subtitles and apply each turn's state exactly once.
+- Unit coverage for performance mapping, legal lifecycle transitions, skipping, and speech failure.
+- A rendering-disabled regression harness that compares decisions, dialogue, and final state with the pre-conversion behaviour.
+
+### Acceptance Checks
+
+- `npm run check` passes.
+- Existing Mock and Jev scenarios produce the same actions, dialogue, memories, and final state when rendering is disabled.
+- A skipped or failed performance cannot apply state twice or leave input permanently disabled.
+
+### Verification
+
+- The full automated suite passes with 32 tests plus dialogue lint.
+- A lifecycle-driven head-office route matches the rendering-disabled route turn for turn and ends with identical snapshots.
+- Focused tests cover deterministic portrait cues, legal phase order, skip, presentation failure, terminal endings, and state-once behaviour.
+- Browser verification confirms that input locks during the existing 920 ms speaking performance, unlocks afterward, and reset safely cancels an active performance.
+
+## Phase 10 — 4:3 CD-ROM Interface Shell
+
+**Status:** Complete and verified on 20 September 2026.
+
+Replace the chat layout with a fixed logical 640×480 security terminal that scales responsively with letterboxing and integer scaling where practical.
+
+### Deliverables
+
+- An in-world industrial terminal shell with a 160×120 or 192×144 Arthur viewport.
+- A subtitle area, compact transcript, free-text input, provider status, reset control, and accessibility controls.
+- Developer diagnostics moved into an explicit modal or drawer with a keyboard shortcut.
+- Nearest-neighbour image treatment, limited palette, bevels, warning stripes, and restrained optional scanline/noise effects.
+- Keyboard navigation, visible focus, semantic controls, and reduced-motion support.
+
+### Acceptance Checks
+
+- The encounter remains playable at 100%, 2×, and responsive window sizes.
+- The Arthur image, subtitles, input, and status remain readable without scrolling the logical stage.
+- All current diagnostics remain available without dominating the player view.
+
+### Verification
+
+- The shell renders from a 640×480 logical stage, fills the available viewport continuously, caps at a crisp 2× scale, and proportionally scales down for smaller viewports.
+- Browser playthrough confirms captions, compact transcript, input locking, Arthur's speaking fallback, and the entry-granted ending inside the new shell.
+- The F2 developer dialog retains emotional state, decision reasoning, memory, exact context, and raw provider response, with focus restored when it closes.
+- The visual-effects control, semantic labels, visible focus, and reduced-motion path remain available.
+- The full automated suite passes with 34 tests plus dialogue lint.
+
+## Phase 11 — Arthur Performance System
+
+**Status:** Complete and verified on 20 September 2026. The blind perception check is scheduled with the wider human evaluation in Phase 14.
+
+Promote Arthur from a chat avatar to the main performance surface using deterministic, frame-controlled animation.
+
+### Deliverables
+
+- Low-resolution, colour-reduced versions of the existing portrait and mouth frames.
+- Idle, blink, listening, and talk A/B/C animation from current assets.
+- Suspicious, irritated, hostile, friendly, afraid, dismissive, and entry-granted portrait states.
+- Deterministic action-and-tone mapping for reaction-in, speaking, and reaction-out sequences.
+- A neutral fallback for missing or invalid performance metadata.
+- Authored frame drops and glitches used sparingly as part of the period style.
+
+### Acceptance Checks
+
+- Every one of the twelve actions resolves to a valid performance sequence.
+- Missing art falls back safely to the neutral portrait.
+- Blind testers can identify at least four broad Arthur attitudes without opening diagnostics.
+
+### Verification
+
+- All twelve actions resolve through deterministic action-and-tone mapping to a shipped portrait cue; invalid cues fall back to Arthur's neutral portrait.
+- The browser plays listening while the player types, cycles the four mouth poses at eight frames per second, and restores the mapped reaction portrait after speech.
+- Live Mock playthroughs verified the afraid weapon-de-escalation response and the persistent entry-granted ending, including the open-door terminal state.
+- Blink timing, reduced-motion behaviour, sparse authored glitches, frame sequencing, and neutral fallback are covered by focused tests.
+- Browser console inspection is clean, and the full automated suite passes with 38 tests plus dialogue lint covering 12 actions, 143 fragments, 13 templates, 6 branches, and 162 possible lines.
+
+## Phase 12 — Speech and Period Audio
+
+**Status:** Complete and verified on 20 September 2026. Browser and operating-system voice comparisons remain part of Phase 14.
+
+Add replaceable speech and sound systems while keeping captions authoritative and preventing audio failure from blocking the encounter.
+
+### Deliverables
+
+- A speech-adapter interface with browser Web Speech API support first and room for a later eSpeak/WASM adapter.
+- Per-line or per-tone rate, pitch, delay, and voice-preset metadata.
+- Talk animation driven by actual speech duration, with a deterministic timing fallback.
+- Subtitles enabled by default, plus mute, volume, replay, and speech-skip controls.
+- Optional Web Audio intercom processing with light band-limiting, compression, and noise.
+- Low-key ambience, relay/interface sounds, a warning sting, and an entry-unlock sound.
+
+### Acceptance Checks
+
+- Every line remains understandable with captions alone.
+- Speech cancellation, an unavailable voice, or audio-context failure never blocks input or loses a completed turn.
+- Mouth animation and captions start and finish with the active performance lifecycle.
+
+### Verification
+
+- A replaceable browser speech adapter now uses `SpeechSynthesisUtterance` start, end, error, and cancellation events to control speaking duration when the API is available.
+- Neutral, friendly, irritated, hostile, de-escalation, entry, and ending deliveries resolve deterministic rate, pitch, pre-delay, and audio-preset metadata without changing authored dialogue.
+- Unsupported or muted speech uses cancellable deterministic timing, leaves complete captions visible, and returns input safely after normal playback or skip.
+- Replay, mute, volume, and skip controls are keyboard-accessible; the voice indicator distinguishes audible browser speech from silent fallback animation.
+- Optional Web Audio provides a low warehouse hum and authored interface, relay, warning, and door-unlock cues through a band-limited compressed effects chain. Browser media failures remain silent and non-blocking.
+- Browser verification covered responsive layout, fallback playback, skip, replay, mute, volume, focusable controls, and a clean console. The test browser exposed neither Web Speech nor Web Audio, so real voice and device-specific sound quality remain explicit Phase 14 checks.
+- The full automated suite passes with 44 tests plus dialogue lint covering 12 actions, 143 fragments, 13 templates, 6 branches, and 162 possible lines.
+
+## Phase 13 — Outcomes and Authored Performance Pass
+
+**Status:** Planned.
+
+Give the complete encounter a strong opening and four visibly distinct endings while adding performance metadata to the authored content incrementally.
+
+### Deliverables
+
+- A short connection/boot sequence that establishes the security-terminal fiction.
+- Four presentation endings: entry granted, refused, expelled, and locked out.
+- Backwards-compatible simulation outcomes so existing rules and tests remain useful.
+- Optional dialogue metadata for portrait cue, speech preset, timing, and sound effects, with safe defaults for all 162 possible lines.
+- A repetition and tone audit covering common routes and terminal responses.
+
+### Acceptance Checks
+
+- All four outcomes are visually and audibly distinct.
+- At least three established entry strategies still reach success.
+- Every authored line resolves to a valid performance without requiring duplicated dialogue text.
+
+## Phase 14 — Provider and Human Evaluation
+
+**Status:** Planned.
+
+Measure whether the new presentation improves Arthur's legibility and dramatic presence without changing the structured-decision behaviour validated in Phase 8.
+
+### Deliverables
+
+- A complete Mock and live Jev rerun with action parity compared against the pre-conversion baseline.
+- Blind sessions based on `MANUAL_PLAYTEST.md`.
+- Evaluation prompts for emotional legibility, voice intelligibility, waiting time, retro authenticity, and Arthur's apparent agency.
+- Browser, operating-system, and voice-engine notes for speech differences.
+- Timing adjustments made before any proposed decision-rule changes.
+
+### Acceptance Checks
+
+- Automated checks and provider comparison remain green.
+- Players can explain Arthur's current attitude and describe one way his memory affected the exchange without seeing diagnostics.
+- Reported confusion is separated into presentation, dialogue-content, and decision-quality findings.
+
+## Phase 15 — Release Polish
+
+**Status:** Planned.
+
+Prepare the vertical slice for a new player to launch, understand, complete, and inspect across desktop browsers.
+
+### Deliverables
+
+- Final palette, dithering, image compression, and restrained screen effects.
+- Boot, loading, connection, ending, and credits presentation.
+- A complete keyboard, focus, captions, mute, replay, and reduced-motion pass.
+- Verification in current Chrome, Edge, Firefox, and Safari.
+- Preloading limited to assets needed by the immediate encounter state.
+- Simple deployment documentation for Mock-only hosting and server-backed Jev hosting.
+
+### Acceptance Checks
+
+- A new player can start and complete the encounter without developer guidance.
+- A developer can still inspect the decision context, provider result, state, memory, and performance mapping.
+- The release runs without a frontend framework or unnecessary deployment infrastructure.
+
 ## Implementation Order
 
-Work in this order to keep every stage runnable:
+The first eight phases established and evaluated the simulation. Continue in this order so every presentation stage remains runnable:
 
-1. Project skeleton and JSON loading.
-2. Conversation input and rendering.
-3. Decision-context builder.
-4. Mock provider and action validation.
-5. Authored dialogue and deterministic tone selection.
-6. State updates and clamping.
-7. Debug panel and reset.
-8. Memory, history bounds, and outcome tuning.
-9. Raw context/response inspection.
-10. Verified Jev integration.
-11. Structured playtesting and final tuning.
+1. Lock the pre-conversion regression baseline and add the performance boundary.
+2. Build the 640×480 terminal shell around the unchanged game loop.
+3. Replace the GIF timer with frame-controlled Arthur performances.
+4. Add speech, captions timing, and period audio behind adapters.
+5. Author emotional portrait states and the four ending presentations.
+6. Rerun provider comparisons and conduct blind human sessions.
+7. Complete accessibility, browser verification, asset optimization, and release documentation.
 
 ## Out of Scope
 
@@ -352,10 +533,12 @@ Work in this order to keep every stage runnable:
 - A general dialogue editor or RPG engine.
 - Accounts, databases, or cross-session saves.
 - Production hosting and deployment infrastructure.
-- Voice input or speech synthesis.
+- Voice input, cloud voice services, or a large prerecorded voice library.
 - Complex natural-language simulation inside game logic.
 - Fine-tuning or training a model.
+- Full generated video, multiple camera scenes, inventory systems, or quests.
+- A frontend-framework migration or mobile-first redesign.
 
 ## Immediate Next Milestone
 
-The automated prototype roadmap is complete. The next useful evidence should come from blind sessions using `MANUAL_PLAYTEST.md`; after that, choose between tuning the recorded weak spots, adding another NPC scenario, or preparing a deployable build.
+Implement Phase 13: add the connection sequence, four presentation endings, and optional per-line performance metadata while preserving every established entry route.

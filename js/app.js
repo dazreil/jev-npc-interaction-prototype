@@ -1,5 +1,14 @@
 import { Game, MAX_MEMORIES } from "./game.js";
+import { PeriodAudio } from "./audio.js";
+import {
+  LOGICAL_STAGE_HEIGHT,
+  LOGICAL_STAGE_WIDTH,
+  calculateStageScale
+} from "./layout.js";
 import { determineTone } from "./npc.js";
+import { PERFORMANCE_PHASES, PerformanceController } from "./performance.js";
+import { PortraitAnimator } from "./portrait.js";
+import { BrowserSpeechAdapter, SpeechDirector } from "./speech.js";
 import { chooseNpcAction as chooseJevAction } from "./providers/jev.js?phase=4";
 import { chooseNpcAction as chooseMockAction } from "./providers/mock.js";
 
@@ -16,10 +25,16 @@ const providers = {
   }
 };
 
-const STATIC_PORTRAIT = "assets/arthur-portrait.jpg";
-const SPEAKING_PORTRAIT = "assets/arthur-speaking.gif";
-const PLAYER_PORTRAIT = "assets/player-shadow.jpg";
-const SPEAKING_DURATION_MS = 920;
+const PHASE_LABELS = Object.freeze({
+  [PERFORMANCE_PHASES.IDLE]: "Idle",
+  [PERFORMANCE_PHASES.PLAYER_TYPING]: "Input open",
+  [PERFORMANCE_PHASES.DECIDING]: "Processing",
+  [PERFORMANCE_PHASES.REACTION_IN]: "Receiving",
+  [PERFORMANCE_PHASES.SPEAKING]: "Arthur speaking",
+  [PERFORMANCE_PHASES.REACTION_OUT]: "Closing signal",
+  [PERFORMANCE_PHASES.AWAITING_PLAYER]: "Awaiting input",
+  [PERFORMANCE_PHASES.ENDING]: "Link closed"
+});
 
 const elements = {
   conversation: document.querySelector("#conversation"),
@@ -45,58 +60,106 @@ const elements = {
   providerSelect: document.querySelector("#provider-select"),
   providerNote: document.querySelector("#provider-note"),
   providerStatus: document.querySelector("#provider-status"),
-  resetButton: document.querySelector("#reset-button")
+  resetButton: document.querySelector("#reset-button"),
+  stageMount: document.querySelector("#terminal-mount"),
+  arthurPortrait: document.querySelector("#arthur-portrait"),
+  arthurFrame: document.querySelector("#arthur-frame"),
+  subtitleText: document.querySelector("#subtitle-text"),
+  subtitleSpeaker: document.querySelector("#subtitle-speaker"),
+  phaseLabel: document.querySelector("#phase-label"),
+  linkStatus: document.querySelector("#link-status"),
+  doorStatus: document.querySelector("#door-status"),
+  turnCountCompact: document.querySelector("#turn-count-compact"),
+  effectsToggle: document.querySelector("#effects-toggle"),
+  audioToggle: document.querySelector("#audio-toggle"),
+  replayButton: document.querySelector("#replay-button"),
+  skipButton: document.querySelector("#skip-button"),
+  volumeControl: document.querySelector("#volume-control"),
+  voiceLamp: document.querySelector("#voice-lamp"),
+  debugDialog: document.querySelector("#debug-dialog"),
+  debugOpen: document.querySelector("#debug-open"),
+  debugClose: document.querySelector("#debug-close")
 };
 
 let game;
 let dialogueData;
-let portraitAnimationTimer;
-let portraitAnimationSequence = 0;
-let activeArthurPortrait;
-let activeArthurFrame;
+let activeArthurPortrait = elements.arthurPortrait;
+let activeArthurFrame = elements.arthurFrame;
+let focusBeforeDebug = null;
+let lastPerformance = null;
+let replayRunId = 0;
+const periodAudio = new PeriodAudio();
+const speechDirector = new SpeechDirector({ adapter: new BrowserSpeechAdapter() });
+const delay = (durationMs) =>
+  durationMs > 0
+    ? new Promise((resolve) => setTimeout(resolve, durationMs))
+    : Promise.resolve();
+const performanceController = new PerformanceController({
+  wait: (durationMs, phase, performance) => {
+    if (phase !== PERFORMANCE_PHASES.SPEAKING) return delay(durationMs);
 
-function animateArthurPortrait(portrait, frame) {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-  window.clearTimeout(portraitAnimationTimer);
-
-  if (activeArthurPortrait && activeArthurPortrait !== portrait) {
-    activeArthurPortrait.src = STATIC_PORTRAIT;
-    activeArthurFrame.classList.remove("is-speaking");
+    return speechDirector.deliver(performance, {
+      onStart: ({ mode }) => {
+        portraitAnimator.startTalking();
+        elements.voiceLamp.classList.toggle("lamp--on", mode === "speech");
+      },
+      onEnd: () => {
+        elements.voiceLamp.classList.remove("lamp--on");
+        portraitAnimator.show(performance.portraitCue);
+      }
+    });
   }
+});
+const portraitAnimator = new PortraitAnimator({
+  onFrame: ({ cue, src, glitch }) => {
+    activeArthurPortrait.src = src;
+    activeArthurFrame.dataset.portraitCue = cue;
+    activeArthurFrame.classList.toggle("is-glitching", glitch);
+  },
+  reducedMotion: () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  autoTalk: false
+});
 
-  activeArthurPortrait = portrait;
-  activeArthurFrame = frame;
-  portraitAnimationSequence += 1;
-  frame.classList.add("is-speaking");
-  portrait.src = `${SPEAKING_PORTRAIT}?reply=${portraitAnimationSequence}`;
+function renderPerformancePhase({ phase, performance }) {
+  document.body.dataset.performancePhase = phase;
+  elements.phaseLabel.textContent = PHASE_LABELS[phase] ?? phase;
+  elements.linkStatus.textContent = [
+    PERFORMANCE_PHASES.DECIDING,
+    PERFORMANCE_PHASES.REACTION_IN
+  ].includes(phase)
+    ? "Processing"
+    : phase === PERFORMANCE_PHASES.SPEAKING
+      ? "Receiving"
+      : phase === PERFORMANCE_PHASES.ENDING
+        ? "Closed"
+        : "Ready";
 
-  portraitAnimationTimer = window.setTimeout(() => {
-    portrait.src = STATIC_PORTRAIT;
-    frame.classList.remove("is-speaking");
-  }, SPEAKING_DURATION_MS);
+  activeArthurFrame.classList.toggle(
+    "is-speaking",
+    phase === PERFORMANCE_PHASES.SPEAKING
+  );
+  const canSkip = [
+    PERFORMANCE_PHASES.REACTION_IN,
+    PERFORMANCE_PHASES.SPEAKING,
+    PERFORMANCE_PHASES.REACTION_OUT
+  ].includes(phase);
+  elements.skipButton.disabled = !canSkip;
+  if (phase !== PERFORMANCE_PHASES.SPEAKING) {
+    elements.voiceLamp.classList.remove("lamp--on");
+  }
+  portraitAnimator.handlePhase({ phase, performance });
+
+  if (phase === PERFORMANCE_PHASES.REACTION_IN && performance) {
+    periodAudio.playPerformanceCue(performance);
+  }
 }
+
+performanceController.subscribe(renderPerformancePhase);
 
 function appendMessage(speaker, text, action = null) {
   const article = document.createElement("article");
   article.className = `message message--${speaker}`;
   if (action) article.dataset.action = action;
-
-  const avatar = document.createElement("div");
-  avatar.className = "message-avatar";
-
-  const avatarImage = document.createElement("img");
-  avatarImage.width = 360;
-  avatarImage.height = speaker === "arthur" ? 480 : 360;
-  avatarImage.src = speaker === "arthur" ? STATIC_PORTRAIT : PLAYER_PORTRAIT;
-  avatarImage.alt =
-    speaker === "arthur"
-      ? "Arthur, the warehouse security guard"
-      : "Anonymous player silhouette";
-  avatar.append(avatarImage);
-
-  const body = document.createElement("div");
-  body.className = "message-body";
 
   const label = document.createElement("span");
   label.className = "message-speaker";
@@ -106,12 +169,14 @@ function appendMessage(speaker, text, action = null) {
   copy.className = "message-text";
   copy.textContent = text;
 
-  body.append(label, copy);
-  article.append(avatar, body);
+  article.append(label, copy);
   elements.conversation.append(article);
   elements.conversation.scrollTop = elements.conversation.scrollHeight;
 
-  if (speaker === "arthur") animateArthurPortrait(avatarImage, avatar);
+  if (speaker === "arthur") {
+    elements.subtitleSpeaker.textContent = "Arthur / Gatehouse";
+    elements.subtitleText.textContent = text;
+  }
 }
 
 function renderState(snapshot) {
@@ -175,6 +240,7 @@ function renderDebug(snapshot) {
   renderState(snapshot);
   renderMemories(snapshot.memories);
   elements.turnCount.textContent = `Turn ${snapshot.turn}`;
+  elements.turnCountCompact.textContent = String(snapshot.turn).padStart(2, "0");
   elements.currentGoal.textContent = snapshot.primaryGoal.label;
   elements.lastAction.textContent = decision?.action ?? "WAITING";
   elements.confidence.textContent = decision
@@ -242,15 +308,18 @@ function renderOutcome(status) {
 
   if (status === "success") {
     elements.outcome.textContent = "Arthur unlocks the warehouse door.\n\nYou are inside.";
+    elements.doorStatus.textContent = "Open";
     elements.outcome.hidden = false;
   } else if (status === "failure") {
     elements.outcome.textContent =
       "Arthur turns away and refuses to continue the conversation.\n\nReset to try again.";
     elements.outcome.classList.add("outcome--failure");
     elements.outcome.hidden = false;
+    elements.doorStatus.textContent = "Denied";
   } else {
     elements.outcome.hidden = true;
     elements.outcome.textContent = "";
+    elements.doorStatus.textContent = "Locked";
   }
 
   const ended = status !== "active";
@@ -258,10 +327,33 @@ function renderOutcome(status) {
   elements.sendButton.disabled = ended;
   elements.inputHint.textContent = ended
     ? "The conversation has ended. Reset the scenario to play again."
-    : "Enter to send · 280 characters maximum";
+    : "Enter to transmit · 280 character limit";
+}
+
+function updateStageScale() {
+  const scale = calculateStageScale(window.innerWidth, window.innerHeight);
+
+  document.documentElement.style.setProperty("--stage-scale", String(scale));
+  elements.stageMount.style.width = `${LOGICAL_STAGE_WIDTH * scale}px`;
+  elements.stageMount.style.height = `${LOGICAL_STAGE_HEIGHT * scale}px`;
+}
+
+function openDebug() {
+  if (elements.debugDialog.open) return;
+  focusBeforeDebug = document.activeElement;
+  elements.debugDialog.showModal();
+  elements.debugClose.focus();
+}
+
+function closeDebug() {
+  if (elements.debugDialog.open) elements.debugDialog.close();
 }
 
 function renderInitialScene() {
+  replayRunId += 1;
+  speechDirector.cancel();
+  performanceController.reset();
+  lastPerformance = null;
   elements.conversation.replaceChildren();
   appendMessage("arthur", dialogueData.opening);
   renderDebug(game.getSnapshot());
@@ -275,7 +367,37 @@ function setBusy(isBusy) {
   elements.input.disabled = ended || isBusy;
   elements.sendButton.disabled = ended || isBusy;
   elements.sendButton.querySelector("span").textContent =
-    isBusy && !ended ? "Thinking" : "Speak";
+    isBusy && !ended ? "Wait" : "Send";
+  elements.replayButton.disabled = isBusy || !lastPerformance;
+}
+
+async function replayLastLine() {
+  if (!lastPerformance || elements.replayButton.disabled) return;
+
+  const runId = ++replayRunId;
+  elements.replayButton.disabled = true;
+  await periodAudio.resume();
+  periodAudio.playRelay();
+  activeArthurFrame.classList.add("is-speaking");
+
+  await speechDirector.deliver(lastPerformance, {
+    onStart: ({ mode }) => {
+      portraitAnimator.startTalking();
+      elements.voiceLamp.classList.toggle("lamp--on", mode === "speech");
+    },
+    onEnd: () => {
+      elements.voiceLamp.classList.remove("lamp--on");
+      portraitAnimator.show(lastPerformance.portraitCue);
+    }
+  });
+
+  if (runId !== replayRunId) return;
+  activeArthurFrame.classList.remove("is-speaking");
+  renderPerformancePhase({
+    phase: performanceController.phase,
+    performance: performanceController.currentPerformance
+  });
+  elements.replayButton.disabled = false;
 }
 
 async function handleSubmit(event) {
@@ -283,17 +405,26 @@ async function handleSubmit(event) {
   const input = elements.input.value.trim();
   if (!input || !game || game.status !== "active") return;
 
+  replayRunId += 1;
+  speechDirector.cancel();
+  await periodAudio.resume();
+  periodAudio.startAmbience();
+  periodAudio.playInterfaceClick();
   setBusy(true);
   elements.input.value = "";
+  performanceController.beginDecision();
 
   try {
     const turn = await game.takeTurn(input);
     appendMessage("player", turn.playerInput);
     appendMessage("arthur", turn.dialogue, turn.decision.action);
+    lastPerformance = turn.npcPerformance;
     clearProviderStatus();
     renderDebug(game.getSnapshot());
-    renderOutcome(turn.status);
+    const presentation = await performanceController.play(turn.npcPerformance);
+    if (!presentation.cancelled) renderOutcome(turn.status);
   } catch (error) {
+    performanceController.failDecision();
     const snapshot = game.getSnapshot();
     renderDebug(snapshot);
 
@@ -349,14 +480,65 @@ async function initialise() {
 }
 
 elements.form.addEventListener("submit", handleSubmit);
+elements.input.addEventListener("input", () => {
+  performanceController.setPlayerTyping(Boolean(elements.input.value.trim()));
+});
+elements.effectsToggle.addEventListener("click", () => {
+  const enabled = elements.effectsToggle.getAttribute("aria-pressed") === "true";
+  document.body.classList.toggle("effects-off", enabled);
+  elements.effectsToggle.setAttribute("aria-pressed", String(!enabled));
+  elements.effectsToggle.textContent = enabled ? "FX Off" : "FX On";
+});
+elements.audioToggle.addEventListener("click", async () => {
+  const enabled = elements.audioToggle.getAttribute("aria-pressed") === "true";
+  const muted = enabled;
+  speechDirector.setMuted(muted);
+  periodAudio.setMuted(muted);
+  elements.audioToggle.setAttribute("aria-pressed", String(!muted));
+  elements.audioToggle.textContent = muted ? "Audio off" : "Audio on";
+  elements.voiceLamp.classList.remove("lamp--on");
+
+  if (!muted) {
+    await periodAudio.resume();
+    periodAudio.startAmbience();
+    periodAudio.playInterfaceClick();
+  }
+});
+elements.volumeControl.addEventListener("input", () => {
+  const volume = Number(elements.volumeControl.value);
+  speechDirector.setVolume(volume);
+  periodAudio.setVolume(volume);
+  elements.volumeControl.setAttribute("aria-valuetext", `${Math.round(volume * 100)} percent`);
+});
+elements.replayButton.addEventListener("click", replayLastLine);
+elements.skipButton.addEventListener("click", () => {
+  speechDirector.cancel();
+  performanceController.skip();
+});
+elements.debugOpen.addEventListener("click", openDebug);
+elements.debugClose.addEventListener("click", closeDebug);
+elements.debugDialog.addEventListener("close", () => {
+  if (focusBeforeDebug instanceof HTMLElement) focusBeforeDebug.focus();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "F2") return;
+  event.preventDefault();
+  if (elements.debugDialog.open) closeDebug();
+  else openDebug();
+});
+window.addEventListener("resize", updateStageScale);
 elements.providerSelect.addEventListener("change", () => {
   selectProvider(elements.providerSelect.value);
   clearProviderStatus();
 });
 elements.resetButton.addEventListener("click", () => {
+  replayRunId += 1;
+  speechDirector.cancel();
+  performanceController.reset();
   game.reset();
   clearProviderStatus();
   renderInitialScene();
 });
 
+updateStageScale();
 initialise();

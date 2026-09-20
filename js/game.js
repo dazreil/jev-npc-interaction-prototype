@@ -1,4 +1,5 @@
 import { selectDialogue } from "./dialogue.js";
+import { createNpcPerformance } from "./performance.js";
 import {
   STATE_KEYS,
   applyStateChanges,
@@ -113,6 +114,7 @@ export class Game {
     this.lastRawResponse = null;
     this.lastProviderId = null;
     this.lastProviderError = null;
+    this.lastPerformance = null;
   }
 
   setProvider(provider, providerId) {
@@ -235,6 +237,7 @@ export class Game {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.lastDecision = null;
+      this.lastPerformance = null;
       this.lastProviderError = message;
       this.lastRawResponse = {
         provider: this.providerId,
@@ -273,11 +276,18 @@ export class Game {
     if (decision.action === "END_CONVERSATION") this.status = "failure";
 
     this.lastDecision = { ...decision, tone };
+    this.lastPerformance = createNpcPerformance({
+      action: decision.action,
+      tone,
+      line: dialogue,
+      status: this.status
+    });
 
     return {
       playerInput: input,
       dialogue,
       decision: this.lastDecision,
+      npcPerformance: structuredClone(this.lastPerformance),
       status: this.status
     };
   }
@@ -295,6 +305,7 @@ export class Game {
       providerId: this.providerId,
       lastProviderId: this.lastProviderId,
       lastProviderError: this.lastProviderError,
+      lastPerformance: this.lastPerformance ? structuredClone(this.lastPerformance) : null,
       primaryGoal: getPrimaryGoal(this.npc)
     };
   }

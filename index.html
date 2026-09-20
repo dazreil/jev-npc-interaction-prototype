@@ -5,162 +5,226 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="A small authored-dialogue NPC decision prototype featuring Arthur, a warehouse security guard."
+      content="A retro security-terminal encounter with Arthur, a warehouse security guard."
     />
-    <title>Warehouse Entrance — NPC Decision Prototype</title>
-    <link rel="preload" href="assets/arthur-speaking.gif" as="image" />
-    <link rel="preload" href="assets/player-shadow.jpg" as="image" />
+    <title>Perimeter 04 — Arthur Security Link</title>
+    <link rel="preload" href="assets/arthur-portrait.jpg" as="image" />
+    <link rel="preload" href="assets/arthur-speech/frame-1.jpg" as="image" />
+    <link rel="preload" href="assets/arthur-speech/frame-2.jpg" as="image" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="ambient ambient--one" aria-hidden="true"></div>
-    <div class="ambient ambient--two" aria-hidden="true"></div>
+    <div id="terminal-mount" class="terminal-mount">
+      <main id="terminal-stage" class="terminal-stage" aria-labelledby="terminal-title">
+        <div class="terminal-rivets" aria-hidden="true"></div>
 
-    <main class="app-shell">
-      <section class="game-panel" aria-labelledby="location-title">
-        <header class="scene-header">
-          <div>
-            <p class="eyebrow">Docklands · Perimeter 04</p>
-            <h1 id="location-title">Warehouse Entrance</h1>
+        <header class="terminal-header">
+          <div class="terminal-brand">
+            <span class="brand-mark" aria-hidden="true">WSC</span>
+            <div>
+              <p>West Shipping Concern</p>
+              <h1 id="terminal-title">Perimeter 04 Security Link</h1>
+            </div>
           </div>
-          <div class="scene-meta" aria-label="Scene information">
+
+          <div class="header-readouts" aria-label="Terminal status">
+            <div class="status-readout">
+              <span class="status-lamp status-lamp--green" aria-hidden="true"></span>
+              <span>Link</span>
+              <strong id="link-status">Ready</strong>
+            </div>
+            <div class="status-readout">
+              <span class="status-lamp status-lamp--red" aria-hidden="true"></span>
+              <span>Door</span>
+              <strong id="door-status">Locked</strong>
+            </div>
             <time datetime="02:13">02:13</time>
-            <span><i aria-hidden="true"></i> Closed</span>
           </div>
         </header>
 
-        <div class="scene-art" aria-hidden="true">
-          <div class="lamp"></div>
-          <div class="warehouse-door">
-            <span>AUTHORIZED<br />PERSONNEL ONLY</span>
+        <section class="terminal-workspace" aria-label="Security intercom">
+          <section class="video-module" aria-labelledby="feed-title">
+            <div class="module-heading">
+              <span id="feed-title">Camera 04-A</span>
+              <span id="phase-label">Idle</span>
+            </div>
+
+            <div id="arthur-frame" class="arthur-viewport">
+              <img
+                id="arthur-portrait"
+                src="assets/arthur-portrait.jpg"
+                width="360"
+                height="480"
+                alt="Arthur, the warehouse security guard"
+              />
+              <div class="video-scan" aria-hidden="true"></div>
+              <div class="tracking-corners" aria-hidden="true"></div>
+              <span class="signal-label">Live / Gatehouse</span>
+            </div>
+
+            <div class="identity-strip">
+              <div>
+                <span>Security officer</span>
+                <strong>Arthur</strong>
+              </div>
+              <div class="identity-code">ID 04-117<br />Night watch</div>
+            </div>
+
+            <div class="system-lamps" aria-label="Atmospheric system indicators">
+              <span><i class="lamp lamp--on" aria-hidden="true"></i> Video</span>
+              <span><i class="lamp lamp--on" aria-hidden="true"></i> Text</span>
+              <span><i id="voice-lamp" class="lamp" aria-hidden="true"></i> Voice</span>
+            </div>
+
+            <div class="audio-deck" aria-label="Speech and audio controls">
+              <div class="audio-buttons">
+                <button id="audio-toggle" type="button" aria-pressed="true">Audio on</button>
+                <button id="replay-button" type="button" disabled>Replay</button>
+                <button id="skip-button" type="button" disabled>Skip</button>
+              </div>
+              <label class="volume-control" for="volume-control">
+                <span>Volume</span>
+                <input
+                  id="volume-control"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value="0.72"
+                  aria-valuetext="72 percent"
+                />
+              </label>
+            </div>
+          </section>
+
+          <section class="comms-module" aria-label="Conversation controls">
+            <section class="subtitle-panel" aria-labelledby="subtitle-speaker">
+              <div class="subtitle-heading">
+                <span id="subtitle-speaker">Arthur / Gatehouse</span>
+                <span>Captions on</span>
+              </div>
+              <p id="subtitle-text" aria-live="polite">Establishing security link…</p>
+            </section>
+
+            <section class="transcript-module" aria-labelledby="transcript-title">
+              <div class="module-heading">
+                <span id="transcript-title">Link transcript</span>
+                <span id="turn-count-compact">00</span>
+              </div>
+              <div
+                id="conversation"
+                class="conversation"
+                role="log"
+                aria-live="off"
+                aria-label="Conversation transcript with Arthur"
+              ></div>
+            </section>
+
+            <div id="outcome" class="outcome" role="status" hidden></div>
+
+            <form id="player-form" class="player-form">
+              <label for="player-input">Transmit message</label>
+              <div class="input-row">
+                <input
+                  id="player-input"
+                  name="player-input"
+                  type="text"
+                  autocomplete="off"
+                  maxlength="280"
+                  placeholder="TYPE MESSAGE_"
+                  required
+                />
+                <button id="send-button" type="submit">
+                  <span>Send</span>
+                  <span aria-hidden="true">▶</span>
+                </button>
+              </div>
+              <p id="input-hint" class="input-hint">Enter to transmit · 280 character limit</p>
+            </form>
+          </section>
+        </section>
+
+        <footer class="terminal-controls">
+          <div class="provider-control">
+            <label for="provider-select">Decision system</label>
+            <select id="provider-select" aria-describedby="provider-note">
+              <option value="mock">Mock</option>
+              <option value="jev">Jev — checking server</option>
+            </select>
+            <span id="provider-note">Offline deterministic decision model</span>
           </div>
-        </div>
 
-        <p class="scene-description">
-          Rain ticks against the corrugated roof. Arthur watches you from beneath
-          the security lamp, one hand resting beside the locked door.
-        </p>
+          <p id="provider-status" class="provider-status" role="status" hidden></p>
 
-        <div
-          id="conversation"
-          class="conversation"
-          role="log"
-          aria-live="polite"
-          aria-label="Conversation with Arthur"
-        ></div>
-
-        <div id="outcome" class="outcome" hidden></div>
-
-        <form id="player-form" class="player-form">
-          <label for="player-input">What do you say?</label>
-          <div class="input-row">
-            <input
-              id="player-input"
-              name="player-input"
-              type="text"
-              autocomplete="off"
-              maxlength="280"
-              placeholder="Type anything…"
-              required
-            />
-            <button id="send-button" type="submit">
-              <span>Speak</span>
-              <span aria-hidden="true">↵</span>
-            </button>
+          <div class="hardware-controls">
+            <button id="effects-toggle" type="button" aria-pressed="true">FX On</button>
+            <button id="debug-open" type="button" aria-haspopup="dialog">Developer <kbd>F2</kbd></button>
+            <button id="reset-button" class="reset-button" type="button">Reset link</button>
           </div>
-          <p id="input-hint" class="input-hint">Enter to send · 280 characters maximum</p>
-        </form>
-      </section>
+        </footer>
+      </main>
+    </div>
 
-      <aside class="debug-panel" aria-labelledby="debug-title">
+    <dialog id="debug-dialog" class="debug-dialog" aria-labelledby="debug-title">
+      <div class="debug-panel">
         <header class="debug-header">
           <div>
-            <p class="eyebrow">NPC internal state</p>
-            <h2 id="debug-title">Arthur</h2>
-            <p class="npc-role">Night security guard</p>
+            <p class="eyebrow">Developer inspection</p>
+            <h2 id="debug-title">Arthur / Decision telemetry</h2>
           </div>
-          <span class="live-badge"><i aria-hidden="true"></i> Live</span>
+          <button id="debug-close" type="button" aria-label="Close developer inspection">Close</button>
         </header>
 
-        <section class="debug-section" aria-labelledby="state-title">
-          <div class="section-heading">
-            <h3 id="state-title">Emotional state</h3>
-            <span id="turn-count">Turn 0</span>
-          </div>
-          <div id="state-values" class="state-values"></div>
-        </section>
+        <div class="debug-scroll">
+          <section class="debug-section" aria-labelledby="state-title">
+            <div class="section-heading">
+              <h3 id="state-title">Emotional state</h3>
+              <span id="turn-count">Turn 0</span>
+            </div>
+            <div id="state-values" class="state-values"></div>
+          </section>
 
-        <section class="debug-section decision-section" aria-labelledby="decision-title">
-          <h3 id="decision-title">Latest decision</h3>
-          <dl class="decision-grid">
-            <div>
-              <dt>Current goal</dt>
-              <dd id="current-goal">Protect warehouse</dd>
+          <section class="debug-section decision-section" aria-labelledby="decision-title">
+            <h3 id="decision-title">Latest decision</h3>
+            <dl class="decision-grid">
+              <div><dt>Current goal</dt><dd id="current-goal">Protect warehouse</dd></div>
+              <div><dt>Action</dt><dd id="last-action" class="code-value">WAITING</dd></div>
+              <div><dt>Confidence</dt><dd id="confidence">—</dd></div>
+              <div><dt>Tone</dt><dd id="tone">Neutral</dd></div>
+              <div><dt>Provider</dt><dd id="decision-provider">Mock</dd></div>
+              <div><dt>Validation</dt><dd id="validation-status">Waiting</dd></div>
+            </dl>
+            <div class="reason-block">
+              <span>Reason</span>
+              <p id="decision-reason">Waiting for the player to speak.</p>
             </div>
-            <div>
-              <dt>Action</dt>
-              <dd id="last-action" class="code-value">WAITING</dd>
-            </div>
-            <div>
-              <dt>Confidence</dt>
-              <dd id="confidence">—</dd>
-            </div>
-            <div>
-              <dt>Tone</dt>
-              <dd id="tone">Neutral</dd>
-            </div>
-            <div>
-              <dt>Provider</dt>
-              <dd id="decision-provider">Mock</dd>
-            </div>
-            <div>
-              <dt>Validation</dt>
-              <dd id="validation-status">Waiting</dd>
-            </div>
-          </dl>
-          <div class="reason-block">
-            <span>Reason</span>
-            <p id="decision-reason">Waiting for the player to speak.</p>
-          </div>
-          <p id="fallback-notice" class="fallback-notice" hidden></p>
-        </section>
+            <p id="fallback-notice" class="fallback-notice" hidden></p>
+          </section>
 
-        <section class="debug-section" aria-labelledby="memory-title">
-          <div class="section-heading">
-            <h3 id="memory-title">Memories</h3>
-            <span id="memory-count">0 / 8</span>
-          </div>
-          <ul id="memory-list" class="memory-list">
-            <li class="empty-memory">Nothing important recorded yet.</li>
-          </ul>
-        </section>
+          <section class="debug-section" aria-labelledby="memory-title">
+            <div class="section-heading">
+              <h3 id="memory-title">Memories</h3>
+              <span id="memory-count">0 / 8</span>
+            </div>
+            <ul id="memory-list" class="memory-list">
+              <li class="empty-memory">Nothing important recorded yet.</li>
+            </ul>
+          </section>
 
-        <section class="debug-section inspection-section" aria-label="Provider inspection">
-          <details>
-            <summary>Decision context</summary>
-            <pre id="context-json">No request sent yet.</pre>
-          </details>
-          <details>
-            <summary>Raw provider response</summary>
-            <pre id="response-json">No response received yet.</pre>
-          </details>
-        </section>
+          <section class="debug-section inspection-section" aria-label="Provider inspection">
+            <details>
+              <summary>Decision context</summary>
+              <pre id="context-json">No request sent yet.</pre>
+            </details>
+            <details>
+              <summary>Raw provider response</summary>
+              <pre id="response-json">No response received yet.</pre>
+            </details>
+          </section>
+        </div>
+      </div>
+    </dialog>
 
-        <footer class="debug-controls">
-          <label for="provider-select">Provider</label>
-          <select id="provider-select" aria-describedby="provider-note">
-            <option value="mock">Mock</option>
-            <option value="jev">Jev — checking server</option>
-          </select>
-          <p id="provider-note">Offline deterministic decision model</p>
-          <p id="provider-status" class="provider-status" role="status" hidden></p>
-          <button id="reset-button" class="reset-button" type="button">
-            Reset conversation
-          </button>
-        </footer>
-      </aside>
-    </main>
-
-    <script type="module" src="js/app.js?phase=4"></script>
+    <script type="module" src="js/app.js?phase=12"></script>
   </body>
 </html>

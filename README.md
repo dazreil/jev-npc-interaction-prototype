@@ -4,6 +4,8 @@ A small browser-based text game that explores whether a decision model can make 
 
 Arthur's spoken lines all come from `data/dialogue.json`. The Mock and Jev providers select only a structured action and return developer-facing decision metadata. The game validates the action before selecting an authored line.
 
+The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. Arthur occupies the main video feed, replies appear as captions with a compact transcript, and developer telemetry is available through the **Developer** control or <kbd>F2</kbd>. Browser speech, replay, mute, volume, skip, ambience, and authored interface sounds sit behind replaceable presentation adapters; captions and deterministic timing remain available when browser media APIs are missing.
+
 ## Run locally
 
 The complete offline Mock experience needs no credentials. Start it with:
@@ -95,14 +97,20 @@ If the server, network, or TypeSafe API fails, no turn or state change is applie
 - `js/dialogue.js` selects an authored line for the chosen action and deterministic emotional tone.
 - `js/dialogue-lint.js` validates every authored line, template slot, and conditional branch.
 - `js/npc.js` owns NPC state helpers and clamping.
+- `js/layout.js` keeps the 640×480 terminal proportional, fills the available viewport, and caps enlargement at 2×.
+- `js/performance.js` maps committed turns to renderer metadata and controls the idle, typing, decision, reaction, speaking, and ending lifecycle.
+- `js/portrait.js` maps performance phases to deterministic idle, blink, listening, mouth, and emotional portrait frames with a neutral fallback.
+- `js/speech.js` supplies deterministic delivery profiles, the replaceable Web Speech adapter, actual speech-event timing, replay, cancellation, and silent fallback timing.
+- `js/audio.js` owns optional Web Audio ambience and the band-limited, compressed relay, warning, interface, and door-unlock sounds.
 - `js/app.js` renders the UI and translates browser events into game turns.
 - `js/providers/jev.js` builds and validates the Jev `choice` request and maps the selected action to deterministic game effects, including the repair path.
 - `server.mjs` serves the game and protects the TypeSafe credential behind the same-origin Jev endpoint.
 - `scripts/run-playtests.mjs` runs the repeatable provider comparison and writes `PLAYTEST_REPORT.md`.
 - `scripts/lint-dialogue.mjs` audits dialogue content and reports the number of possible rendered lines.
 - `assets/arthur-portrait.jpg` is the generated, web-sized portrait used for Arthur's left-side chat avatar.
-- `assets/arthur-speech/frame-1.jpg` through `frame-4.jpg` are the four generated mouth poses.
-- `assets/arthur-speaking.gif` is the four-frame limited-palette talking animation played whenever Arthur replies.
+- `assets/arthur-speech/frame-1.jpg` through `frame-4.jpg` are sequenced at eight frames per second while Arthur speaks.
+- `assets/arthur-reactions/` contains identity-matched blink, listening, emotional, and entry-granted portraits; the browser rasterizes them to a 96×72 source surface before enlarging them with nearest-neighbour rendering.
+- `assets/arthur-speaking.gif` is retained as a legacy source artifact and is no longer used by the interface.
 - `assets/player-shadow.jpg` is the anonymous player avatar displayed on the opposite side of the chat.
 
-See [ROADMAP.md](ROADMAP.md) for milestones and acceptance criteria.
+See [ROADMAP.md](ROADMAP.md) for milestones and acceptance criteria. Phases 9–15 cover the planned retro CD-ROM vertical-slice conversion; [RETRO_CDROM_DESIGN_SPEC.md](RETRO_CDROM_DESIGN_SPEC.md) records the full visual, audio, interaction, and evaluation direction.
