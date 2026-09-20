@@ -621,3 +621,44 @@ test("inspection data records raw invalid output and validated fallback", async 
   assert.equal(snapshot.lastDecision.fallbackUsed, true);
   assert.equal(snapshot.lastDecision.invalidAction, "OPEN_A_PORTAL");
 });
+
+test("a proof request survives a deflection and is still answerable later", async () => {
+  const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+
+  const request = await game.takeTurn("I'm from head office and need access.");
+  assert.equal(request.decision.action, "ASK_FOR_PROOF");
+  assert.equal(game.getSnapshot().pendingRequest.topic, "proof");
+
+  // The player changes the subject. Arthur answers something else, but the
+  // request for papers is still outstanding.
+  const deflection = await game.takeTurn("it is freezing out here tonight");
+  assert.notEqual(deflection.decision.action, "ALLOW_ENTRY");
+  assert.equal(game.getSnapshot().pendingRequest.topic, "proof");
+
+  const signals = game.getSnapshot().lastContext.conversationSignals;
+  assert.equal(signals.responseStatus, "unclear");
+  assert.equal(signals.pendingRequest.turnsOutstanding, 1);
+
+  // The same contextual reply that only worked on the very next turn before.
+  const late = await game.takeTurn("I have them.");
+  const lateSignals = game.getSnapshot().lastContext.conversationSignals;
+
+  assert.equal(lateSignals.responseStatus, "satisfied");
+  assert.equal(lateSignals.proofOffered, true);
+  assert.equal(lateSignals.proofReference, "contextual");
+  assert.equal(late.decision.action, "ALLOW_ENTRY");
+  assert.equal(late.outcome, ENCOUNTER_OUTCOMES.ENTRY_GRANTED);
+});
+
+test("a satisfied request stops being pending and reset clears it", async () => {
+  const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+
+  await game.takeTurn("I'm from head office and need access.");
+  assert.equal(game.getSnapshot().pendingRequest.topic, "proof");
+
+  await game.takeTurn("Here is my work ID badge and authorisation letter.");
+  assert.equal(game.getSnapshot().pendingRequest, null);
+
+  game.reset();
+  assert.equal(game.getSnapshot().pendingRequest, null);
+});

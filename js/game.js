@@ -6,7 +6,11 @@ import {
   getTrustEntryThreshold
 } from "./character.js";
 import { createNpcPerformance } from "./performance.js";
-import { deriveConversationSignals, hasUnresolvedSuspicion } from "./conversation-signals.js";
+import {
+  deriveConversationSignals,
+  hasUnresolvedSuspicion,
+  resolvePendingRequest
+} from "./conversation-signals.js";
 import {
   STATE_KEYS,
   applyStateChanges,
@@ -221,6 +225,7 @@ export class Game {
     this.status = "active";
     this.outcome = ENCOUNTER_OUTCOMES.ACTIVE;
     this.reasonPrompted = false;
+    this.pendingRequest = null;
     this.lastDecision = null;
     this.lastContext = null;
     this.lastRawResponse = null;
@@ -345,7 +350,10 @@ export class Game {
       turn: this.turn + 1
     };
 
-    context.conversationSignals = deriveConversationSignals(context);
+    context.conversationSignals = deriveConversationSignals({
+      ...context,
+      pendingRequest: this.pendingRequest
+    });
     context.availableActions = this.getAvailableActions(context.conversationSignals);
 
     const suppliedRequestedProof =
@@ -469,6 +477,14 @@ export class Game {
     if (introducedPlayerName) this.playerName = introducedPlayerName;
     if (decision.action === "ASK_FOR_REASON") this.reasonPrompted = true;
     if (decision.action === "REPAIR_CONVERSATION") this.reasonPrompted = false;
+
+    // A question Arthur asked stays outstanding until the player actually
+    // settles it, so a deflected question survives the turn that dodged it.
+    if (["satisfied", "refused"].includes(this.lastContext.conversationSignals?.responseStatus)) {
+      this.pendingRequest = null;
+    }
+    this.pendingRequest =
+      resolvePendingRequest(decision.action, dialogue, this.turn) ?? this.pendingRequest;
     this.history.push({ speaker: "player", text: input });
     this.history.push({ speaker: "arthur", text: dialogue, action: decision.action });
     this.history = this.history.slice(-MAX_HISTORY_ENTRIES);
@@ -535,6 +551,7 @@ export class Game {
       status: this.status,
       outcome: this.outcome,
       reasonPrompted: this.reasonPrompted,
+      pendingRequest: this.pendingRequest ? structuredClone(this.pendingRequest) : null,
       playerAddress: this.playerAddress,
       playerName: this.playerName,
       characterProfile: structuredClone(this.characterProfile),

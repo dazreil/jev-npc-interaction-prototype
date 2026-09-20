@@ -1,4 +1,4 @@
-import { deriveConversationSignals } from "../conversation-signals.js";
+import { deriveConversationSignals, inferPurpose } from "../conversation-signals.js";
 
 const JEV_ENDPOINT = "/api/jev/decision";
 const REQUEST_TIMEOUT_MS = 8000;
@@ -30,6 +30,11 @@ export const ACTION_CRITERIA = Object.freeze({
     "End the exchange when the player leaves, or when they repeat insults or hostility after Arthur already issued a warning and further conversation is pointless."
 });
 
+// Appended to the instructions only on the turns that actually carry a
+// pending question, so that an ordinary turn's request is unchanged.
+const PENDING_REQUEST_GUIDANCE =
+  "conversationSignals.pendingRequest, when present, is something Arthur put to the player on an earlier turn that they still owe him a response to. It may be a question such as why they are there, or a directive such as holding papers up to the camera; either way the player has not yet settled it. It carries the action that raised it, its topic, and turnsOutstanding. It appears only once it has outlived the turn that raised it. conversationSignals.responseStatus judges the latest message against it: 'satisfied' when the player supplied or did what was asked, 'refused' when they explicitly declined, 'unclear' when the text settles nothing either way, or 'none'. Treat a pending request as still open across intervening turns: if Arthur asked for papers, the player changed the subject, and the player only now refers to 'them' or 'it', that responds to the original request even though Arthur has spoken since. When responseStatus is 'satisfied', act on that rather than repeating the request. Judge every other case on its meaning, as you would without these fields.";
+
 const ACTION_STATE_CHANGES = Object.freeze({
   ANSWER_QUESTION: { trust: 2 },
   REFUSE_ENTRY: { suspicion: 3, irritation: 2 },
@@ -43,13 +48,6 @@ const ACTION_STATE_CHANGES = Object.freeze({
   BECOME_SUSPICIOUS: { trust: -15, suspicion: 20, irritation: 10 },
   REPAIR_CONVERSATION: { trust: 10, suspicion: -14, irritation: -12, fear: -4 },
   END_CONVERSATION: { irritation: 5 }
-});
-
-const PURPOSE_PATTERNS = Object.freeze({
-  emergency: /\b(boiler|gas|leak|fire|smoke|alarm|pressure|flood|emergency|burst|electrical|sparks)\b/i,
-  authority: /\b(head office|management|manager|inspector|inspection|contractor|engineer|technician|maintenance|maintanance|mantenice|boss(?:es)? sent me|sent by (?:the )?(?:boss|management)|work here|employee|fix(?:ing)? (?:the )?(?:coffee )?machines?)\b/i,
-  delivery: /\b(delivery|courier|package|parcel|shipment|drop off|driver)\b/i,
-  personal: /\b(left my|forgot my|my bag|my phone|meet someone|friend inside|personal item)\b/i
 });
 
 const WEAPON_THREAT_PATTERN =
@@ -68,10 +66,6 @@ function requireAvailableActions(availableActions) {
   }
 
   return uniqueActions;
-}
-
-function inferPurpose(input) {
-  return Object.entries(PURPOSE_PATTERNS).find(([, pattern]) => pattern.test(input))?.[0] ?? null;
 }
 
 function deriveMemory(action, context) {
@@ -166,6 +160,18 @@ export function buildJevRequest(context, availableActions) {
   const actions = requireAvailableActions(availableActions);
   const criteria = Object.fromEntries(actions.map((action) => [action, ACTION_CRITERIA[action]]));
   const conversationSignals = context.conversationSignals ?? deriveConversationSignals(context);
+  // Arthur's own last line already shows Jev what he just put to the player, so
+  // restating it adds no information. These two keys are omitted entirely until
+  // they carry something recentConversation cannot show: a request that has
+  // outlived the turn that raised it. Jev is not deterministic, so any change
+  // here needs repeated runs, not a single playtest, to judge its effect.
+  const { pendingRequest, responseStatus, ...baseSignals } = conversationSignals;
+  const carriesPendingRequest = (pendingRequest?.turnsOutstanding ?? 0) >= 2;
+  const requestGuidance = carriesPendingRequest ? PENDING_REQUEST_GUIDANCE : "";
+  const reportedSignals =
+    carriesPendingRequest
+      ? { ...baseSignals, pendingRequest, responseStatus }
+      : baseSignals;
 
   return {
     state: {
@@ -184,7 +190,7 @@ export function buildJevRequest(context, availableActions) {
       persistentMemories: context.memories,
       recentConversation: context.recentConversation,
       latestPlayerMessage: context.playerInput,
-      conversationSignals,
+      conversationSignals: reportedSignals,
       turn: context.turn
     },
     model: "jev-latest",
@@ -192,6 +198,7 @@ export function buildJevRequest(context, availableActions) {
       next_action: {
         type: "choice",
         instructions:
+          requestGuidance +
           "Which single action should Arthur take immediately after the latest player message? Judge the message in light of Arthur's personality, practical cognitive style, current emotional state, security goals, memories, recent conversation, communication effort, and conversationSignals, including actions he already took. Arthur has an estimated IQ of 95: he is ordinarily capable and practical, uses simple everyday reasoning, avoids elaborate deductions, and assumes people arriving at a staffed industrial gate know the basic drill. The npc.characterProfile is his fixed temperament for this encounter; use its decision style when ranking plausible actions. The scene layout is fixed: Arthur is in Guard Tower 04 beyond the locked warehouse car-park gate; the player is outside that gate; they can only see and hear each other through a camera intercom. Arthur can make a preliminary visual check of papers through the camera. ALLOW_ENTRY opens only the car-park gate, after which the visitor must report to Guard Tower 04 and show the original documents before approaching the warehouse. Never describe ALLOW_ENTRY as warehouse access. Never reason as though Arthur and the player are standing face to face. A gun displayed outside is serious suspicious conduct but cannot directly force Arthur to open the gate; Arthur should say so while de-escalating. A very terse message may make Arthur slightly more irritated, while a considered explanation gives him more to work with; let explicit meaning, politeness, hostility, and threats outweigh length alone. A player introducing their own name is conversational context, not a question: judge any purpose in the same message normally, or choose ASK_FOR_REASON if no purpose was given. The authored dialogue layer will acknowledge the name. Arthur protects the warehouse grounds, follows rules, requires a purpose that actually justifies car-park access, notices contradictions and manipulation, and may still respond humanely to respectful or urgent appeals. Treat matching ID, official papers, authorisation, work orders, ticket references, and specific technical details supplied in the conversation as preliminary camera evidence Arthur can accept. When conversationSignals.proofOffered is true after a coherent work or delivery claim, the requested evidence has been supplied even if the player refers to it as 'it' or 'them'; choose ALLOW_ENTRY when available rather than REFUSE_ENTRY or ASK_FOR_PROOF. When the latest purpose conflicts with a purpose in persistent memories, choose BECOME_SUSPICIOUS rather than REFUSE_ENTRY, even if the new purpose is also insufficient. BECOME_SUSPICIOUS is removed after Arthur raises one unresolved challenge. While conversationSignals.unresolvedSuspicion is true, never repeat that challenge: choose REPAIR_CONVERSATION when the player supplies evidence or clarifies the original claim, REFUSE_ENTRY when they evade it, or END_CONVERSATION only when the exchange has become futile or hostile. When the player clearly says they are leaving, heading home, or saying goodbye, choose END_CONVERSATION. Arthur asks for the player's purpose only once per conversational attempt; if ASK_FOR_REASON is absent because he already asked and the player remains vague, choose REFUSE_ENTRY rather than manufacturing another version of the same question. Do not repeat a request for proof when the latest message supplies the requested evidence, and do not repeat a first warning after hostility continues. If the player apologizes or honestly clarifies earlier damage after Arthur became suspicious or irritated, choose REPAIR_CONVERSATION: acknowledge the repair cautiously, lower the tension, and invite the player to give one concrete next step. Do not choose it for a generic polite request with no prior damage. If the player asks Arthur's name or who he is, choose ANSWER_QUESTION so he answers directly that he is Arthur. If the player makes a first explicit gun, firearm, weapon, or shooting threat and DEESCALATE_THREAT is available, choose DEESCALATE_THREAT: Arthur should calmly remind the player that he is behind the locked car-park gate, invite them to lower the weapon, and ask what they need without mentioning police. Use THREATEN_PLAYER only for a boundary or physical threat against the gate that remains after de-escalation. Select the action whose description best fits what Arthur should do now.",
         criteria
       }
