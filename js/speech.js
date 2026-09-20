@@ -469,7 +469,10 @@ export class PiperSpeechAdapter {
       this.context.currentTime
     );
 
-    const playbackRate = finiteInRange(rate, 1, 0.5, 1.5) * finiteInRange(pitch, 1, 0.4, 1.4);
+    // Piper has already produced a naturally voiced recording. Changing an
+    // AudioBufferSource's playbackRate also shifts its pitch like slowed tape,
+    // which made Arthur unnaturally deep. Preserve the model's native delivery.
+    const playbackRate = 1;
     const active = { sources: [], startTimers: [] };
     this.active = active;
     const completions = [];

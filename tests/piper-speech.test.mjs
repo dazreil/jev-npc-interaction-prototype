@@ -207,16 +207,15 @@ test("sentences are synthesised one at a time and scheduled gaplessly", async ()
   assert.equal(result.status, "ended");
 });
 
-test("rate and pitch multiply into playbackRate and shorten the schedule", async () => {
+test("Piper preserves its native pitch and playback speed", async () => {
   const context = fakeContext();
   const { adapter } = buildAdapter({ context });
   await adapter.prepare();
 
   await adapter.speak({ text: "Sentence one here. Sentence two here.", rate: 1.2, pitch: 0.5, volume: 1 });
 
-  assert.equal(context.sources[0].playbackRate.value, 0.6);
-  // 0.1s of audio at 0.6x plays for 0.1 / 0.6 seconds.
-  assert.equal(context.started[1], 0.05 + 0.1 / 0.6);
+  assert.equal(context.sources[0].playbackRate.value, 1);
+  assert.equal(context.started[1], 0.05 + 0.1);
 });
 
 test("onStart fires once with the piper engine even across many sentences", async () => {
