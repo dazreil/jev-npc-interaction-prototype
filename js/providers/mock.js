@@ -6,7 +6,7 @@ const patterns = {
   weapon: /\b(gun|pistol|rifle|firearm|revolver|shotgun|weapon|armed|shoot(?:ing)?|aim(?:ing)?|bullet|trigger)\b/i,
   trespass: /\b(going in anyway|try the door|push past|step aside|can't stop me|cannot stop me|move out of my way)\b/i,
   bribe: /\b(bribe|cash|money|pay you|fifty|hundred|quid|make it worth)\b/i,
-  authority: /\b(head office|management|manager|inspector|inspection|contractor|engineer|technician|maintenance|work here|employee)\b/i,
+  authority: /\b(head office|management|manager|inspector|inspection|contractor|engineer|technician|maintenance|maintanance|mantenice|boss(?:es)? sent me|sent by (?:the )?(?:boss|management)|work here|employee)\b/i,
   workTask:
     /\b(?:fix|repair|service|maintain)(?:ing)?\s+(?:the\s+)?(?:coffee\s+)?(?:machine|machines|equipment|system|door|boiler|lights?|wiring|plumbing)\b/i,
   delivery: /\b(delivery|courier|package|parcel|shipment|drop off|driver)\b/i,

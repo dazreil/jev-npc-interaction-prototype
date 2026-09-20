@@ -100,7 +100,8 @@ test("Jev receives an explicit signal when a pronoun answers Arthur's proof requ
     activePurpose: "authority",
     proofWasRequested: true,
     proofOffered: true,
-    proofReference: "contextual"
+    proofReference: "contextual",
+    unresolvedSuspicion: false
   });
   assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /I have them/i);
 });
@@ -115,6 +116,18 @@ test("valid Jev choices become deterministic game decisions", () => {
   assert.equal(decision.memory.value, "emergency");
   assert.equal(decision.providerDetails.probabilities.ASK_FOR_PROOF, 0.7);
   assert.match(decision.reason, /ASK_FOR_PROOF/);
+});
+
+test("Jev preserves a misspelled maintenance claim as an authority purpose", () => {
+  const maintenanceContext = {
+    ...context,
+    playerInput: "the bosses sent me here to do some mantenice"
+  };
+  const decision = parseJevResponse(validResponse(), maintenanceContext, actions);
+
+  assert.deepEqual(decision.memory.tags, ["authority", "claim"]);
+  assert.equal(decision.memory.topic, "purpose");
+  assert.equal(decision.memory.value, "authority");
 });
 
 test("Jev consequences contain no provider-generated dialogue", () => {

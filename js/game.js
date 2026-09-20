@@ -6,7 +6,7 @@ import {
   getTrustEntryThreshold
 } from "./character.js";
 import { createNpcPerformance } from "./performance.js";
-import { deriveConversationSignals } from "./conversation-signals.js";
+import { deriveConversationSignals, hasUnresolvedSuspicion } from "./conversation-signals.js";
 import {
   STATE_KEYS,
   applyStateChanges,
@@ -268,16 +268,21 @@ export class Game {
     const hasUnrepairedRisk = this.memories.some(
       (memory) =>
         (memory.tags?.some((tag) =>
-          ["threat", "weapon", "bribe", "contradiction", "lie"].includes(tag)
+          ["threat", "weapon", "bribe", "contradiction", "dishonesty", "lie", "suspicion"].includes(tag)
         ) ?? false) &&
         (Number(memory.createdTurn) || 0) > latestRepairTurn
     );
+    const suspicionAlreadyRaised = hasUnresolvedSuspicion(this.memories);
     const suppliedRequestedProof =
       conversationSignals?.proofOffered === true &&
       ["authority", "delivery"].includes(conversationSignals.activePurpose);
 
     return AVAILABLE_ACTIONS.filter((action) => {
       if (action === "ASK_FOR_REASON" && this.reasonPrompted) {
+        return false;
+      }
+
+      if (action === "BECOME_SUSPICIOUS" && suspicionAlreadyRaised) {
         return false;
       }
 

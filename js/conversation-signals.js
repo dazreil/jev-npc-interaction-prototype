@@ -18,6 +18,24 @@ function latestPurpose(memories = []) {
     ?.value ?? null;
 }
 
+export function hasUnresolvedSuspicion(memories = []) {
+  const latestRepairTurn = memories.reduce(
+    (latest, memory) =>
+      memory?.tags?.includes("repair")
+        ? Math.max(latest, Number(memory.createdTurn) || 0)
+        : latest,
+    -1
+  );
+
+  return memories.some(
+    (memory) =>
+      (memory?.tags?.some((tag) =>
+        ["suspicion", "contradiction", "dishonesty", "lie", "bribe"].includes(tag)
+      ) ?? false) &&
+      (Number(memory.createdTurn) || 0) > latestRepairTurn
+  );
+}
+
 export function deriveConversationSignals({ playerInput, recentConversation = [], memories = [] }) {
   const input = String(playerInput ?? "").trim();
   const lastArthurAction = latestArthurAction(recentConversation);
@@ -32,6 +50,7 @@ export function deriveConversationSignals({ playerInput, recentConversation = []
     activePurpose: latestPurpose(memories),
     proofWasRequested,
     proofOffered: namesProof || refersToRequestedProof,
-    proofReference: namesProof ? "named" : refersToRequestedProof ? "contextual" : "none"
+    proofReference: namesProof ? "named" : refersToRequestedProof ? "contextual" : "none",
+    unresolvedSuspicion: hasUnresolvedSuspicion(memories)
   };
 }

@@ -438,6 +438,11 @@ test("contradicting a remembered purpose makes Arthur suspicious", async () => {
   assert.ok(game.memories.some((memory) => memory.tags.includes("contradiction")));
   assert.ok(game.npc.state.suspicion >= 70);
   assert.equal(game.getAvailableActions().includes("ALLOW_ENTRY"), false);
+  assert.equal(game.getAvailableActions().includes("BECOME_SUSPICIOUS"), false);
+
+  const followUpContext = game.buildDecisionContext("That is the true version.");
+  assert.equal(followUpContext.conversationSignals.unresolvedSuspicion, true);
+  assert.equal(followUpContext.availableActions.includes("BECOME_SUSPICIOUS"), false);
 });
 
 test("an honest repair can reopen the path from suspicion to proof", async () => {
@@ -462,6 +467,7 @@ test("an honest repair can reopen the path from suspicion to proof", async () =>
   assert.match(repair.dialogue, /start again|explain|honesty|truth/i);
   assert.ok(game.memories.some((memory) => memory.tags.includes("repair")));
   assert.equal(game.getAvailableActions().includes("ALLOW_ENTRY"), true);
+  assert.equal(game.getAvailableActions().includes("BECOME_SUSPICIOUS"), true);
 
   const proof = await game.takeTurn(
     "Here is my work ID badge and signed authorisation letter."

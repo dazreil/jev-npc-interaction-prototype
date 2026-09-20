@@ -491,10 +491,23 @@
           "I understand. Still no entry without proof.",
           "Bad situation, friend. Rules do not change."
         ],
-        "BECOME_SUSPICIOUS": [
-          "Story changed. Which one is true?",
-          "No. Before you say different. Tell truth now."
-        ],
+        "BECOME_SUSPICIOUS": {
+          "template": "{challenge}",
+          "slots": {
+            "challenge": [
+              "Story changed. Which one is true?",
+              "No. Before you say different. Tell truth now."
+            ]
+          },
+          "branches": [
+            {
+              "when": {
+                "playerContains": ["letter from the king", "from the king"]
+              },
+              "template": "Letter from king? No jokes. Show warehouse work order and real ID."
+            }
+          ]
+        },
         "REPAIR_CONVERSATION": [
           "Good. We speak straight now. What you need?",
           "Apology accepted, friend. No more games."
