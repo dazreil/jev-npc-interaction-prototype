@@ -128,10 +128,12 @@ const speechDirector = new SpeechDirector({
       return periodAudio.context;
     },
     onProgress: ({ loaded, total }) => {
-      if (!(total > 0)) return;
+      if (!(total > 0) || elements.bootSequence.hidden) return;
       const percent = Math.min(100, Math.max(0, Math.round((loaded / total) * 100)));
       elements.linkStatus.textContent = `Voice ${percent}%`;
       elements.linkStatus.title = `Gatehouse link: calibrating neural voice ${percent}%`;
+      elements.bootMessage.textContent = `LOADING ARTHUR VOICE MODEL... ${percent}%`;
+      elements.bootProgressFill.style.width = `${35 + Math.round(percent * 0.6)}%`;
     }
   })
 });
@@ -487,15 +489,12 @@ function renderOutcome(outcome = "active") {
 
 async function playBootSequence() {
   const runId = ++bootRunId;
-  speechDirector.prepare();
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const stepDelay = reducedMotion ? 20 : 260;
   const steps = [
-    ["CHECKING HARDLINE CARRIER...", 18],
-    ["AUTHENTICATING CAMERAS 04-A / 04-B...", 43],
-    ["OPENING GUARD TOWER AUDIO CHANNEL...", 68],
-    ["SYNCING NIGHT WATCH TERMINAL...", 86],
-    ["SECURITY LINK ESTABLISHED", 100]
+    ["CHECKING HARDLINE CARRIER...", 12],
+    ["AUTHENTICATING CAMERAS 04-A / 04-B...", 24],
+    ["OPENING GUARD TOWER AUDIO CHANNEL...", 35]
   ];
 
   elements.bootSequence.hidden = false;
@@ -510,6 +509,23 @@ async function playBootSequence() {
     elements.bootProgressFill.style.width = `${progress}%`;
     await delay(stepDelay);
   }
+
+  if (runId !== bootRunId) return;
+  elements.bootMessage.textContent = "INITIALISING LOCAL PIPER VOICE...";
+  elements.linkStatus.textContent = "Voice init";
+  const piperReady = await speechDirector.prepare();
+
+  if (runId !== bootRunId) return;
+  elements.bootMessage.textContent = piperReady
+    ? "ARTHUR VOICE MODEL READY"
+    : "NEURAL VOICE OFFLINE — FALLBACK READY";
+  elements.bootProgressFill.style.width = "96%";
+  await delay(stepDelay);
+
+  if (runId !== bootRunId) return;
+  elements.bootMessage.textContent = "SECURITY LINK ESTABLISHED";
+  elements.bootProgressFill.style.width = "100%";
+  await delay(stepDelay);
 
   if (runId !== bootRunId) return;
   elements.bootSequence.hidden = true;
