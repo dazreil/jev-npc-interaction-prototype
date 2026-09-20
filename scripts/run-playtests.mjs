@@ -374,12 +374,13 @@ async function runEdgeCases(npcTemplate, dialogueData) {
     provider: invalidProvider,
     providerId: "invalid-test"
   });
+  const invalidInitialTrust = invalidGame.npc.state.trust;
   const invalidTurn = await invalidGame.takeTurn("Diagnostic invalid action.");
   const invalidPass =
     invalidTurn.decision.action === "REFUSE_ENTRY" &&
     invalidTurn.decision.fallbackUsed &&
     invalidGame.memories.length === 0 &&
-    invalidGame.npc.state.trust === npcTemplate.state.trust;
+    invalidGame.npc.state.trust === invalidInitialTrust;
 
   const offlineProvider = async () => {
     throw new Error("Simulated offline provider.");
@@ -390,6 +391,7 @@ async function runEdgeCases(npcTemplate, dialogueData) {
     provider: offlineProvider,
     providerId: "jev"
   });
+  const offlineInitialTrust = offlineGame.npc.state.trust;
   let failedAsExpected = false;
   try {
     await offlineGame.takeTurn("Good evening, sir.");
@@ -403,7 +405,7 @@ async function runEdgeCases(npcTemplate, dialogueData) {
     failedAsExpected &&
     failedSnapshot.turn === 0 &&
     failedSnapshot.history.length === 0 &&
-    failedSnapshot.npc.state.trust === npcTemplate.state.trust &&
+    failedSnapshot.npc.state.trust === offlineInitialTrust &&
     recoveredTurn.decision.action === "ASK_FOR_REASON" &&
     offlineGame.turn === 1;
 
@@ -509,9 +511,9 @@ function renderReport(results, edgeCases, dialogueAudit) {
     "",
     `Dialogue lint: ${dialogueAudit.errors.length ? "FAIL" : "PASS"}`,
     "",
-    "| Actions | Authored fragments | Template entries | Conditional branches | Possible rendered lines | Warnings |",
-    "| ---: | ---: | ---: | ---: | ---: | ---: |",
-    `| ${stats.actionCount} | ${stats.authoredFragments} | ${stats.templateEntries} | ${stats.branchCount} | ${stats.possibleLines} | ${dialogueAudit.warnings.length} |`
+    "| Character profiles | Actions | Authored fragments | Template entries | Conditional branches | Possible rendered lines | Warnings |",
+    "| ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    `| ${stats.profileCount} | ${stats.actionCount} | ${stats.authoredFragments} | ${stats.templateEntries} | ${stats.branchCount} | ${stats.possibleLines} | ${dialogueAudit.warnings.length} |`
   );
 
   lines.push("", "## Failure Handling", "", "| Check | Result | Evidence |", "| --- | --- | --- |");

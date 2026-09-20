@@ -91,7 +91,7 @@ export function selectDialogue(
   action,
   tone,
   variantIndex = 0,
-  { playerInput = "", dialogueContext = {} } = {}
+  { playerInput = "", profileId = "", dialogueContext = {} } = {}
 ) {
   const variants = dialogueData.actions[action];
 
@@ -99,7 +99,9 @@ export function selectDialogue(
     throw new Error(`No authored dialogue exists for action: ${action}`);
   }
 
+  const profileValue = dialogueData.profiles?.[profileId]?.actions?.[action];
   const authoredValue =
+    profileValue ||
     (isWeaponThreat(playerInput) && variants.weapon) ||
     (isNameQuestion(playerInput) && variants.name) ||
     variants[tone] ||

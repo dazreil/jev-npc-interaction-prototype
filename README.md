@@ -59,7 +59,16 @@ The resulting Mock-versus-Jev transcript, complete action coverage, confidence r
 
 The expandable debug views show the exact decision context and raw provider response. Provider reasons are diagnostic data only and are never displayed as Arthur's dialogue.
 
-Arthur keeps up to eight important memories separately from the latest six conversation exchanges. On each reset he randomly settles on `pal`, `sir`, `mate`, or `friend` as his form of address and uses that same word throughout the encounter. Claims record a purpose, contradictions and admitted lies sharply increase suspicion, and unrepaired serious memories can remove `ALLOW_ENTRY` from the actions sent to the provider. Arthur asks for the player's purpose once per conversational attempt; if the player stays vague, he holds the boundary instead of asking a reworded version of the same question. A sincere apology or clarification selects `REPAIR_CONVERSATION`, lowers tension, and marks the earlier damage as repaired so a later credible proof can reopen entry. Common actions rotate through multiple authored lines while emotional tone remains deterministic. Message effort also nudges mood: terse replies add a small amount of irritation, while considered explanations can slightly improve trust. A first weapon threat selects `DEESCALATE_THREAT`, giving Arthur a calm response that asks what the player needs without provoking them.
+Arthur keeps up to eight important memories separately from the latest six conversation exchanges. On each reset his form of address selects a complete character profile that remains fixed throughout the encounter:
+
+| Address | Arthur's character |
+| --- | --- |
+| `pal` | Fast-talking Italian American; impatient with evasiveness and difficult to intimidate. |
+| `sir` | Formal New England rule-keeper; precise, suspicious, and strongly bound to procedure. |
+| `mate` | Talkative Irish American; patient, sympathetic, and inclined to hear the player out. |
+| `friend` | Terse Eastern European English learner; reserved, direct, and economical with words. |
+
+The profile changes Arthur's starting mood, personality values, trust threshold, authored phrasing, speech rate, pitch, and pre-delay. Jev receives the same profile in its structured decision context. Claims record a purpose, contradictions and admitted lies sharply increase suspicion, and unrepaired serious memories can remove `ALLOW_ENTRY` from the actions sent to the provider. Arthur asks for the player's purpose once per conversational attempt; if the player stays vague, he holds the boundary instead of asking a reworded version of the same question. A sincere apology or clarification selects `REPAIR_CONVERSATION`, lowers tension, and marks the earlier damage as repaired so a later credible proof can reopen entry. Message effort also nudges mood: terse replies add a small amount of irritation, while considered explanations can slightly improve trust. A first weapon threat selects `DEESCALATE_THREAT`, giving Arthur a calm response that asks what the player needs without provoking them.
 
 ## Authored dialogue branches
 

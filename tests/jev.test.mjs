@@ -13,7 +13,12 @@ const context = {
     id: "arthur",
     personality: { patience: 35, greed: 25, courage: 70, sympathy: 55, ruleFollowing: 80 },
     state: { trust: 20, suspicion: 40, irritation: 10, fear: 5 },
-    goals: [{ id: "protect_warehouse", label: "Protect warehouse", priority: 100 }]
+    goals: [{ id: "protect_warehouse", label: "Protect warehouse", priority: 100 }],
+    characterProfile: {
+      id: "sir",
+      label: "Formal New England rule-keeper",
+      decisionStyle: "Formal, restrained, precise, and strongly bound to procedure."
+    }
   },
   world: { location: "warehouse entrance", time: "02:13", warehouseOpen: false },
   memories: [],
@@ -52,6 +57,7 @@ test("Jev request contains one Choice over exactly the available actions", () =>
   assert.equal(request.questions.next_action.criteria.ALLOW_ENTRY, undefined);
   assert.equal(request.state.latestPlayerMessage, context.playerInput);
   assert.deepEqual(request.state.npc.currentState, context.npc.state);
+  assert.deepEqual(request.state.npc.characterProfile, context.npc.characterProfile);
 });
 
 test("valid Jev choices become deterministic game decisions", () => {

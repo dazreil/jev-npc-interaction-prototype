@@ -1,3 +1,5 @@
+import { ARTHUR_CHARACTER_IDS } from "./character.js";
+
 const TONES = new Set(["neutral", "friendly", "irritated", "hostile"]);
 const VARIANT_KEYS = new Set([...TONES, "name", "weapon"]);
 const TEMPLATE_KEYS = new Set(["template", "templates", "slots", "branches"]);
@@ -234,6 +236,7 @@ export function lintDialogueData(dialogueData, availableActions) {
   const warnings = [];
   const statistics = {
     actionCount: 0,
+    profileCount: 0,
     variantEntries: 0,
     authoredFragments: 0,
     templateEntries: 0,
@@ -283,6 +286,54 @@ export function lintDialogueData(dialogueData, availableActions) {
     }
   }
 
+  if (!dialogueData.profiles || typeof dialogueData.profiles !== "object" || Array.isArray(dialogueData.profiles)) {
+    errors.push("profiles must be an object.");
+  } else {
+    const profileNames = Object.keys(dialogueData.profiles);
+    statistics.profileCount = profileNames.length;
+
+    for (const profileId of ARTHUR_CHARACTER_IDS) {
+      if (!Object.hasOwn(dialogueData.profiles, profileId)) {
+        errors.push(`profiles.${profileId} is missing.`);
+      }
+    }
+
+    for (const [profileId, profile] of Object.entries(dialogueData.profiles)) {
+      const profilePath = `profiles.${profileId}`;
+      if (!ARTHUR_CHARACTER_IDS.includes(profileId)) {
+        errors.push(`${profilePath} is not a supported Arthur profile.`);
+      }
+      if (!profile || typeof profile !== "object" || Array.isArray(profile)) {
+        errors.push(`${profilePath} must be an object.`);
+        continue;
+      }
+      if (!isNonEmptyString(profile.opening)) {
+        errors.push(`${profilePath}.opening must be a non-empty string.`);
+      } else {
+        statistics.authoredFragments += 1;
+        statistics.possibleLines += 1;
+      }
+      if (!profile.actions || typeof profile.actions !== "object" || Array.isArray(profile.actions)) {
+        errors.push(`${profilePath}.actions must be an object.`);
+        continue;
+      }
+
+      for (const [action, value] of Object.entries(profile.actions)) {
+        if (!availableActions.includes(action)) {
+          errors.push(`${profilePath}.actions.${action} is not an available action.`);
+          continue;
+        }
+        validateDialogueValue(
+          value,
+          `${profilePath}.actions.${action}`,
+          availableActions,
+          errors,
+          warnings,
+          statistics
+        );
+      }
+    }
+  }
+
   return { errors, warnings, statistics };
 }
-

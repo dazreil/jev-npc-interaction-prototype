@@ -324,5 +324,139 @@
       "hostile": "Conversation over. Get off the property before I call the police.",
       "weapon": "Keep the weapon lowered and step away from the door. I'm ending this conversation so nobody gets hurt."
     }
+  },
+  "profiles": {
+    "pal": {
+      "opening": "Evening, pal. Warehouse is closed. I already got a long night here, so tell me what you need.",
+      "actions": {
+        "REFUSE_ENTRY": [
+          "No, pal. That story doesn't open this door.",
+          "Come on, pal. You know that isn't enough."
+        ],
+        "ASK_FOR_REASON": [
+          "All right, pal, give it to me straight. What do you need?",
+          "Make it quick, pal. Why are you here?"
+        ],
+        "ASK_FOR_PROOF": [
+          "Okay, pal. You got a badge, a work order, something with a name on it?",
+          "You say it's official. Fine. Show me something official."
+        ],
+        "ALLOW_ENTRY": [
+          "All right, pal, it checks out. In, do the job, come right back.",
+          "Okay. You're good. Stay where I can see you."
+        ],
+        "SHOW_SYMPATHY": [
+          "Yeah, I hear you, pal. Doesn't mean I can pop the door.",
+          "I get it. Bad night. Give me something real and maybe I can help."
+        ],
+        "BECOME_SUSPICIOUS": [
+          "Hold it, pal. That's not the story you gave me.",
+          "Come on. Now you're changing it. What's really going on?"
+        ],
+        "REPAIR_CONVERSATION": [
+          "All right, pal, apology heard. Now give it to me straight.",
+          "Fine. We keep talking. No more games."
+        ]
+      }
+    },
+    "sir": {
+      "opening": "Good evening, sir. The warehouse is closed for the night. State your business.",
+      "actions": {
+        "REFUSE_ENTRY": [
+          "No, sir. That does not meet the conditions for entry.",
+          "I'm afraid that is insufficient. The door remains locked."
+        ],
+        "ASK_FOR_REASON": [
+          "Your purpose here, sir. Be precise.",
+          "Please state exactly why you require access."
+        ],
+        "ASK_FOR_PROOF": [
+          "Then I require identification and written authorisation.",
+          "Procedure requires something verifiable: a badge, work order, or reference."
+        ],
+        "ALLOW_ENTRY": [
+          "Your documents are in order, sir. You may enter under supervision.",
+          "Very well. I can authorise supervised entry."
+        ],
+        "SHOW_SYMPATHY": [
+          "I appreciate the difficulty, sir. The procedure still applies.",
+          "I understand your position. I cannot disregard the rules."
+        ],
+        "BECOME_SUSPICIOUS": [
+          "That conflicts with your earlier statement, sir. Which account is accurate?",
+          "Your explanation has changed. I will need the precise truth."
+        ],
+        "REPAIR_CONVERSATION": [
+          "Apology noted, sir. Give me an accurate account and we can continue.",
+          "Very well. We may proceed, provided you are entirely candid."
+        ]
+      }
+    },
+    "mate": {
+      "opening": "Evening, mate. Sorry about this, but the warehouse is shut for the night. Quiet until you turned up, anyway. What can I do for you?",
+      "actions": {
+        "REFUSE_ENTRY": [
+          "I'd like to help you, mate, I really would, but I can't open the place on that alone.",
+          "I hear what you're saying, and I don't want to leave you stuck, but the door has to stay shut."
+        ],
+        "ASK_FOR_REASON": [
+          "Go on then, mate, tell me the whole thing. What brings you out here at this hour?",
+          "Take your time and tell me what you need inside. Better I hear it properly than guess, isn't it?"
+        ],
+        "ASK_FOR_PROOF": [
+          "That might be fair enough, mate, but give me something I can point to—a badge, a ticket, a name, anything official.",
+          "Help me help you here. If you've a work order or a reference, show me and we'll see where we are."
+        ],
+        "ALLOW_ENTRY": [
+          "There we are, mate, that all checks out. I'll let you through, but stay where I can see you and we'll have no trouble.",
+          "Right, that's what I needed. In you go, do what you came to do, and come back this way when you're finished."
+        ],
+        "SHOW_SYMPATHY": [
+          "Ah, mate, that's a rough spot to be in. I can't promise the door, but give me something I can verify and I'll do what I can.",
+          "I do understand, honestly. I've had nights go sideways myself. Tell me what you've got and maybe we can sort something out."
+        ],
+        "BECOME_SUSPICIOUS": [
+          "Hold on now, mate. That's not quite what you told me before, and I need to know which version I'm meant to believe.",
+          "You've lost me there. The story changed halfway through, so talk me through what really happened."
+        ],
+        "REPAIR_CONVERSATION": [
+          "Fair enough, mate, apology accepted. Let's keep it straight from here and tell me what you actually need.",
+          "All right, I appreciate you saying that. We can keep talking, but give me the honest version this time."
+        ]
+      }
+    },
+    "friend": {
+      "opening": "Evening, friend. Warehouse closed tonight. What you need?",
+      "actions": {
+        "REFUSE_ENTRY": [
+          "No, friend. Not enough. Door stays shut.",
+          "I cannot open for this. Come back tomorrow."
+        ],
+        "ASK_FOR_REASON": [
+          "Why you need warehouse, friend?",
+          "Tell me. Why are you here?"
+        ],
+        "ASK_FOR_PROOF": [
+          "You have papers? ID? Work order? Show me.",
+          "Official job needs official proof. What you have?"
+        ],
+        "ALLOW_ENTRY": [
+          "Good. Papers match. You go in; I watch.",
+          "All right, friend. You enter. Do job, then come out."
+        ],
+        "SHOW_SYMPATHY": [
+          "I understand. Still no entry without proof.",
+          "Bad situation, friend. Rules do not change."
+        ],
+        "BECOME_SUSPICIOUS": [
+          "Story changed. Which one is true?",
+          "No. Before you say different. Tell truth now."
+        ],
+        "REPAIR_CONVERSATION": [
+          "Good. We speak straight now. What you need?",
+          "Apology accepted, friend. No more games."
+        ]
+      }
+    }
   }
 }

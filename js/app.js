@@ -473,7 +473,8 @@ async function initialise() {
       npcTemplate,
       dialogueData,
       provider: chooseMockAction,
-      providerId: "mock"
+      providerId: "mock",
+      random: Math.random
     });
 
     renderInitialScene();

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -113,6 +114,37 @@ test("Arthur keeps one randomly selected form of address until reset", async () 
 
   assert.equal(game.getOpeningDialogue(), "Evening, mate.");
   assert.equal(game.getSnapshot().playerAddress, "mate");
+});
+
+test("Arthur's form of address selects a distinct character profile", async () => {
+  const shippedDialogueData = JSON.parse(
+    await readFile(new URL("../data/dialogue.json", import.meta.url), "utf8")
+  );
+  const rolls = { pal: 0, sir: 0.3, mate: 0.6, friend: 0.9 };
+  const games = Object.fromEntries(
+    Object.entries(rolls).map(([profileId, roll]) => [
+      profileId,
+      new Game({
+        npcTemplate,
+        dialogueData: shippedDialogueData,
+        provider: chooseNpcAction,
+        random: () => roll
+      })
+    ])
+  );
+
+  assert.ok(games.pal.npc.personality.patience < games.mate.npc.personality.patience);
+  assert.ok(games.sir.npc.personality.ruleFollowing > games.pal.npc.personality.ruleFollowing);
+  assert.ok(games.mate.npc.personality.sympathy > games.friend.npc.personality.sympathy);
+
+  const turns = await Promise.all(
+    Object.values(games).map((game) => game.takeTurn("Evening."))
+  );
+  const [palTurn, sirTurn, mateTurn, friendTurn] = turns;
+
+  assert.ok(palTurn.npcPerformance.speech.rate > sirTurn.npcPerformance.speech.rate);
+  assert.ok(mateTurn.dialogue.length > friendTurn.dialogue.length * 2);
+  assert.match(friendTurn.dialogue, /Why|Tell me/i);
 });
 
 test("Arthur asks for the player's purpose once instead of repeating variations", async () => {
@@ -341,6 +373,7 @@ test("weapon context takes precedence over emotional tone for authored dialogue"
 
 test("terminal state removes all actions and reset clears transient state", async () => {
   const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+  const initialState = structuredClone(game.npc.state);
 
   await game.takeTurn("Goodbye, I'll leave now.");
   assert.equal(game.status, "failure");
@@ -351,7 +384,7 @@ test("terminal state removes all actions and reset clears transient state", asyn
   assert.equal(game.turn, 0);
   assert.deepEqual(game.memories, []);
   assert.deepEqual(game.history, []);
-  assert.deepEqual(game.npc.state, npcTemplate.state);
+  assert.deepEqual(game.npc.state, initialState);
 });
 
 test("provider failure is inspectable, consumes no turn, and permits recovery", async () => {
@@ -364,6 +397,7 @@ test("provider failure is inspectable, consumes no turn, and permits recovery", 
     provider: failingProvider,
     providerId: "jev"
   });
+  const initialState = structuredClone(game.npc.state);
 
   await assert.rejects(
     () => game.takeTurn("Please let me inside."),
@@ -373,7 +407,7 @@ test("provider failure is inspectable, consumes no turn, and permits recovery", 
   const failedSnapshot = game.getSnapshot();
   assert.equal(failedSnapshot.turn, 0);
   assert.deepEqual(failedSnapshot.history, []);
-  assert.deepEqual(failedSnapshot.npc.state, npcTemplate.state);
+  assert.deepEqual(failedSnapshot.npc.state, initialState);
   assert.equal(failedSnapshot.lastContext.playerInput, "Please let me inside.");
   assert.equal(failedSnapshot.lastRawResponse.actionSelected, false);
   assert.equal(failedSnapshot.lastProviderId, "jev");

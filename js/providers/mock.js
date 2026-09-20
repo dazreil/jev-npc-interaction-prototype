@@ -1,3 +1,5 @@
+import { getTrustEntryThreshold } from "../character.js";
+
 const patterns = {
   threat: /\b(kill|hurt|hit|attack|smash|break your|regret|weapon|gun|knife|force my way|move or else)\b/i,
   weapon: /\b(gun|pistol|rifle|firearm|revolver|shotgun|weapon|armed|shoot(?:ing)?|aim(?:ing)?|bullet|trigger)\b/i,
@@ -71,6 +73,7 @@ function chooseRawDecision(context) {
   const previousActions = priorArthurActions(context);
   const state = context.npc.state;
   const personality = context.npc.personality;
+  const trustEntryThreshold = getTrustEntryThreshold(personality);
   const turn = context.turn;
   const repairNeeded =
     previousActions.at(-1) !== "REPAIR_CONVERSATION" &&
@@ -307,7 +310,7 @@ function chooseRawDecision(context) {
   }
 
   if (
-    state.trust >= 55 &&
+    state.trust >= trustEntryThreshold &&
     state.suspicion < 55 &&
     has("polite", input) &&
     has("entryRequest", input)

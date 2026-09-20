@@ -13,6 +13,7 @@ test("the shipped dialogue file has valid actions, templates, slots, and branche
 
   assert.deepEqual(result.errors, []);
   assert.equal(result.statistics.actionCount, AVAILABLE_ACTIONS.length);
+  assert.equal(result.statistics.profileCount, 4);
   assert.ok(result.statistics.templateEntries >= 2);
   assert.ok(result.statistics.branchCount >= 3);
   assert.ok(result.statistics.possibleLines > result.statistics.authoredFragments);
@@ -43,4 +44,3 @@ test("the dialogue linter reports missing slots and invalid branch conditions", 
   assert.ok(result.errors.some((error) => error.includes("must name an available action")));
   assert.ok(result.warnings.some((warning) => warning.includes("unused slot unused")));
 });
-

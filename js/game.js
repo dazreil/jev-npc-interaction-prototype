@@ -1,4 +1,10 @@
 import { selectDialogue } from "./dialogue.js";
+import {
+  ARTHUR_CHARACTER_IDS,
+  applyArthurCharacterProfile,
+  getArthurCharacterProfile,
+  getTrustEntryThreshold
+} from "./character.js";
 import { createNpcPerformance } from "./performance.js";
 import {
   STATE_KEYS,
@@ -28,7 +34,7 @@ export const AVAILABLE_ACTIONS = Object.freeze([
 export const FALLBACK_ACTION = "REFUSE_ENTRY";
 export const MAX_HISTORY_ENTRIES = 12;
 export const MAX_MEMORIES = 8;
-export const PLAYER_ADDRESS_TERMS = Object.freeze(["pal", "sir", "mate", "friend"]);
+export const PLAYER_ADDRESS_TERMS = ARTHUR_CHARACTER_IDS;
 
 const PLAYER_ADDRESS_TOKEN = "[[address]]";
 
@@ -108,7 +114,7 @@ export function validateDecision(rawDecision, availableActions = AVAILABLE_ACTIO
 }
 
 export class Game {
-  constructor({ npcTemplate, dialogueData, provider, providerId = "mock", random = Math.random }) {
+  constructor({ npcTemplate, dialogueData, provider, providerId = "mock", random = () => 0 }) {
     this.npcTemplate = npcTemplate;
     this.dialogueData = dialogueData;
     this.provider = provider;
@@ -118,13 +124,14 @@ export class Game {
   }
 
   reset() {
-    this.npc = cloneNpc(this.npcTemplate);
+    this.playerAddress = choosePlayerAddress(this.random);
+    this.characterProfile = getArthurCharacterProfile(this.playerAddress);
+    this.npc = applyArthurCharacterProfile(cloneNpc(this.npcTemplate), this.characterProfile);
     this.memories = [];
     this.history = [];
     this.turn = 0;
     this.status = "active";
     this.reasonPrompted = false;
-    this.playerAddress = choosePlayerAddress(this.random);
     this.lastDecision = null;
     this.lastContext = null;
     this.lastRawResponse = null;
@@ -143,16 +150,19 @@ export class Game {
   }
 
   getOpeningDialogue() {
-    return personalizeDialogue(this.dialogueData.opening, this.playerAddress);
+    const opening =
+      this.dialogueData.profiles?.[this.characterProfile.id]?.opening ?? this.dialogueData.opening;
+    return personalizeDialogue(opening, this.playerAddress);
   }
 
   getAvailableActions() {
     if (this.status !== "active") return [];
 
     const state = this.npc.state;
+    const trustEntryThreshold = getTrustEntryThreshold(this.npc.personality);
     const memoryTags = new Set(this.memories.flatMap((memory) => memory.tags));
     const hasEntryBasis =
-      state.trust >= 55 ||
+      state.trust >= trustEntryThreshold ||
       memoryTags.has("authority") ||
       memoryTags.has("emergency") ||
       memoryTags.has("delivery") ||
@@ -199,7 +209,12 @@ export class Game {
         id: contextNpc.id,
         personality: structuredClone(contextNpc.personality),
         state: structuredClone(contextNpc.state),
-        goals: structuredClone(contextNpc.goals)
+        goals: structuredClone(contextNpc.goals),
+        characterProfile: {
+          id: this.characterProfile.id,
+          label: this.characterProfile.label,
+          decisionStyle: this.characterProfile.decisionStyle
+        }
       },
       world: {
         location: "warehouse entrance",
@@ -279,6 +294,7 @@ export class Game {
     const dialogue = personalizeDialogue(
       selectDialogue(this.dialogueData, decision.action, tone, this.turn, {
         playerInput: input,
+        profileId: this.characterProfile.id,
         dialogueContext: {
           memories: this.memories,
           history: this.history,
@@ -309,6 +325,7 @@ export class Game {
       action: decision.action,
       tone,
       line: dialogue,
+      speech: this.characterProfile.speech,
       status: this.status
     });
 
@@ -330,6 +347,7 @@ export class Game {
       status: this.status,
       reasonPrompted: this.reasonPrompted,
       playerAddress: this.playerAddress,
+      characterProfile: structuredClone(this.characterProfile),
       lastDecision: this.lastDecision ? structuredClone(this.lastDecision) : null,
       lastContext: this.lastContext ? structuredClone(this.lastContext) : null,
       lastRawResponse: this.lastRawResponse ? structuredClone(this.lastRawResponse) : null,
