@@ -16,7 +16,10 @@
   --red: #b84c39;
   --blue: #739a91;
   --stage-scale: 1;
-  font-family: "Courier New", Courier, monospace;
+  --terminal-font: Monaco, "Lucida Console", "Courier New", Courier, monospace;
+  font-family: var(--terminal-font);
+  font-feature-settings: "liga" 0, "calt" 0;
+  font-variant-ligatures: none;
   font-synthesis: none;
 }
 
@@ -552,8 +555,9 @@ summary:focus-visible {
   margin: 8px 0 0;
   overflow: hidden;
   color: var(--green-bright);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 13px;
+  font-family: var(--terminal-font);
+  font-size: 11px;
+  letter-spacing: 0.15px;
   line-height: 1.35;
   text-shadow: 0 0 4px rgba(135, 184, 95, 0.25);
   -webkit-box-orient: vertical;
@@ -1048,7 +1052,7 @@ pre {
   overflow: auto;
   background: #050805;
   color: #91a478;
-  font: 8px/1.5 "Courier New", monospace;
+  font: 8px/1.5 var(--terminal-font);
   white-space: pre-wrap;
   word-break: break-word;
 }
