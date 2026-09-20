@@ -450,7 +450,7 @@ Add replaceable speech and sound systems while keeping captions authoritative an
 - Unsupported or muted speech uses cancellable deterministic timing, leaves complete captions visible, and returns input safely after normal playback or skip.
 - Replay, mute, volume, and skip controls are keyboard-accessible; the voice indicator distinguishes audible browser speech from silent fallback animation.
 - Optional Web Audio provides a low warehouse hum and authored interface, relay, warning, and door-unlock cues through a band-limited compressed effects chain. Browser media failures remain silent and non-blocking.
-- Browser verification covered responsive layout, fallback playback, skip, replay, mute, volume, focusable controls, and a clean console. The test browser exposed neither Web Speech nor Web Audio, so real voice and device-specific sound quality remain explicit Phase 14 checks.
+- Browser verification covered responsive layout, the single incoming-message display, the restored shadowed player endpoint, fallback playback, skip, replay, mute, volume, focusable controls, and a clean console. The test browser exposed neither Web Speech nor Web Audio, so real voice and device-specific sound quality remain explicit Phase 14 checks.
 - The full automated suite passes with 44 tests plus dialogue lint covering 12 actions, 143 fragments, 13 templates, 6 branches, and 162 possible lines.
 
 ## Phase 13 — Outcomes and Authored Performance Pass

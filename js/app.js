@@ -66,6 +66,7 @@ const elements = {
   arthurFrame: document.querySelector("#arthur-frame"),
   subtitleText: document.querySelector("#subtitle-text"),
   subtitleSpeaker: document.querySelector("#subtitle-speaker"),
+  playerMessage: document.querySelector("#player-message"),
   phaseLabel: document.querySelector("#phase-label"),
   linkStatus: document.querySelector("#link-status"),
   doorStatus: document.querySelector("#door-status"),
@@ -176,6 +177,8 @@ function appendMessage(speaker, text, action = null) {
   if (speaker === "arthur") {
     elements.subtitleSpeaker.textContent = "Arthur / Gatehouse";
     elements.subtitleText.textContent = text;
+  } else {
+    elements.playerMessage.textContent = text;
   }
 }
 
@@ -355,6 +358,7 @@ function renderInitialScene() {
   performanceController.reset();
   lastPerformance = null;
   elements.conversation.replaceChildren();
+  elements.playerMessage.textContent = "Awaiting transmission.";
   appendMessage("arthur", dialogueData.opening);
   renderDebug(game.getSnapshot());
   renderOutcome("active");

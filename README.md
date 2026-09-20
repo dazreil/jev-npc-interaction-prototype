@@ -4,7 +4,7 @@ A small browser-based text game that explores whether a decision model can make 
 
 Arthur's spoken lines all come from `data/dialogue.json`. The Mock and Jev providers select only a structured action and return developer-facing decision metadata. The game validates the action before selecting an authored line.
 
-The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. Arthur occupies the main video feed, replies appear as captions with a compact transcript, and developer telemetry is available through the **Developer** control or <kbd>F2</kbd>. Browser speech, replay, mute, volume, skip, ambience, and authored interface sounds sit behind replaceable presentation adapters; captions and deterministic timing remain available when browser media APIs are missing.
+The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. Arthur occupies the gatehouse feed while a shadowed external feed represents the player. Each participant has one current message, avoiding a duplicated subtitle-and-transcript view, and developer telemetry remains available through the **Developer** control or <kbd>F2</kbd>. Browser speech, replay, mute, volume, skip, ambience, and authored interface sounds sit behind replaceable presentation adapters; the current incoming message and deterministic timing remain available when browser media APIs are missing.
 
 ## Run locally
 
