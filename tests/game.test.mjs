@@ -8,6 +8,7 @@ import {
   ENCOUNTER_OUTCOMES,
   MAX_MEMORIES,
   Game,
+  extractPlayerName,
   validateDecision
 } from "../js/game.js";
 import {
@@ -65,6 +66,15 @@ test("message effort makes terse replies slightly more irritating", () => {
   assert.deepEqual(assessMessageEffort("name?").stateChanges, { trust: -1, irritation: 2 });
   assert.equal(assessMessageEffort("name?").label, "terse");
   assert.equal(assessMessageEffort("Please explain why the warehouse is closed tonight.").label, "ordinary");
+});
+
+test("player introductions extract a name without mistaking ordinary phrases for names", () => {
+  assert.equal(extractPlayerName("I'm David, here to fix the machines."), "David");
+  assert.equal(extractPlayerName("my name is sarah"), "Sarah");
+  assert.equal(extractPlayerName("Call me O'Brien."), "O'Brien");
+  assert.equal(extractPlayerName("I'm here to do maintenance."), null);
+  assert.equal(extractPlayerName("I'm fixing the coffee machines."), null);
+  assert.equal(extractPlayerName("I am from head office."), null);
 });
 
 test("a supported head-office claim can lead to authored entry dialogue", async () => {
@@ -220,8 +230,10 @@ test("ordinary repair language gets a contextual human proof request", async () 
   assert.equal(purpose.decision.action, "ASK_FOR_PROOF");
   assert.equal(
     purpose.dialogue,
-    "Coffee machines at this hour? All right, sir. Let me see the work order and your ID."
+    "David. Thank you. Coffee machines at this hour? All right, sir. Let me see the work order and your ID."
   );
+  assert.equal(game.getSnapshot().playerName, "David");
+  assert.equal(game.getSnapshot().lastContext.player.name, "David");
   assert.doesNotMatch(purpose.dialogue, /procedure|requires|state your business/i);
 
   const repeatedPurpose = await game.takeTurn("To do maintenance.");

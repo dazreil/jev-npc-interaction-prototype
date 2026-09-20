@@ -45,6 +45,38 @@ export const ENCOUNTER_OUTCOMES = Object.freeze({
 });
 
 const PLAYER_ADDRESS_TOKEN = "[[address]]";
+const PLAYER_NAME_TOKEN = "[[playerName]]";
+const PLAYER_NAME_PATTERN =
+  /\b(?:my name is|call me|i am|i'm|im)\s+([a-z][a-z'-]{1,24})\b/i;
+const NON_NAME_INTRODUCTIONS = new Set([
+  "a",
+  "an",
+  "at",
+  "bringing",
+  "carrying",
+  "delivering",
+  "doing",
+  "fixing",
+  "from",
+  "going",
+  "here",
+  "looking",
+  "not",
+  "repairing",
+  "sorry",
+  "the",
+  "trying",
+  "with"
+]);
+const NAME_ACKNOWLEDGEMENT_ACTIONS = new Set([
+  "ANSWER_QUESTION",
+  "REFUSE_ENTRY",
+  "ASK_FOR_REASON",
+  "ASK_FOR_PROOF",
+  "ALLOW_ENTRY",
+  "SHOW_SYMPATHY",
+  "REPAIR_CONVERSATION"
+]);
 
 function choosePlayerAddress(random) {
   const roll = Number(random());
@@ -54,6 +86,28 @@ function choosePlayerAddress(random) {
 
 function personalizeDialogue(line, playerAddress) {
   return String(line).replaceAll(PLAYER_ADDRESS_TOKEN, playerAddress);
+}
+
+export function extractPlayerName(input = "") {
+  const candidate = String(input).match(PLAYER_NAME_PATTERN)?.[1];
+  if (!candidate || NON_NAME_INTRODUCTIONS.has(candidate.toLowerCase())) return null;
+  if (candidate.toLowerCase().endsWith("ing")) return null;
+  return candidate
+    .toLowerCase()
+    .split(/(['-])/)
+    .map((part) => (/^[a-z]/.test(part) ? `${part[0].toUpperCase()}${part.slice(1)}` : part))
+    .join("");
+}
+
+function acknowledgePlayerName(line, playerName, profileId, action, dialogueData) {
+  if (!playerName || !NAME_ACKNOWLEDGEMENT_ACTIONS.has(action)) return line;
+
+  const acknowledgement =
+    dialogueData.profiles?.[profileId]?.nameAcknowledgement ??
+    dialogueData.nameAcknowledgement ??
+    `All right, ${PLAYER_NAME_TOKEN}.`;
+
+  return `${String(acknowledgement).replaceAll(PLAYER_NAME_TOKEN, playerName)} ${line}`;
 }
 
 function resolveTerminalOutcome({ action, previousAction, memories, state }) {
@@ -158,6 +212,7 @@ export class Game {
 
   reset() {
     this.playerAddress = choosePlayerAddress(this.random);
+    this.playerName = null;
     this.characterProfile = getArthurCharacterProfile(this.playerAddress);
     this.npc = applyArthurCharacterProfile(cloneNpc(this.npcTemplate), this.characterProfile);
     this.memories = [];
@@ -242,7 +297,7 @@ export class Game {
     });
   }
 
-  buildDecisionContext(playerInput) {
+  buildDecisionContext(playerInput, introducedPlayerName = null) {
     const messageEffort = assessMessageEffort(playerInput);
     const contextNpc = cloneNpc(this.npc);
     applyStateChanges(contextNpc, messageEffort.stateChanges);
@@ -263,6 +318,9 @@ export class Game {
         location: "warehouse entrance",
         time: "02:13",
         warehouseOpen: false
+      },
+      player: {
+        name: introducedPlayerName ?? this.playerName
       },
       memories: structuredClone(this.memories),
       recentConversation: structuredClone(this.history.slice(-MAX_HISTORY_ENTRIES)),
@@ -321,7 +379,10 @@ export class Game {
       throw new Error("Enter something for Arthur to respond to.");
     }
 
-    this.lastContext = this.buildDecisionContext(input);
+    const introducedPlayerName = extractPlayerName(input);
+    const isNewPlayerName =
+      Boolean(introducedPlayerName) && introducedPlayerName !== this.playerName;
+    this.lastContext = this.buildDecisionContext(input, introducedPlayerName);
     this.lastProviderId = this.providerId;
     this.lastProviderError = null;
 
@@ -358,7 +419,7 @@ export class Game {
       this.lastContext.availableActions
     );
     const tone = determineTone(this.npc.state);
-    const dialogue = personalizeDialogue(
+    const personalizedDialogue = personalizeDialogue(
       selectDialogue(this.dialogueData, decision.action, tone, this.turn, {
         playerInput: input,
         profileId: this.characterProfile.id,
@@ -372,6 +433,13 @@ export class Game {
       }),
       this.playerAddress
     );
+    const dialogue = acknowledgePlayerName(
+      personalizedDialogue,
+      isNewPlayerName ? introducedPlayerName : null,
+      this.characterProfile.id,
+      decision.action,
+      this.dialogueData
+    );
     const authoredPerformance = resolveDialoguePerformance(
       this.dialogueData,
       decision.action,
@@ -382,6 +450,7 @@ export class Game {
     const previousAction = this.lastDecision?.action ?? null;
 
     this.turn += 1;
+    if (introducedPlayerName) this.playerName = introducedPlayerName;
     if (decision.action === "ASK_FOR_REASON") this.reasonPrompted = true;
     if (decision.action === "REPAIR_CONVERSATION") this.reasonPrompted = false;
     this.history.push({ speaker: "player", text: input });
@@ -451,6 +520,7 @@ export class Game {
       outcome: this.outcome,
       reasonPrompted: this.reasonPrompted,
       playerAddress: this.playerAddress,
+      playerName: this.playerName,
       characterProfile: structuredClone(this.characterProfile),
       lastDecision: this.lastDecision ? structuredClone(this.lastDecision) : null,
       lastContext: this.lastContext ? structuredClone(this.lastContext) : null,
@@ -472,6 +542,7 @@ export class Game {
         role: this.npc.role
       },
       playerAddress: this.playerAddress,
+      playerName: this.playerName,
       characterProfile: structuredClone(this.characterProfile),
       openingDialogue: this.getOpeningDialogue(),
       currentProviderId: this.providerId,

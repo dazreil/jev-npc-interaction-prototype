@@ -21,6 +21,7 @@ const context = {
     }
   },
   world: { location: "warehouse entrance", time: "02:13", warehouseOpen: false },
+  player: { name: "David" },
   memories: [],
   recentConversation: [],
   playerInput: "I'm the night engineer. There is a boiler emergency inside.",
@@ -58,6 +59,7 @@ test("Jev request contains one Choice over exactly the available actions", () =>
   assert.equal(request.state.latestPlayerMessage, context.playerInput);
   assert.deepEqual(request.state.npc.currentState, context.npc.state);
   assert.deepEqual(request.state.npc.characterProfile, context.npc.characterProfile);
+  assert.deepEqual(request.state.player, { name: "David" });
 });
 
 test("Jev receives an explicit signal when a pronoun answers Arthur's proof request", () => {

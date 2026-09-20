@@ -1,5 +1,6 @@
 {
   "opening": "Evening, [[address]]. Sorry, but the warehouse is closed for the night.",
+  "nameAcknowledgement": "All right, [[playerName]].",
   "performance": {
     "actions": {
       "DEESCALATE_THREAT": {
@@ -344,6 +345,7 @@
   "profiles": {
     "pal": {
       "opening": "Evening, pal. Warehouse is closed. I already got a long night here, so tell me what you need.",
+      "nameAcknowledgement": "[[playerName]], got it.",
       "actions": {
         "REFUSE_ENTRY": [
           "No, pal. That story doesn't open this door.",
@@ -377,6 +379,7 @@
     },
     "sir": {
       "opening": "Good evening, sir. Sorry, we're closed up for the night. What brings you out here?",
+      "nameAcknowledgement": "[[playerName]]. Thank you.",
       "actions": {
         "REFUSE_ENTRY": [
           "I can't open the door on that alone, sir. You'll need to come back in the morning.",
@@ -432,6 +435,7 @@
     },
     "mate": {
       "opening": "Evening, mate. Sorry about this, but the warehouse is shut for the night. Quiet until you turned up, anyway. What can I do for you?",
+      "nameAcknowledgement": "[[playerName]], is it? Good to meet you.",
       "actions": {
         "REFUSE_ENTRY": [
           "I'd like to help you, mate, I really would, but I can't open the place on that alone.",
@@ -465,6 +469,7 @@
     },
     "friend": {
       "opening": "Evening, friend. Warehouse closed tonight. What you need?",
+      "nameAcknowledgement": "[[playerName]]. Good.",
       "actions": {
         "REFUSE_ENTRY": [
           "No, friend. Not enough. Door stays shut.",

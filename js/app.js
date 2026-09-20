@@ -586,12 +586,11 @@ async function handleSubmit(event) {
 
     if (snapshot.lastProviderError) {
       const failedProvider = providers[snapshot.lastProviderId]?.label ?? snapshot.lastProviderId;
-      selectProvider("mock");
       elements.providerStatus.textContent =
-        `${failedProvider} failed: ${snapshot.lastProviderError} Switched back to Mock; no turn was consumed.`;
+        `${failedProvider} failed: ${snapshot.lastProviderError} No turn was consumed.`;
       elements.providerStatus.hidden = false;
       elements.inputHint.textContent =
-        "The provider failed. Your message is still here and can be sent with Mock.";
+        "The provider failed. Your message is still here; check the Jev server and try again.";
     } else {
       elements.inputHint.textContent = error.message;
     }
@@ -624,8 +623,8 @@ async function initialise() {
     game = new Game({
       npcTemplate,
       dialogueData,
-      provider: chooseMockAction,
-      providerId: "mock",
+      provider: chooseJevAction,
+      providerId: "jev",
       random: Math.random
     });
 

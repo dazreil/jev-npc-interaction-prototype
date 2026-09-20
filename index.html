@@ -190,10 +190,10 @@
           <div class="provider-control">
             <label for="provider-select">Decision system</label>
             <select id="provider-select" aria-describedby="provider-note">
+              <option value="jev" selected>Jev — checking server</option>
               <option value="mock">Mock</option>
-              <option value="jev">Jev — checking server</option>
             </select>
-            <span id="provider-note">Offline deterministic decision model</span>
+            <span id="provider-note">TypeSafe Jev structured action selection</span>
           </div>
 
           <p id="provider-status" class="provider-status" role="status" hidden></p>
@@ -319,7 +319,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=15.2";
+        appScript.src = "js/app.js?phase=15.3";
         document.body.append(appScript);
       }
     </script>
