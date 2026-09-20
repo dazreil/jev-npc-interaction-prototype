@@ -499,6 +499,7 @@ Tasks:
 Tasks:
 
 - Finalise UI art, colour reduction, dithering and asset compression.
+- Add slight ambient movement to the player's shadowed avatar without facial animation or revealing any facial detail; respect reduced-motion preferences.
 - Add boot screen, loading/connection feedback and credits.
 - Test keyboard-only play, focus visibility, captions and reduced motion.
 - Test current Chrome, Edge, Firefox and Safari versions.

@@ -521,6 +521,7 @@ Prepare the vertical slice for a new player to launch, understand, complete, and
 ### Deliverables
 
 - Final palette, dithering, image compression, and restrained screen effects.
+- Subtle idle motion for the player's avatar, with no facial movement and the face remaining fully obscured in shadow.
 - Boot, loading, connection, ending, and credits presentation.
 - A complete keyboard, focus, captions, mute, replay, and reduced-motion pass.
 - Verification in current Chrome, Edge, Firefox, and Safari.
@@ -530,6 +531,7 @@ Prepare the vertical slice for a new player to launch, understand, complete, and
 ### Acceptance Checks
 
 - A new player can start and complete the encounter without developer guidance.
+- The player avatar has slight ambient movement without revealing or animating the face, and becomes still when reduced motion is requested.
 - A developer can still inspect the decision context, provider result, state, memory, and performance mapping.
 - The release runs without a frontend framework or unnecessary deployment infrastructure.
 
