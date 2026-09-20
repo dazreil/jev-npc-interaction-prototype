@@ -225,6 +225,30 @@
       </div>
     </dialog>
 
-    <script type="module" src="js/app.js?phase=12"></script>
+    <script>
+      if (window.location.protocol === "file:") {
+        const message =
+          "LOCAL SERVER REQUIRED — RUN npm run start:mock, THEN OPEN http://localhost:5173";
+        const subtitle = document.querySelector("#subtitle-text");
+        const conversation = document.querySelector("#conversation");
+        const providerStatus = document.querySelector("#provider-status");
+        const form = document.querySelector("#player-form");
+
+        subtitle.textContent = message;
+        conversation.textContent =
+          "Safari cannot load the game's modules and JSON data from a file:// address. " +
+          "Start the local server and use the HTTP address shown above.";
+        providerStatus.textContent = "Direct file launch blocked by browser security.";
+        providerStatus.hidden = false;
+        form.addEventListener("submit", (event) => event.preventDefault());
+        form.querySelector("input").disabled = true;
+        form.querySelector("button").disabled = true;
+      } else {
+        const appScript = document.createElement("script");
+        appScript.type = "module";
+        appScript.src = "js/app.js?phase=12.1";
+        document.body.append(appScript);
+      }
+    </script>
   </body>
 </html>

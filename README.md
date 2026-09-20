@@ -16,6 +16,8 @@ npm run start:mock
 
 Then open [http://localhost:5173](http://localhost:5173).
 
+Do not open `index.html` directly from Finder. Safari and other browsers block the module and JSON requests made from a `file://` address. The page detects this case and displays the server command instead of remaining on the connection placeholder.
+
 To use Jev, copy `.env.example` to `.env`, set `TYPESAFE_API_KEY`, and run:
 
 ```bash
