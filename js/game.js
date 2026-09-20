@@ -6,6 +6,7 @@ import {
   getTrustEntryThreshold
 } from "./character.js";
 import { createNpcPerformance } from "./performance.js";
+import { deriveConversationSignals } from "./conversation-signals.js";
 import {
   STATE_KEYS,
   applyStateChanges,
@@ -171,6 +172,8 @@ export class Game {
     this.lastProviderId = null;
     this.lastProviderError = null;
     this.lastPerformance = null;
+    this.debugLog = [];
+    this.debugSequence = 0;
   }
 
   setProvider(provider, providerId) {
@@ -188,7 +191,7 @@ export class Game {
     return personalizeDialogue(opening, this.playerAddress);
   }
 
-  getAvailableActions() {
+  getAvailableActions(conversationSignals = null) {
     if (this.status !== "active") return [];
 
     const state = this.npc.state;
@@ -214,6 +217,9 @@ export class Game {
         ) ?? false) &&
         (Number(memory.createdTurn) || 0) > latestRepairTurn
     );
+    const suppliedRequestedProof =
+      conversationSignals?.proofOffered === true &&
+      ["authority", "delivery"].includes(conversationSignals.activePurpose);
 
     return AVAILABLE_ACTIONS.filter((action) => {
       if (action === "ASK_FOR_REASON" && this.reasonPrompted) {
@@ -221,7 +227,11 @@ export class Game {
       }
 
       if (action === "ALLOW_ENTRY") {
-        return hasEntryBasis && !hasUnrepairedRisk && state.suspicion < 78 && state.irritation < 71;
+        return (
+          hasEntryBasis &&
+          !hasUnrepairedRisk &&
+          (suppliedRequestedProof || (state.suspicion < 78 && state.irritation < 71))
+        );
       }
 
       if (["ANSWER_QUESTION", "SHOW_SYMPATHY"].includes(action) && state.irritation > 70) {
@@ -237,7 +247,7 @@ export class Game {
     const contextNpc = cloneNpc(this.npc);
     applyStateChanges(contextNpc, messageEffort.stateChanges);
 
-    return {
+    const context = {
       npc: {
         id: contextNpc.id,
         personality: structuredClone(contextNpc.personality),
@@ -257,10 +267,24 @@ export class Game {
       memories: structuredClone(this.memories),
       recentConversation: structuredClone(this.history.slice(-MAX_HISTORY_ENTRIES)),
       playerInput,
-      availableActions: this.getAvailableActions(),
       messageEffort,
       turn: this.turn + 1
     };
+
+    context.conversationSignals = deriveConversationSignals(context);
+    context.availableActions = this.getAvailableActions(context.conversationSignals);
+
+    const suppliedRequestedProof =
+      context.conversationSignals.proofOffered &&
+      ["authority", "delivery"].includes(context.conversationSignals.activePurpose) &&
+      context.availableActions.includes("ALLOW_ENTRY");
+    if (suppliedRequestedProof) {
+      context.availableActions = context.availableActions.filter(
+        (action) => !["REFUSE_ENTRY", "ASK_FOR_PROOF"].includes(action)
+      );
+    }
+
+    return context;
   }
 
   addMemory(memory) {
@@ -316,6 +340,16 @@ export class Game {
         error: message,
         actionSelected: false
       };
+      this.debugLog.push({
+        sequence: ++this.debugSequence,
+        turn: this.lastContext.turn,
+        result: "provider_error",
+        providerId: this.lastProviderId,
+        playerInput: input,
+        context: structuredClone(this.lastContext),
+        rawProviderResponse: structuredClone(this.lastRawResponse),
+        error: message
+      });
       throw new DecisionProviderError(this.providerId, message);
     }
 
@@ -380,6 +414,23 @@ export class Game {
       outcome: this.outcome
     });
 
+    this.debugLog.push({
+      sequence: ++this.debugSequence,
+      turn: this.turn,
+      result: "decision",
+      providerId: this.lastProviderId,
+      playerInput: input,
+      context: structuredClone(this.lastContext),
+      rawProviderResponse: structuredClone(this.lastRawResponse),
+      decision: structuredClone(this.lastDecision),
+      dialogue,
+      performance: structuredClone(this.lastPerformance),
+      stateAfter: structuredClone(this.npc.state),
+      memoriesAfter: structuredClone(this.memories),
+      status: this.status,
+      outcome: this.outcome
+    });
+
     return {
       playerInput: input,
       dialogue,
@@ -409,6 +460,25 @@ export class Game {
       lastProviderError: this.lastProviderError,
       lastPerformance: this.lastPerformance ? structuredClone(this.lastPerformance) : null,
       primaryGoal: getPrimaryGoal(this.npc)
+    };
+  }
+
+  getConversationLog() {
+    return {
+      schemaVersion: 1,
+      npc: {
+        id: this.npc.id,
+        name: this.npc.name,
+        role: this.npc.role
+      },
+      playerAddress: this.playerAddress,
+      characterProfile: structuredClone(this.characterProfile),
+      openingDialogue: this.getOpeningDialogue(),
+      currentProviderId: this.providerId,
+      turn: this.turn,
+      status: this.status,
+      outcome: this.outcome,
+      entries: structuredClone(this.debugLog)
     };
   }
 }

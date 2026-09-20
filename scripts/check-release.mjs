@@ -56,6 +56,7 @@ check(reactionPaths.every((asset) => asset.endsWith(".webp")), "Reaction portrai
 
 check(html.includes('id="credits-dialog"'), "Credits dialog is missing");
 check(html.includes('id="debug-dialog"'), "Developer diagnostics dialog is missing");
+check(html.includes('id="debug-export"'), "Conversation log export control is missing");
 check(css.includes("@keyframes player-idle"), "Player idle animation is missing");
 check(
   /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.player-viewport img[\s\S]*?animation: none/.test(css),

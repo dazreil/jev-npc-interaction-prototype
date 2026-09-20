@@ -81,6 +81,8 @@ const elements = {
   debugDialog: document.querySelector("#debug-dialog"),
   debugOpen: document.querySelector("#debug-open"),
   debugClose: document.querySelector("#debug-close"),
+  debugExport: document.querySelector("#debug-export"),
+  debugLogStatus: document.querySelector("#debug-log-status"),
   creditsDialog: document.querySelector("#credits-dialog"),
   creditsOpen: document.querySelector("#credits-open"),
   creditsClose: document.querySelector("#credits-close"),
@@ -306,6 +308,8 @@ function renderDebug(snapshot) {
   elements.fallbackNotice.textContent = decision?.fallbackUsed
     ? `Rejected provider action: ${decision.invalidAction}. Used ${decision.action}.`
     : "";
+  const logEntries = game?.getConversationLog().entries.length ?? 0;
+  elements.debugLogStatus.textContent = `${logEntries} ${logEntries === 1 ? "record" : "records"}`;
 }
 
 function clearProviderStatus() {
@@ -452,6 +456,37 @@ function openDebug() {
 
 function closeDebug() {
   if (elements.debugDialog.open) elements.debugDialog.close();
+}
+
+function exportConversationLog() {
+  if (!game) return;
+
+  const exportedAt = new Date();
+  const payload = {
+    ...game.getConversationLog(),
+    exportedAt: exportedAt.toISOString(),
+    runtime: {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    }
+  };
+  const blob = new Blob([`${JSON.stringify(payload, null, 2)}\n`], {
+    type: "application/json"
+  });
+  const downloadUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const timestamp = exportedAt.toISOString().replaceAll(":", "-").replace(/\.\d{3}Z$/, "Z");
+
+  link.href = downloadUrl;
+  link.download = `arthur-conversation-${timestamp}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
+
+  const entries = payload.entries.length;
+  elements.debugLogStatus.textContent = `Saved ${entries}`;
 }
 
 function openCredits() {
@@ -651,6 +686,7 @@ elements.skipButton.addEventListener("click", () => {
 });
 elements.debugOpen.addEventListener("click", openDebug);
 elements.debugClose.addEventListener("click", closeDebug);
+elements.debugExport.addEventListener("click", exportConversationLog);
 elements.debugDialog.addEventListener("close", () => {
   if (focusBeforeDebug instanceof HTMLElement) focusBeforeDebug.focus();
 });

@@ -93,6 +93,8 @@ This runs all 57 automated tests, dialogue lint, and the offline release audit. 
 
 The expandable debug views show the exact decision context and raw provider response. Provider reasons are diagnostic data only and are never displayed as Arthur's dialogue.
 
+The **Export log** control in the Developer panel downloads the complete current encounter as JSON. Each record includes the player input, Arthur's reply, provider, available actions, derived conversation signals, raw provider response, validated decision, emotional state, memories, performance metadata, and outcome. Provider failures are recorded without consuming a turn. The export never contains the server-side TypeSafe API key.
+
 The encounter has four terminal presentations. Credible proof or earned trust grants entry; choosing to leave records a refusal; repeated personal hostility gets the player expelled; threats or forced-entry behaviour trigger a full security lockout. The simulation retains its original `active`, `success`, and `failure` status values for provider and test compatibility while exposing the more precise outcome to the performance layer.
 
 Arthur keeps up to eight important memories separately from the latest six conversation exchanges. On each reset his form of address selects a complete character profile that remains fixed throughout the encounter:

@@ -83,6 +83,50 @@ test("a supported head-office claim can lead to authored entry dialogue", async 
   assert.equal(second.outcome, ENCOUNTER_OUTCOMES.ENTRY_GRANTED);
 });
 
+test("a contextual reply resolves requested official papers instead of looping", async () => {
+  const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+
+  const request = await game.takeTurn("I'm from head office and need access.");
+  assert.equal(request.decision.action, "ASK_FOR_PROOF");
+
+  const proof = await game.takeTurn("I have them.");
+  assert.equal(proof.decision.action, "ALLOW_ENTRY");
+  assert.equal(proof.outcome, ENCOUNTER_OUTCOMES.ENTRY_GRANTED);
+  assert.equal(proof.decision.memory.tags.includes("proof"), true);
+
+  const log = game.getConversationLog();
+  assert.equal(log.entries.length, 2);
+  assert.equal(log.entries[1].context.conversationSignals.proofOffered, true);
+  assert.equal(log.entries[1].context.conversationSignals.proofReference, "contextual");
+  assert.equal(log.entries[1].decision.action, "ALLOW_ENTRY");
+  assert.equal(log.entries[1].dialogue, "ALLOW_ENTRY neutral");
+  assert.deepEqual(log.entries[1].stateAfter, game.npc.state);
+});
+
+test("named work papers and an ID badge cannot be routed back to refusal", async () => {
+  const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+
+  await game.takeTurn("I'm a maintenance contractor here for a night inspection.");
+  const proof = await game.takeTurn("I have official work papers and an id badge");
+  const context = game.getSnapshot().lastContext;
+
+  assert.equal(context.conversationSignals.proofOffered, true);
+  assert.equal(context.conversationSignals.proofReference, "named");
+  assert.equal(context.availableActions.includes("REFUSE_ENTRY"), false);
+  assert.equal(context.availableActions.includes("ASK_FOR_PROOF"), false);
+  assert.equal(proof.decision.action, "ALLOW_ENTRY");
+});
+
+test("denying possession after a proof request does not count as evidence", async () => {
+  const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+
+  await game.takeTurn("I'm from head office and need access.");
+  const denial = await game.takeTurn("I don't have them.");
+
+  assert.notEqual(denial.decision.action, "ALLOW_ENTRY");
+  assert.equal(game.getSnapshot().lastContext.conversationSignals.proofOffered, false);
+});
+
 test("asking Arthur's name uses the authored name response", async () => {
   const nameDialogueData = structuredClone(dialogueData);
   nameDialogueData.actions.ANSWER_QUESTION.name = "Arthur. I'm the night guard here. What do you need?";
@@ -476,6 +520,9 @@ test("provider failure is inspectable, consumes no turn, and permits recovery", 
   assert.equal(failedSnapshot.lastContext.playerInput, "Please let me inside.");
   assert.equal(failedSnapshot.lastRawResponse.actionSelected, false);
   assert.equal(failedSnapshot.lastProviderId, "jev");
+  assert.equal(game.getConversationLog().entries.length, 1);
+  assert.equal(game.getConversationLog().entries[0].result, "provider_error");
+  assert.equal(game.getConversationLog().entries[0].error, "Provider is not configured.");
 
   game.setProvider(chooseNpcAction, "mock");
   const recoveredTurn = await game.takeTurn("Please let me inside.");

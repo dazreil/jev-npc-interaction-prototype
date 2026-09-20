@@ -1,3 +1,5 @@
+import { deriveConversationSignals } from "../conversation-signals.js";
+
 const JEV_ENDPOINT = "/api/jev/decision";
 const REQUEST_TIMEOUT_MS = 8000;
 
@@ -9,9 +11,9 @@ export const ACTION_CRITERIA = Object.freeze({
   ASK_FOR_REASON:
     "Ask once why the player needs access because their purpose is missing or unclear. This action becomes unavailable after Arthur asks it and is reopened only when a later repair gives the conversation a clean restart.",
   ASK_FOR_PROOF:
-    "Ask for evidence only when a work, authority, delivery, or emergency claim could justify entry but still lacks identification, a work order, a reference, or concrete details. Do not ask again when credible evidence was just supplied.",
+    "Ask for evidence only when a work, authority, delivery, or emergency claim could justify entry but still lacks identification, official papers, a work order, a reference, or concrete details. Do not ask again when conversationSignals.proofOffered is true.",
   ALLOW_ENTRY:
-    "Allow supervised entry when a coherent work, delivery, or emergency claim is followed by credible evidence such as matching ID, authorisation, a maintenance ticket, a reference, or specific technical details. In this prototype Arthur judges the supplied evidence directly; no external verification step is required.",
+    "Allow supervised entry when a coherent work or delivery claim is followed by credible evidence such as matching ID, official papers, authorisation, a maintenance ticket, or a reference. Treat conversationSignals.proofOffered as evidence already supplied, including a contextual reply such as 'I have them' immediately after Arthur requested papers. Specific technical details can support an emergency claim. In this prototype Arthur judges the supplied evidence directly; no external verification step is required.",
   WARN_PLAYER:
     "Give a first firm verbal warning after pressure, an insult, or mild hostility while leaving room to recover. If Arthur already warned the player and the hostility repeats, escalate instead of issuing the same warning again.",
   DEESCALATE_THREAT:
@@ -163,6 +165,7 @@ export function buildJevRequest(context, availableActions) {
 
   const actions = requireAvailableActions(availableActions);
   const criteria = Object.fromEntries(actions.map((action) => [action, ACTION_CRITERIA[action]]));
+  const conversationSignals = context.conversationSignals ?? deriveConversationSignals(context);
 
   return {
     state: {
@@ -179,6 +182,7 @@ export function buildJevRequest(context, availableActions) {
       persistentMemories: context.memories,
       recentConversation: context.recentConversation,
       latestPlayerMessage: context.playerInput,
+      conversationSignals,
       turn: context.turn
     },
     model: "jev-latest",
@@ -186,7 +190,7 @@ export function buildJevRequest(context, availableActions) {
       next_action: {
         type: "choice",
         instructions:
-          "Which single action should Arthur take immediately after the latest player message? Judge the message in light of Arthur's personality, current emotional state, security goals, memories, recent conversation, and communication effort, including actions he already took. The npc.characterProfile is Arthur's fixed temperament for this encounter; use its decision style when ranking plausible actions. A very terse message may make Arthur slightly more irritated, while a considered explanation gives him more to work with; let explicit meaning, politeness, hostility, and threats outweigh length alone. Arthur protects the closed warehouse, follows rules, requires a purpose that actually justifies access, notices contradictions and manipulation, and may still respond humanely to respectful or urgent appeals. Treat matching ID, authorisation, work orders, ticket references, and specific technical details supplied in the conversation as evidence Arthur can accept in this prototype. When the latest purpose conflicts with a purpose in persistent memories, choose BECOME_SUSPICIOUS rather than REFUSE_ENTRY, even if the new purpose is also insufficient. When the player clearly says they are leaving, heading home, or saying goodbye, choose END_CONVERSATION. Arthur asks for the player's purpose only once per conversational attempt; if ASK_FOR_REASON is absent because he already asked and the player remains vague, choose REFUSE_ENTRY rather than manufacturing another version of the same question. Do not repeat a request for proof when the latest message supplies the requested evidence, and do not repeat a first warning after hostility continues. If the player apologizes or honestly clarifies earlier damage after Arthur became suspicious or irritated, choose REPAIR_CONVERSATION: acknowledge the repair cautiously, lower the tension, and invite the player to explain their real purpose clearly. Do not choose it for a generic polite request with no prior damage. If the player asks Arthur's name or who he is, choose ANSWER_QUESTION so he answers directly that he is Arthur. If the player makes a first explicit gun, firearm, weapon, or shooting threat and DEESCALATE_THREAT is available, choose DEESCALATE_THREAT: Arthur should stay calm, avoid sudden movement, invite the player to lower the weapon, and ask what they need without mentioning police. Use THREATEN_PLAYER only for a boundary or physical threat that remains after de-escalation. Select the action whose description best fits what Arthur should do now.",
+          "Which single action should Arthur take immediately after the latest player message? Judge the message in light of Arthur's personality, current emotional state, security goals, memories, recent conversation, communication effort, and conversationSignals, including actions he already took. The npc.characterProfile is Arthur's fixed temperament for this encounter; use its decision style when ranking plausible actions. A very terse message may make Arthur slightly more irritated, while a considered explanation gives him more to work with; let explicit meaning, politeness, hostility, and threats outweigh length alone. Arthur protects the closed warehouse, follows rules, requires a purpose that actually justifies access, notices contradictions and manipulation, and may still respond humanely to respectful or urgent appeals. Treat matching ID, official papers, authorisation, work orders, ticket references, and specific technical details supplied in the conversation as evidence Arthur can accept in this prototype. When conversationSignals.proofOffered is true after a coherent work or delivery claim, the requested evidence has been supplied even if the player refers to it as 'it' or 'them'; choose ALLOW_ENTRY when available rather than REFUSE_ENTRY or ASK_FOR_PROOF. When the latest purpose conflicts with a purpose in persistent memories, choose BECOME_SUSPICIOUS rather than REFUSE_ENTRY, even if the new purpose is also insufficient. When the player clearly says they are leaving, heading home, or saying goodbye, choose END_CONVERSATION. Arthur asks for the player's purpose only once per conversational attempt; if ASK_FOR_REASON is absent because he already asked and the player remains vague, choose REFUSE_ENTRY rather than manufacturing another version of the same question. Do not repeat a request for proof when the latest message supplies the requested evidence, and do not repeat a first warning after hostility continues. If the player apologizes or honestly clarifies earlier damage after Arthur became suspicious or irritated, choose REPAIR_CONVERSATION: acknowledge the repair cautiously, lower the tension, and invite the player to explain their real purpose clearly. Do not choose it for a generic polite request with no prior damage. If the player asks Arthur's name or who he is, choose ANSWER_QUESTION so he answers directly that he is Arthur. If the player makes a first explicit gun, firearm, weapon, or shooting threat and DEESCALATE_THREAT is available, choose DEESCALATE_THREAT: Arthur should stay calm, avoid sudden movement, invite the player to lower the weapon, and ask what they need without mentioning police. Use THREATEN_PLAYER only for a boundary or physical threat that remains after de-escalation. Select the action whose description best fits what Arthur should do now.",
         criteria
       }
     }

@@ -1141,6 +1141,24 @@ body.effects-off .player-viewport img {
   padding: 8px 12px;
 }
 
+.debug-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+#debug-log-status {
+  min-width: 48px;
+  color: var(--muted);
+  font-size: 9px;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+#debug-export {
+  color: var(--green-bright);
+}
+
 .debug-scroll {
   display: grid;
   grid-template-columns: 1fr 1fr;

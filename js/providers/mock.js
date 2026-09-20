@@ -1,4 +1,5 @@
 import { getTrustEntryThreshold } from "../character.js";
+import { deriveConversationSignals } from "../conversation-signals.js";
 
 const patterns = {
   threat: /\b(kill|hurt|hit|attack|smash|break your|regret|weapon|gun|knife|force my way|move or else)\b/i,
@@ -8,7 +9,7 @@ const patterns = {
   authority: /\b(head office|management|manager|inspector|inspection|contractor|engineer|maintenance|work here|employee)\b/i,
   delivery: /\b(delivery|courier|package|parcel|shipment|drop off|driver)\b/i,
   personal: /\b(left my|forgot my|my bag|my phone|meet someone|friend inside|personal item)\b/i,
-  proof: /\b(id|identification|badge|work order|authorisation|authorization|letter|pass|credentials|employee number|call my manager|manifest|invoice|delivery note)\b/i,
+  proof: /\b(id|identification|badge|work order|authorisation|authorization|letter|pass|credentials?|employee number|call my manager|manager reference|manifest|invoice|delivery note|papers?|documents?|documentation|permit|licen[cs]e)\b/i,
   emergency: /\b(boiler|gas|leak|fire|smoke|alarm|pressure|flood|emergency|burst|electrical|sparks)\b/i,
   detail: /\b(pressure valve|isolation valve|night engineer|ticket|reference|job number|unit [a-z0-9-]+|bay [a-z0-9-]+|control room)\b/i,
   polite: /\b(please|thank you|thanks|sir|understand|sorry|appreciate)\b/i,
@@ -73,6 +74,7 @@ function chooseRawDecision(context) {
   const previousActions = priorArthurActions(context);
   const state = context.npc.state;
   const personality = context.npc.personality;
+  const conversationSignals = context.conversationSignals ?? deriveConversationSignals(context);
   const trustEntryThreshold = getTrustEntryThreshold(personality);
   const turn = context.turn;
   const repairNeeded =
@@ -264,7 +266,7 @@ function chooseRawDecision(context) {
   const reportsEmergency = currentPurpose === "emergency";
   const claimsDelivery = currentPurpose === "delivery";
   const claimsPersonalReason = currentPurpose === "personal";
-  const offersProof = has("proof", input);
+  const offersProof = has("proof", input) || conversationSignals.proofOffered;
   const givesSpecificDetail = has("detail", input);
   const priorPurpose = previousPurposeMemory?.value;
   const priorAuthorityClaim =

@@ -60,6 +60,39 @@ test("Jev request contains one Choice over exactly the available actions", () =>
   assert.deepEqual(request.state.npc.characterProfile, context.npc.characterProfile);
 });
 
+test("Jev receives an explicit signal when a pronoun answers Arthur's proof request", () => {
+  const proofContext = {
+    ...context,
+    memories: [
+      {
+        fact: "Player claims to have a work-related reason for entering",
+        importance: 62,
+        tags: ["authority", "claim"],
+        topic: "purpose",
+        value: "authority",
+        createdTurn: 1
+      }
+    ],
+    recentConversation: [
+      { speaker: "player", text: "I'm from head office." },
+      { speaker: "arthur", text: "Show me official papers.", action: "ASK_FOR_PROOF" }
+    ],
+    playerInput: "I have them.",
+    turn: 2
+  };
+  const proofActions = ["REFUSE_ENTRY", "ASK_FOR_PROOF", "ALLOW_ENTRY"];
+  const request = buildJevRequest(proofContext, proofActions);
+
+  assert.deepEqual(request.state.conversationSignals, {
+    lastArthurAction: "ASK_FOR_PROOF",
+    activePurpose: "authority",
+    proofWasRequested: true,
+    proofOffered: true,
+    proofReference: "contextual"
+  });
+  assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /I have them/i);
+});
+
 test("valid Jev choices become deterministic game decisions", () => {
   const decision = parseJevResponse(validResponse(), context, actions);
 
