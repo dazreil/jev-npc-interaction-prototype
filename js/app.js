@@ -8,7 +8,7 @@ import {
 import { determineTone } from "./npc.js";
 import { PERFORMANCE_PHASES, PerformanceController } from "./performance.js";
 import { PortraitAnimator } from "./portrait.js";
-import { BrowserSpeechAdapter, SpeechDirector } from "./speech.js";
+import { BrowserSpeechAdapter, ESpeakWasmAdapter, SpeechDirector } from "./speech.js";
 import { chooseNpcAction as chooseJevAction } from "./providers/jev.js?phase=4";
 import { chooseNpcAction as chooseMockAction } from "./providers/mock.js";
 
@@ -77,6 +77,7 @@ const elements = {
   skipButton: document.querySelector("#skip-button"),
   volumeControl: document.querySelector("#volume-control"),
   voiceLamp: document.querySelector("#voice-lamp"),
+  voiceEngine: document.querySelector("#voice-engine"),
   debugDialog: document.querySelector("#debug-dialog"),
   debugOpen: document.querySelector("#debug-open"),
   debugClose: document.querySelector("#debug-close"),
@@ -94,7 +95,9 @@ let lastPerformance = null;
 let replayRunId = 0;
 let bootRunId = 0;
 const periodAudio = new PeriodAudio();
-const speechDirector = new SpeechDirector({ adapter: new BrowserSpeechAdapter() });
+const speechDirector = new SpeechDirector({
+  adapter: new ESpeakWasmAdapter({ fallback: new BrowserSpeechAdapter() })
+});
 const delay = (durationMs) =>
   durationMs > 0
     ? new Promise((resolve) => setTimeout(resolve, durationMs))
@@ -104,9 +107,10 @@ const performanceController = new PerformanceController({
     if (phase !== PERFORMANCE_PHASES.SPEAKING) return delay(durationMs);
 
     return speechDirector.deliver(performance, {
-      onStart: ({ mode }) => {
+      onStart: ({ mode, engine }) => {
         portraitAnimator.startTalking();
         elements.voiceLamp.classList.toggle("lamp--on", mode === "speech");
+        renderVoiceEngine(engine);
       },
       onEnd: () => {
         elements.voiceLamp.classList.remove("lamp--on");
@@ -124,6 +128,22 @@ const portraitAnimator = new PortraitAnimator({
   reducedMotion: () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   autoTalk: false
 });
+
+function renderVoiceEngine(engine) {
+  const labels = {
+    "espeak-wasm": "WASM",
+    "web-speech": "Browser",
+    timed: "Silent",
+    muted: "Muted"
+  };
+  elements.voiceEngine.textContent = labels[engine] ?? "WASM";
+  elements.voiceEngine.title =
+    engine === "espeak-wasm"
+      ? "eSpeak NG running locally through WebAssembly"
+      : engine === "web-speech"
+        ? "Browser speech fallback"
+        : "Timed caption fallback";
+}
 
 function renderPerformancePhase({ phase, performance }) {
   document.body.dataset.performancePhase = phase;
@@ -451,14 +471,16 @@ async function replayLastLine() {
 
   const runId = ++replayRunId;
   elements.replayButton.disabled = true;
+  speechDirector.prepare();
   await periodAudio.resume();
   periodAudio.playRelay();
   activeArthurFrame.classList.add("is-speaking");
 
   await speechDirector.deliver(lastPerformance, {
-    onStart: ({ mode }) => {
+    onStart: ({ mode, engine }) => {
       portraitAnimator.startTalking();
       elements.voiceLamp.classList.toggle("lamp--on", mode === "speech");
+      renderVoiceEngine(engine);
     },
     onEnd: () => {
       elements.voiceLamp.classList.remove("lamp--on");
@@ -482,6 +504,7 @@ async function handleSubmit(event) {
 
   replayRunId += 1;
   speechDirector.cancel();
+  speechDirector.prepare();
   await periodAudio.resume();
   periodAudio.startAmbience();
   periodAudio.playInterfaceClick();
@@ -575,9 +598,13 @@ elements.audioToggle.addEventListener("click", async () => {
   elements.voiceLamp.classList.remove("lamp--on");
 
   if (!muted) {
+    speechDirector.prepare();
     await periodAudio.resume();
     periodAudio.startAmbience();
     periodAudio.playInterfaceClick();
+    renderVoiceEngine("espeak-wasm");
+  } else {
+    renderVoiceEngine("muted");
   }
 });
 elements.volumeControl.addEventListener("input", () => {

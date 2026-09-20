@@ -3,11 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "postinstall": "node scripts/install-espeak-assets.mjs",
     "start": "node server.mjs",
     "start:mock": "python3 -m http.server 5173",
     "test": "node --test tests/*.test.mjs",
     "lint:dialogue": "node scripts/lint-dialogue.mjs",
     "check": "npm test && npm run lint:dialogue",
     "playtest": "node scripts/run-playtests.mjs"
+  },
+  "dependencies": {
+    "@echogarden/espeak-ng-emscripten": "0.3.5"
   }
 }

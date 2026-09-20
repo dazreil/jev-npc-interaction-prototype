@@ -18,7 +18,7 @@
       type="font/ttf"
       crossorigin
     />
-    <link rel="stylesheet" href="styles.css?phase=13.1" />
+    <link rel="stylesheet" href="styles.css?phase=13.2" />
   </head>
   <body>
     <div id="terminal-mount" class="terminal-mount">
@@ -91,7 +91,7 @@
             <div class="system-lamps" aria-label="Atmospheric system indicators">
               <span><i class="lamp lamp--on" aria-hidden="true"></i> Video</span>
               <span><i class="lamp lamp--on" aria-hidden="true"></i> Text</span>
-              <span><i id="voice-lamp" class="lamp" aria-hidden="true"></i> Voice</span>
+              <span><i id="voice-lamp" class="lamp" aria-hidden="true"></i> Voice <b id="voice-engine">WASM</b></span>
             </div>
 
             <div class="audio-deck" aria-label="Speech and audio controls">
@@ -291,7 +291,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=13.1";
+        appScript.src = "js/app.js?phase=13.2";
         document.body.append(appScript);
       }
     </script>

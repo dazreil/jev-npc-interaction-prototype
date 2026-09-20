@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   BrowserSpeechAdapter,
+  ESpeakWasmAdapter,
   SpeechDirector,
   resolveSpeechProfile
 } from "../js/speech.js";
@@ -26,6 +27,116 @@ test("speech profiles provide deterministic tone and action delivery metadata", 
     preDelayMs: 0,
     audioPreset: "intercom"
   });
+});
+
+test("eSpeak WASM adapter synthesizes PCM and resolves from real buffer playback", async () => {
+  const calls = {};
+  const parameter = () => ({ value: 0, setValueAtTime(value) { this.value = value; } });
+  const audioNode = () => ({ connect: () => {} });
+  let source;
+  let copiedSamples;
+  const context = {
+    state: "running",
+    currentTime: 0,
+    destination: {},
+    createBiquadFilter: () => ({ ...audioNode(), frequency: parameter(), type: "" }),
+    createDynamicsCompressor: () => ({
+      ...audioNode(),
+      threshold: parameter(),
+      knee: parameter(),
+      ratio: parameter(),
+      attack: parameter(),
+      release: parameter()
+    }),
+    createGain: () => ({ ...audioNode(), gain: parameter() }),
+    createBuffer: (_channels, length, sampleRate) => ({
+      length,
+      sampleRate,
+      copyToChannel: (samples) => {
+        copiedSamples = samples;
+      }
+    }),
+    createBufferSource: () => {
+      source = {
+        connect: () => {},
+        start: () => queueMicrotask(() => source.onended()),
+        stop: () => source.onended?.()
+      };
+      return source;
+    }
+  };
+  class FakeWorker {
+    constructor() {
+      this.samplerate = 22050;
+    }
+    set_voice(value) { calls.voice = value; }
+    set_rate(value) { calls.rate = value; }
+    set_pitch(value) { calls.pitch = value; }
+    synthesize(text, callback) {
+      calls.text = text;
+      callback(new Int16Array([0, 16384, -16384]), []);
+    }
+  }
+  const adapter = new ESpeakWasmAdapter({
+    wasmSupported: true,
+    contextFactory: () => context,
+    importModule: async () => ({
+      default: async () => ({ eSpeakNGWorker: FakeWorker })
+    }),
+    fallback: { supported: false, cancel: () => false }
+  });
+  const starts = [];
+
+  const result = await adapter.speak({
+    text: "Arthur speaking.",
+    rate: 0.8,
+    pitch: 0.7,
+    volume: 0.6,
+    voice: "en-gb+m3",
+    audioPreset: "warning-intercom",
+    onStart: ({ engine }) => starts.push(engine)
+  });
+
+  assert.deepEqual(result, { status: "ended", started: true });
+  assert.deepEqual(calls, {
+    voice: "en-gb+m3",
+    rate: 140,
+    pitch: 35,
+    text: "Arthur speaking."
+  });
+  assert.deepEqual([...copiedSamples], [0, 0.5, -0.5]);
+  assert.deepEqual(starts, ["espeak-wasm"]);
+});
+
+test("eSpeak load failure falls back to browser speech without blocking the turn", async () => {
+  const engines = [];
+  const fallback = {
+    supported: true,
+    cancel: () => false,
+    speak: async ({ onStart }) => {
+      onStart({ engine: "web-speech" });
+      return { status: "ended", started: true };
+    }
+  };
+  const adapter = new ESpeakWasmAdapter({
+    wasmSupported: true,
+    contextFactory: () => null,
+    importModule: async () => {
+      throw new Error("missing WASM assets");
+    },
+    fallback
+  });
+
+  const result = await adapter.speak({
+    text: "Fallback line.",
+    rate: 1,
+    pitch: 1,
+    volume: 0.7,
+    onStart: ({ engine }) => engines.push(engine)
+  });
+
+  assert.deepEqual(result, { status: "ended", started: true });
+  assert.deepEqual(engines, ["web-speech"]);
 });
 
 test("browser speech adapter resolves from actual speech events and applies its profile", async () => {

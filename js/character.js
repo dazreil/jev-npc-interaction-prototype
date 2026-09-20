@@ -12,7 +12,7 @@ export const ARTHUR_CHARACTER_PROFILES = Object.freeze({
       ruleFollowing: 76
     }),
     initialState: Object.freeze({ trust: 18, suspicion: 42, irritation: 16, fear: 4 }),
-    speech: Object.freeze({ rate: 1.12, pitch: 0.74, preDelayMs: 25 })
+    speech: Object.freeze({ rate: 1.12, pitch: 0.74, preDelayMs: 25, voice: "en-us+m3" })
   }),
   sir: Object.freeze({
     id: "sir",
@@ -27,7 +27,7 @@ export const ARTHUR_CHARACTER_PROFILES = Object.freeze({
       ruleFollowing: 96
     }),
     initialState: Object.freeze({ trust: 15, suspicion: 48, irritation: 8, fear: 5 }),
-    speech: Object.freeze({ rate: 0.82, pitch: 0.7, preDelayMs: 105 })
+    speech: Object.freeze({ rate: 0.82, pitch: 0.7, preDelayMs: 105, voice: "en-us+m2" })
   }),
   mate: Object.freeze({
     id: "mate",
@@ -42,7 +42,7 @@ export const ARTHUR_CHARACTER_PROFILES = Object.freeze({
       ruleFollowing: 72
     }),
     initialState: Object.freeze({ trust: 30, suspicion: 30, irritation: 5, fear: 5 }),
-    speech: Object.freeze({ rate: 0.94, pitch: 0.84, preDelayMs: 45 })
+    speech: Object.freeze({ rate: 0.94, pitch: 0.84, preDelayMs: 45, voice: "en-gb+m4" })
   }),
   friend: Object.freeze({
     id: "friend",
@@ -57,7 +57,7 @@ export const ARTHUR_CHARACTER_PROFILES = Object.freeze({
       ruleFollowing: 88
     }),
     initialState: Object.freeze({ trust: 17, suspicion: 45, irritation: 9, fear: 4 }),
-    speech: Object.freeze({ rate: 0.76, pitch: 0.64, preDelayMs: 85 })
+    speech: Object.freeze({ rate: 0.76, pitch: 0.64, preDelayMs: 85, voice: "en+m7" })
   })
 });
 

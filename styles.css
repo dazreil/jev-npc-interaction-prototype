@@ -543,6 +543,12 @@ summary:focus-visible {
   margin-right: 3px;
 }
 
+.system-lamps b {
+  color: var(--green);
+  font: inherit;
+  font-weight: 400;
+}
+
 .audio-deck {
   display: grid;
   gap: 6px;

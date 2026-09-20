@@ -450,8 +450,9 @@ Add replaceable speech and sound systems while keeping captions authoritative an
 - Unsupported or muted speech uses cancellable deterministic timing, leaves complete captions visible, and returns input safely after normal playback or skip.
 - Replay, mute, volume, and skip controls are keyboard-accessible; the voice indicator distinguishes audible browser speech from silent fallback animation.
 - Optional Web Audio provides a low warehouse hum and authored interface, relay, warning, and door-unlock cues through a band-limited compressed effects chain. Browser media failures remain silent and non-blocking.
-- Browser verification covered responsive layout, the single incoming-message display, the restored shadowed player endpoint, fallback playback, skip, replay, mute, volume, focusable controls, and a clean console. The test browser exposed neither Web Speech nor Web Audio, so real voice and device-specific sound quality remain explicit Phase 14 checks.
-- The full automated suite passes with 48 tests plus dialogue lint covering 4 character profiles, 12 actions, 204 fragments, 13 templates, 7 branches, and 220 possible lines. `ASK_FOR_REASON` is now a one-time prompt per conversational attempt, preventing Arthur from looping through reworded versions of the same question; a deliberate repair can reopen it. Each reset selects a fixed Arthur profile with distinct temperament, trust threshold, dialogue, and voice delivery.
+- eSpeak NG 0.3.5 now runs locally through its Emscripten WebAssembly build and supplies PCM audio to a filtered Web Audio playback chain. Its 24 MB voice data is installed locally and loaded only on first use; Web Speech and timed captions remain automatic fallbacks.
+- Browser verification covered responsive layout, the single incoming-message display, the restored shadowed player endpoint, eSpeak/WASM playback, fallback playback, skip, replay, mute, volume, focusable controls, and a clean ready state. Device-specific sound quality and cross-browser comparison remain explicit Phase 14 checks.
+- The full automated suite passes with 54 tests plus dialogue lint covering 4 character profiles, 12 actions, 204 fragments, 13 templates, 7 branches, and 220 possible lines. `ASK_FOR_REASON` is now a one-time prompt per conversational attempt, preventing Arthur from looping through reworded versions of the same question; a deliberate repair can reopen it. Each reset selects a fixed Arthur profile with distinct temperament, trust threshold, dialogue, and eSpeak voice delivery.
 
 ## Phase 13 — Outcomes and Authored Performance Pass
 
@@ -480,7 +481,7 @@ Give the complete encounter a strong opening and four visibly distinct endings w
 - Each ending has its own terminal copy, colour treatment, door readout, and synthesized sound cue: unlock, descending denial, warning, or three-tone lockdown.
 - Dialogue data can optionally override portrait cue, speech properties, timing, and sound effect by action or tone. The performance resolver supplies existing safe defaults when metadata is absent, so no dialogue text is duplicated.
 - Browser verification exercised all four endings through real player input at the responsive 640×480 presentation. The boot overlay disabled transmission until ready, terminal controls locked after each ending, and the encounter reset cleanly.
-- The full automated suite passes with 52 tests. Dialogue lint covers 4 character profiles, 12 actions, 204 fragments, 13 templates, 7 branches, and 220 possible lines. All 28 core Mock/Jev comparison assertions and both provider-failure checks pass; the existing exploratory generalization baseline remains 5 of 10 expected actions.
+- The full automated suite passes with 54 tests. Dialogue lint covers 4 character profiles, 12 actions, 204 fragments, 13 templates, 7 branches, and 220 possible lines. All 28 core Mock/Jev comparison assertions and both provider-failure checks pass; the existing exploratory generalization baseline remains 5 of 10 expected actions.
 - Head-office proof, detailed emergency evidence, and sustained respectful conversation remain three verified routes to entry.
 
 ## Phase 14 — Provider and Human Evaluation

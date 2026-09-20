@@ -4,9 +4,17 @@ A small browser-based text game that explores whether a decision model can make 
 
 Arthur's spoken lines all come from `data/dialogue.json`. The Mock and Jev providers select only a structured action and return developer-facing decision metadata. The game validates the action before selecting an authored line.
 
-The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. A short hardline boot sequence opens the encounter; Arthur occupies the gatehouse feed while a shadowed external feed represents the player. Each participant has one current message, avoiding a duplicated subtitle-and-transcript view, and developer telemetry remains available through the **Developer** control or <kbd>F2</kbd>. Browser speech, replay, mute, volume, skip, ambience, and authored interface sounds sit behind replaceable presentation adapters; the current incoming message and deterministic timing remain available when browser media APIs are missing.
+The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. A short hardline boot sequence opens the encounter; Arthur occupies the gatehouse feed while a shadowed external feed represents the player. Each participant has one current message, avoiding a duplicated subtitle-and-transcript view, and developer telemetry remains available through the **Developer** control or <kbd>F2</kbd>. Arthur's default voice is generated locally by eSpeak NG running through WebAssembly, with replay, mute, volume, skip, ambience, and authored interface sounds behind replaceable presentation adapters. The current incoming message and deterministic timing remain available when browser media APIs are missing.
 
 ## Run locally
+
+Install the browser eSpeak NG runtime once:
+
+```bash
+npm install
+```
+
+The post-install step copies the pinned WebAssembly runtime, voice data, and GPL license from `node_modules` into the ignored `assets/vendor/espeak-ng/` runtime directory. The voice files are about 24 MB and load lazily on the first transmission rather than delaying the initial terminal screen.
 
 The complete offline Mock experience needs no credentials. Start it with:
 
@@ -24,7 +32,13 @@ To use Jev, copy `.env.example` to `.env`, set `TYPESAFE_API_KEY`, and run:
 npm start
 ```
 
-The Node server keeps the credential out of browser source and forwards only structured decision requests to TypeSafe. `.env` is gitignored. No packages or build step are required.
+The Node server keeps the credential out of browser source and forwards only structured decision requests to TypeSafe. `.env` is gitignored. No frontend build step is required.
+
+## Speech engine
+
+eSpeak NG/WASM is the preferred speech engine in every browser. The game converts its 22.05 kHz PCM output into a Web Audio buffer, then applies the same narrow-band intercom filter and compression used by the terminal effects. Arthur's persistent character profile selects a voice variant, while the authored performance controls rate, pitch, delay, and filter preset.
+
+The **VOICE** indicator reports `WASM` after eSpeak playback begins. If WebAssembly, its voice data, or Web Audio cannot initialize, it reports `BROWSER` and uses the Web Speech API. If neither engine is available, it reports `SILENT`; captions and timed mouth animation still complete the turn. Loading, playback, and fallback all remain cancellable through **Skip** or **Reset link**.
 
 Run the unit tests and dialogue-content linter together with:
 
@@ -113,7 +127,7 @@ If the server, network, or TypeSafe API fails, no turn or state change is applie
 - `js/layout.js` keeps the 640×480 terminal proportional, fills the available viewport, and caps enlargement at 2×.
 - `js/performance.js` maps committed turns to renderer metadata and controls the idle, typing, decision, reaction, speaking, and ending lifecycle.
 - `js/portrait.js` maps performance phases to deterministic idle, blink, listening, mouth, and emotional portrait frames with a neutral fallback.
-- `js/speech.js` supplies deterministic delivery profiles, the replaceable Web Speech adapter, actual speech-event timing, replay, cancellation, and silent fallback timing.
+- `js/speech.js` supplies the default eSpeak NG/WASM PCM adapter, per-profile voices, Web Speech fallback, actual playback timing, replay, cancellation, and silent fallback timing.
 - `js/audio.js` owns optional Web Audio ambience and the band-limited, compressed relay, warning, denial, lockdown, interface, and door-unlock sounds.
 - `js/app.js` renders the UI and translates browser events into game turns.
 - `js/providers/jev.js` builds and validates the Jev `choice` request and maps the selected action to deterministic game effects, including the repair path.
@@ -126,5 +140,6 @@ If the server, network, or TypeSafe API fails, no turn or state change is applie
 - `assets/arthur-speaking.gif` is retained as a legacy source artifact and is no longer used by the interface.
 - `assets/player-shadow.jpg` is the anonymous player avatar displayed on the opposite side of the chat.
 - `assets/fonts/VT323-Regular.ttf` is the single bundled monospace pixel font used across the complete player and developer interface under the SIL Open Font License in `assets/fonts/OFL.txt`.
+- `scripts/install-espeak-assets.mjs` installs the pinned eSpeak NG browser runtime and its license into `assets/vendor/espeak-ng/`; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 See [ROADMAP.md](ROADMAP.md) for milestones and acceptance criteria. Phases 9–15 cover the planned retro CD-ROM vertical-slice conversion; [RETRO_CDROM_DESIGN_SPEC.md](RETRO_CDROM_DESIGN_SPEC.md) records the full visual, audio, interaction, and evaluation direction.
