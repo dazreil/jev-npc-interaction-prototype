@@ -65,8 +65,8 @@ await Promise.all([
   copyFile(resolve(licenseRoot, "piper-wasm-LICENSE"), resolve(destination, "PIPER-WASM-LICENSE")),
   copyFile(resolve(licenseRoot, "onnxruntime-LICENSE"), resolve(destination, "ONNXRUNTIME-LICENSE")),
   copyFile(
-    resolve(licenseRoot, "en_GB-northern_english_male-medium-MODEL_CARD"),
-    resolve(destination, "en_GB-northern_english_male-medium-MODEL_CARD")
+    resolve(licenseRoot, "en_US-danny-low-MODEL_CARD"),
+    resolve(destination, "en_US-danny-low-MODEL_CARD")
   )
 ]);
 

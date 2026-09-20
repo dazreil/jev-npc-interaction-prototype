@@ -599,7 +599,7 @@ Arthur speaks in the Piper voice with the **VOICE** indicator reading `NEURAL`; 
 
 ### Known constraint
 
-The shipped voice, `en_GB-northern_english_male-medium`, has MIT weights but was trained on a CC-BY-SA 4.0 dataset. Attribution is expected and share-alike may extend to generated audio. Review before any commercial release; the voice is one constructor argument and the adapter is replaceable. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The current trial voice, `en_US-danny-low`, has MIT weights and identifies the Mycroft Mimic 3 voice collection as its dataset. Review the upstream dataset terms before any commercial release; the voice is one constructor argument and the adapter is replaceable. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Immediate Next Milestone
 

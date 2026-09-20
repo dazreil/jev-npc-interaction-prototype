@@ -253,7 +253,7 @@ export class BrowserSpeechAdapter {
 
 export class PiperSpeechAdapter {
   constructor({
-    voiceId = "en_GB-northern_english_male-medium",
+    voiceId = "en_US-danny-low",
     workerUrl = "/js/piper-worker.js",
     workerFactory = typeof globalThis.Worker === "function"
       ? (url) => new Worker(url, { type: "module" })

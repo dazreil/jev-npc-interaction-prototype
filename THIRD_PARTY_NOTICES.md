@@ -28,22 +28,18 @@ file; nothing is fetched from a CDN at play time.
 
 ### Voice model
 
-The shipped voice is `en_GB-northern_english_male-medium` from the Rhasspy
+The shipped voice is `en_US-danny-low` from the Rhasspy
 Piper voice collection. Its model card is installed at
-`assets/vendor/piper/en_GB-northern_english_male-medium-MODEL_CARD`.
+`assets/vendor/piper/en_US-danny-low-MODEL_CARD`.
 
-The voice weights are distributed under the MIT licence, but they were trained
-on a dataset released under **Creative Commons Attribution-ShareAlike 4.0
-International**:
+The voice weights are distributed under the MIT licence. The model card names
+the Mycroft Mimic 3 voice collection as its dataset and directs distributors to
+that project for the dataset terms:
 
-- Dataset: <http://www.openslr.org/83/>
-- Dataset licence: CC-BY-SA 4.0
+- Dataset: <https://github.com/MycroftAI/mimic3-voices>
 
-Distributing audio generated from this voice therefore carries an attribution
-expectation, and the share-alike term may extend to the generated audio. Review
-this before any commercial release, and select a differently licensed voice if
-share-alike is unacceptable. The speech adapter is replaceable by design and the
-voice is a single constructor argument.
+Review the dataset terms before a commercial release. The speech adapter is
+replaceable by design and the voice is a single constructor argument.
 
 ## eSpeak NG (fallback voice)
 
