@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="A retro security-terminal encounter with Arthur, a warehouse security guard."
+      content="A retro car-park gate intercom encounter with Arthur, a warehouse security guard."
     />
     <title>Perimeter 04 — Arthur Security Link</title>
     <link rel="preload" href="assets/arthur-portrait.jpg" as="image" />
@@ -17,7 +17,7 @@
       type="font/ttf"
       crossorigin
     />
-    <link rel="stylesheet" href="styles.css?phase=15.2" />
+    <link rel="stylesheet" href="styles.css?phase=16.1" />
   </head>
   <body>
     <div id="terminal-mount" class="terminal-mount">
@@ -59,99 +59,63 @@
           </div>
         </header>
 
-        <section class="terminal-workspace" aria-label="Security intercom">
-          <section class="video-module" aria-labelledby="feed-title">
+        <section class="terminal-workspace" aria-label="South-gate security intercom">
+          <section class="intercom-module" aria-labelledby="feed-title">
             <div class="module-heading">
-              <span id="feed-title">Guard Tower 04</span>
+              <span id="feed-title">Gate intercom / Channel 04</span>
               <span id="phase-label">Idle</span>
             </div>
 
-            <div id="arthur-frame" class="arthur-viewport">
-              <img
-                id="arthur-portrait"
-                src="assets/arthur-portrait.jpg"
-                width="360"
-                height="480"
-                alt="Arthur, the warehouse security guard"
-              />
-              <div class="video-scan" aria-hidden="true"></div>
-              <div class="tracking-corners" aria-hidden="true"></div>
-              <span class="signal-label">Live / Guard tower</span>
-            </div>
-
-            <div class="identity-strip">
-              <div>
-                <span>Security officer</span>
-                <strong>Arthur</strong>
+            <div class="intercom-feeds">
+              <div class="channel-card arthur-channel">
+                <div id="arthur-frame" class="arthur-viewport">
+                  <img
+                    id="arthur-portrait"
+                    src="assets/arthur-portrait.jpg"
+                    width="360"
+                    height="480"
+                    alt="Arthur in Guard Tower 04"
+                  />
+                  <div class="video-scan" aria-hidden="true"></div>
+                  <div class="tracking-corners" aria-hidden="true"></div>
+                </div>
+                <div class="channel-id">
+                  <span>Guard Tower 04</span>
+                  <strong>Arthur</strong>
+                </div>
               </div>
-              <div class="identity-code">Inside<br />Guard tower 04</div>
-            </div>
 
-            <div class="system-lamps" aria-label="Atmospheric system indicators">
-              <span><i class="lamp lamp--on" aria-hidden="true"></i> Video</span>
-              <span><i class="lamp lamp--on" aria-hidden="true"></i> Text</span>
-              <span><i id="voice-lamp" class="lamp" aria-hidden="true"></i> Voice <b id="voice-engine">WASM</b></span>
-            </div>
-
-            <div class="audio-deck" aria-label="Speech and audio controls">
-              <div class="audio-buttons">
-                <button id="audio-toggle" type="button" aria-pressed="true">Audio on</button>
-                <button id="replay-button" type="button" disabled>Replay</button>
-                <button id="skip-button" type="button" disabled>Skip</button>
+              <div class="channel-card player-card">
+                <div class="player-viewport">
+                  <img
+                    src="assets/player-shadow.jpg"
+                    width="480"
+                    height="480"
+                    alt="Shadowed visitor at the outside gate intercom"
+                  />
+                  <div class="player-scan" aria-hidden="true"></div>
+                </div>
+                <div class="channel-id channel-id--player">
+                  <span>Outside gate</span>
+                  <strong>Unknown</strong>
+                </div>
               </div>
-              <label class="volume-control" for="volume-control">
-                <span>Volume</span>
-                <input
-                  id="volume-control"
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value="0.72"
-                  aria-valuetext="72 percent"
-                />
-              </label>
             </div>
-          </section>
 
-          <section class="comms-module" aria-label="Conversation controls">
             <section class="current-message-panel" aria-labelledby="subtitle-speaker">
               <div class="subtitle-heading">
-                <span id="subtitle-speaker">Arthur / Gatehouse</span>
+                <span id="subtitle-speaker">Arthur / Guard Tower 04</span>
                 <span>Incoming</span>
               </div>
               <p id="subtitle-text" aria-live="polite">Establishing security link…</p>
             </section>
 
             <section class="player-endpoint" aria-labelledby="player-endpoint-title">
-              <div class="player-copy">
-                <div class="module-heading">
-                  <span id="player-endpoint-title">Your transmission</span>
-                  <span>TX <b id="turn-count-compact">00</b></span>
-                </div>
-                <p id="player-message" class="player-message">Awaiting transmission.</p>
+              <div class="module-heading">
+                <span id="player-endpoint-title">Your transmission</span>
+                <span>TX <b id="turn-count-compact">00</b></span>
               </div>
-
-              <div class="player-card">
-                <div class="player-viewport">
-                  <img
-                    src="assets/player-shadow.jpg"
-                    width="480"
-                    height="480"
-                    alt="Shadowed silhouette representing the player outside the warehouse"
-                  />
-                  <div class="player-scan" aria-hidden="true"></div>
-                  <span>Intercom camera / Outside</span>
-                </div>
-
-                <div class="identity-strip player-identity-strip">
-                  <div>
-                    <span>External caller</span>
-                    <strong>Unknown</strong>
-                  </div>
-                  <div class="identity-code">Outside<br />Car-park gate</div>
-                </div>
-              </div>
+              <p id="player-message" class="player-message">Awaiting transmission.</p>
             </section>
 
             <div
@@ -161,8 +125,6 @@
               aria-live="off"
               aria-label="Conversation history with Arthur"
             ></div>
-
-            <div id="outcome" class="outcome" role="status" hidden></div>
 
             <form id="player-form" class="player-form">
               <label for="player-input">Transmit message</label>
@@ -183,6 +145,66 @@
               </div>
               <p id="input-hint" class="input-hint">Enter to transmit · 280 character limit</p>
             </form>
+
+            <div class="intercom-controls">
+              <div class="system-lamps" aria-label="Intercom system indicators">
+                <span><i class="lamp lamp--on" aria-hidden="true"></i> Video</span>
+                <span><i class="lamp lamp--on" aria-hidden="true"></i> Text</span>
+                <span><i id="voice-lamp" class="lamp" aria-hidden="true"></i> Voice <b id="voice-engine">WASM</b></span>
+              </div>
+
+              <div class="audio-deck" aria-label="Speech and audio controls">
+                <div class="audio-buttons">
+                  <button id="audio-toggle" type="button" aria-pressed="true">Audio</button>
+                  <button id="replay-button" type="button" disabled>Replay</button>
+                  <button id="skip-button" type="button" disabled>Skip</button>
+                </div>
+                <label class="volume-control" for="volume-control">
+                  <span>Vol</span>
+                  <input
+                    id="volume-control"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value="0.72"
+                    aria-valuetext="72 percent"
+                  />
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section id="gate-frame" class="gate-module" aria-labelledby="gate-feed-title">
+            <div class="module-heading">
+              <span id="gate-feed-title">Car park / South gate</span>
+              <span id="gate-animation-status">Locked</span>
+            </div>
+
+            <div class="gate-viewport">
+              <img
+                id="gate-feed"
+                src="assets/gates/gate-closed.webp"
+                width="480"
+                height="320"
+                alt="Closed warehouse car-park gate at night"
+              />
+              <div class="gate-scan" aria-hidden="true"></div>
+              <span class="gate-camera-label">CAM 04-B / EXTERIOR</span>
+            </div>
+
+            <div class="gate-readouts" aria-label="Gate checkpoint status">
+              <div><span>Barrier</span><strong id="gate-barrier-state">Secured</strong></div>
+              <div><span>Destination</span><strong>Guard Tower 04</strong></div>
+              <div><span>Warehouse</span><strong>Not cleared</strong></div>
+            </div>
+
+            <div class="gate-procedure">
+              <span>Checkpoint sequence</span>
+              <p>Camera check → Car-park gate → Original papers at tower</p>
+            </div>
+
+            <div id="outcome" class="outcome" role="status" hidden></div>
           </section>
         </section>
 
@@ -234,7 +256,7 @@
           <section class="debug-section decision-section" aria-labelledby="decision-title">
             <h3 id="decision-title">Latest decision</h3>
             <dl class="decision-grid">
-              <div><dt>Current goal</dt><dd id="current-goal">Protect warehouse</dd></div>
+              <div><dt>Current goal</dt><dd id="current-goal">Protect warehouse grounds</dd></div>
               <div><dt>Action</dt><dd id="last-action" class="code-value">WAITING</dd></div>
               <div><dt>Confidence</dt><dd id="confidence">—</dd></div>
               <div><dt>Tone</dt><dd id="tone">Neutral</dd></div>
@@ -286,6 +308,7 @@
           <p class="credits-lede">A Jev NPC interaction prototype by Daryl Smith.</p>
           <dl class="credits-list">
             <div><dt>Arthur and player imagery</dt><dd>Original prototype artwork</dd></div>
+            <div><dt>South-gate animation</dt><dd>Original AI-assisted pixel artwork</dd></div>
             <div><dt>NPC dialogue</dt><dd>Hand-authored for this encounter</dd></div>
             <div><dt>Decision systems</dt><dd>Deterministic Mock and optional TypeSafe Jev</dd></div>
             <div><dt>Local speech</dt><dd>eSpeak NG WebAssembly, GPL-3.0</dd></div>
@@ -319,7 +342,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=15.4";
+        appScript.src = "js/app.js?phase=16.1";
         document.body.append(appScript);
       }
     </script>

@@ -19,9 +19,10 @@ async function requireFile(relativePath) {
   }
 }
 
-const [html, css, server] = await Promise.all([
+const [html, css, app, server] = await Promise.all([
   readFile(resolve(projectRoot, "index.html"), "utf8"),
   readFile(resolve(projectRoot, "styles.css"), "utf8"),
+  readFile(resolve(projectRoot, "js/app.js"), "utf8"),
   readFile(resolve(projectRoot, "server.mjs"), "utf8")
 ]);
 
@@ -57,6 +58,8 @@ check(reactionPaths.every((asset) => asset.endsWith(".webp")), "Reaction portrai
 check(html.includes('id="credits-dialog"'), "Credits dialog is missing");
 check(html.includes('id="debug-dialog"'), "Developer diagnostics dialog is missing");
 check(html.includes('id="debug-export"'), "Conversation log export control is missing");
+check(html.includes('id="gate-feed"'), "Exterior gate feed is missing");
+check(html.includes('id="gate-animation-status"'), "Gate animation status is missing");
 check(css.includes("@keyframes player-idle"), "Player idle animation is missing");
 check(
   /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.player-viewport img[\s\S]*?animation: none/.test(css),
@@ -64,21 +67,36 @@ check(
 );
 check(server.includes('".webp": "image/webp"'), "Server must send the WebP MIME type");
 check(server.includes('process.env.HOST || "127.0.0.1"'), "Server must allow a deployment host binding");
+check(
+  html.includes("assets/gates/gate-closed.webp"),
+  "The initial exterior feed must use the closed-gate frame"
+);
+check(
+  app.includes("assets/gates/gate-opening.webp") && app.includes("assets/gates/gate-open.webp"),
+  "Entry approval must play the gate-opening animation and settle on the open frame"
+);
 
 await Promise.all([
   requireFile("DEPLOYMENT.md"),
   requireFile("Dockerfile"),
   requireFile("THIRD_PARTY_NOTICES.md"),
-  requireFile("assets/fonts/OFL.txt")
+  requireFile("assets/fonts/OFL.txt"),
+  requireFile("assets/gates/gate-closed.webp"),
+  requireFile("assets/gates/gate-open.webp"),
+  requireFile("assets/gates/gate-opening.webp"),
+  requireFile("assets/gates/gate-frame-1.webp"),
+  requireFile("assets/gates/gate-frame-2.webp"),
+  requireFile("assets/gates/gate-frame-3.webp"),
+  requireFile("assets/gates/gate-frame-4.webp")
 ]);
 
 if (failures.length > 0) {
-  console.error("Phase 15 release audit failed:\n");
+  console.error("Release audit failed:\n");
   for (const failure of failures) console.error(`- ${failure}`);
   process.exitCode = 1;
 } else {
   console.log(
-    `Phase 15 release audit passed: ${portraitPaths.length} portrait assets present, ` +
+    `Release audit passed: ${portraitPaths.length} portrait assets present, ` +
       `${Math.round(reactionTotal / 1024)} KiB of lazy reaction art, ${preloadAssets.length} immediate preloads.`
   );
 }

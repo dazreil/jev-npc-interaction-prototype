@@ -70,6 +70,10 @@ const elements = {
   phaseLabel: document.querySelector("#phase-label"),
   linkStatus: document.querySelector("#link-status"),
   doorStatus: document.querySelector("#door-status"),
+  gateFeed: document.querySelector("#gate-feed"),
+  gateFrame: document.querySelector("#gate-frame"),
+  gateAnimationStatus: document.querySelector("#gate-animation-status"),
+  gateBarrierState: document.querySelector("#gate-barrier-state"),
   turnCountCompact: document.querySelector("#turn-count-compact"),
   effectsToggle: document.querySelector("#effects-toggle"),
   audioToggle: document.querySelector("#audio-toggle"),
@@ -100,6 +104,8 @@ let focusBeforeCredits = null;
 let lastPerformance = null;
 let replayRunId = 0;
 let bootRunId = 0;
+let gateRunId = 0;
+let gateAnimationTimer = null;
 const periodAudio = new PeriodAudio();
 const speechDirector = new SpeechDirector({
   adapter: new ESpeakWasmAdapter({
@@ -211,7 +217,7 @@ function appendMessage(speaker, text, action = null) {
   elements.conversation.scrollTop = elements.conversation.scrollHeight;
 
   if (speaker === "arthur") {
-    elements.subtitleSpeaker.textContent = "Arthur / Gatehouse";
+    elements.subtitleSpeaker.textContent = "Arthur / Guard Tower 04";
     elements.subtitleText.textContent = text;
   } else {
     elements.playerMessage.textContent = text;
@@ -347,7 +353,7 @@ async function refreshJevStatus() {
 const OUTCOME_PRESENTATIONS = Object.freeze({
   entry_granted: {
     title: "Car park access granted",
-    code: "South gate opening",
+    code: "South gate open",
     copy: "Arthur opens the car-park gate. Report to Guard Tower 04 with the original documents.",
     door: "Open"
   },
@@ -371,6 +377,52 @@ const OUTCOME_PRESENTATIONS = Object.freeze({
   }
 });
 
+function resetGateFeed() {
+  gateRunId += 1;
+  if (gateAnimationTimer !== null) clearTimeout(gateAnimationTimer);
+  gateAnimationTimer = null;
+  elements.gateFeed.src = "assets/gates/gate-closed.webp";
+  elements.gateFeed.alt = "Closed warehouse car-park gate at night";
+  elements.gateAnimationStatus.textContent = "Locked";
+  elements.gateBarrierState.textContent = "Secured";
+  elements.gateFrame.classList.remove("is-opening", "is-open");
+}
+
+function playGateOpening() {
+  const runId = ++gateRunId;
+  if (gateAnimationTimer !== null) clearTimeout(gateAnimationTimer);
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  elements.gateFrame.classList.remove("is-open");
+  elements.gateAnimationStatus.textContent = reducedMotion ? "Open" : "Opening";
+  elements.gateBarrierState.textContent = reducedMotion ? "Open" : "Moving";
+  elements.gateFeed.alt = "Warehouse car-park gate opening at night";
+
+  if (reducedMotion) {
+    elements.gateFeed.src = "assets/gates/gate-open.webp";
+    elements.gateFrame.classList.add("is-open");
+    elements.doorStatus.textContent = "Open";
+    return;
+  }
+
+  elements.outcome.hidden = true;
+  elements.gateFrame.classList.add("is-opening");
+  elements.gateFeed.src = `assets/gates/gate-opening.webp?run=${runId}`;
+  elements.doorStatus.textContent = "Opening";
+  gateAnimationTimer = setTimeout(() => {
+    if (runId !== gateRunId) return;
+    elements.gateFeed.src = "assets/gates/gate-open.webp";
+    elements.gateFeed.alt = "Open warehouse car-park gate at night";
+    elements.gateAnimationStatus.textContent = "Open";
+    elements.gateBarrierState.textContent = "Open";
+    elements.gateFrame.classList.remove("is-opening");
+    elements.gateFrame.classList.add("is-open");
+    elements.doorStatus.textContent = "Open";
+    elements.outcome.hidden = false;
+    gateAnimationTimer = null;
+  }, 1750);
+}
+
 function renderOutcome(outcome = "active") {
   elements.outcome.className = "outcome";
   const presentation = OUTCOME_PRESENTATIONS[outcome];
@@ -390,8 +442,13 @@ function renderOutcome(outcome = "active") {
     elements.outcome.classList.add(`outcome--${outcome.replaceAll("_", "-")}`);
     elements.outcome.replaceChildren(title, code, copy, reset);
     elements.outcome.hidden = false;
-    elements.doorStatus.textContent = presentation.door;
+    if (outcome === "entry_granted") playGateOpening();
+    else {
+      resetGateFeed();
+      elements.doorStatus.textContent = presentation.door;
+    }
   } else {
+    resetGateFeed();
     elements.outcome.hidden = true;
     elements.outcome.replaceChildren();
     elements.doorStatus.textContent = "Locked";
@@ -411,8 +468,8 @@ async function playBootSequence() {
   const stepDelay = reducedMotion ? 20 : 260;
   const steps = [
     ["CHECKING HARDLINE CARRIER...", 18],
-    ["AUTHENTICATING CAMERA 04-A...", 43],
-    ["OPENING GATEHOUSE AUDIO CHANNEL...", 68],
+    ["AUTHENTICATING CAMERAS 04-A / 04-B...", 43],
+    ["OPENING GUARD TOWER AUDIO CHANNEL...", 68],
     ["SYNCING NIGHT WATCH TERMINAL...", 86],
     ["SECURITY LINK ESTABLISHED", 100]
   ];

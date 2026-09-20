@@ -230,7 +230,9 @@ summary:focus-visible {
 .terminal-header,
 .terminal-controls,
 .video-module,
-.comms-module {
+.comms-module,
+.intercom-module,
+.gate-module {
   border: 1px solid var(--line-dark);
   border-top-color: #707663;
   border-left-color: #666c5b;
@@ -344,7 +346,7 @@ summary:focus-visible {
 
 .terminal-workspace {
   display: grid;
-  grid-template-columns: 214px minmax(0, 1fr);
+  grid-template-columns: 268px minmax(0, 1fr);
   gap: 6px;
   min-height: 0;
 }
@@ -770,6 +772,324 @@ summary:focus-visible {
   color: #b6cec5;
 }
 
+/* Phase 16: compact intercom beside the exterior gate feed */
+
+.intercom-module,
+.gate-module {
+  min-width: 0;
+  min-height: 0;
+  padding: 6px;
+}
+
+.intercom-module {
+  display: grid;
+  grid-template-rows: 16px 95px 62px 43px 45px 55px;
+  gap: 4px;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(19, 23, 18, 0.94), rgba(8, 11, 8, 0.98)),
+    repeating-linear-gradient(135deg, transparent 0 7px, rgba(213, 163, 60, 0.035) 8px 9px);
+}
+
+.intercom-feeds {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.85fr);
+  gap: 5px;
+  min-height: 0;
+}
+
+.channel-card {
+  display: grid;
+  grid-template-rows: 72px 19px;
+  gap: 3px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.intercom-module .arthur-viewport {
+  width: 100%;
+  height: 72px;
+  margin: 0;
+}
+
+.intercom-module .arthur-viewport img {
+  width: 50%;
+  height: 50%;
+  object-position: 50% 28%;
+  transform: scale(2);
+}
+
+.intercom-module .tracking-corners {
+  inset: 5px;
+  width: 9px;
+  height: 9px;
+}
+
+.intercom-module .tracking-corners::after {
+  display: none;
+}
+
+.intercom-module .player-card {
+  grid-template-rows: 72px 19px;
+}
+
+.intercom-module .player-viewport {
+  min-height: 72px;
+}
+
+.channel-id {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 2px 4px;
+  border-left: 2px solid var(--amber);
+  background: #080b08;
+  color: var(--muted);
+  font-size: 7px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.channel-id strong {
+  overflow: hidden;
+  color: #e2dfc7;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-overflow: ellipsis;
+}
+
+.channel-id--player {
+  border-left-color: var(--blue);
+}
+
+.channel-id--player strong {
+  color: #b6cec5;
+}
+
+.intercom-module .current-message-panel {
+  padding: 5px 6px;
+}
+
+.intercom-module #subtitle-text {
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.2;
+  -webkit-line-clamp: 2;
+}
+
+.intercom-module .player-endpoint {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 14px minmax(0, 1fr);
+  gap: 2px;
+  padding: 3px;
+}
+
+.intercom-module .player-endpoint .module-heading {
+  height: 14px;
+  padding: 0 2px;
+}
+
+.intercom-module .player-message {
+  margin: 0;
+  padding: 4px 5px;
+  font-size: 10px;
+  line-height: 1.15;
+}
+
+.intercom-module .player-form label {
+  margin-bottom: 2px;
+}
+
+.intercom-module .player-form input {
+  height: 25px;
+}
+
+.intercom-module .player-form button {
+  width: 54px;
+}
+
+.intercom-module .input-hint {
+  margin-top: 2px;
+  font-size: 7px;
+}
+
+.intercom-controls {
+  display: grid;
+  grid-template-rows: 15px minmax(0, 1fr);
+  gap: 3px;
+  min-height: 0;
+}
+
+.intercom-module .system-lamps {
+  align-items: center;
+  gap: 8px;
+  margin: 0 3px;
+  font-size: 7px;
+}
+
+.intercom-module .audio-deck {
+  grid-template-columns: minmax(0, 1fr) 83px;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 3px;
+}
+
+.intercom-module .audio-deck button {
+  height: 20px;
+  font-size: 7px;
+}
+
+.intercom-module .volume-control {
+  grid-template-columns: 17px minmax(0, 1fr);
+  gap: 3px;
+  font-size: 7px;
+}
+
+.gate-module {
+  position: relative;
+  display: grid;
+  grid-template-rows: 16px 225px 38px 42px;
+  gap: 5px;
+  overflow: hidden;
+  background: #0a0d0a;
+}
+
+.gate-viewport {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  border: 2px solid #090b09;
+  outline: 1px solid #5e6453;
+  background: #020403;
+  box-shadow: inset 0 0 18px #000;
+}
+
+.gate-viewport img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  filter: saturate(0.72) contrast(1.2) brightness(0.83);
+}
+
+.gate-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.32));
+  pointer-events: none;
+}
+
+.gate-camera-label {
+  position: absolute;
+  right: 5px;
+  bottom: 4px;
+  z-index: 3;
+  padding: 2px 4px;
+  background: rgba(3, 6, 4, 0.78);
+  color: rgba(207, 188, 126, 0.82);
+  font-size: 8px;
+  letter-spacing: 0.4px;
+}
+
+.gate-module.is-opening {
+  outline: 1px solid rgba(213, 163, 60, 0.7);
+  box-shadow: inset 0 0 16px rgba(213, 163, 60, 0.08);
+}
+
+.gate-module.is-open .module-heading span:last-child,
+.gate-module.is-open #gate-barrier-state {
+  color: var(--green-bright);
+  text-shadow: 0 0 4px rgba(135, 184, 95, 0.4);
+}
+
+.gate-readouts {
+  display: grid;
+  grid-template-columns: 0.8fr 1.15fr 1fr;
+  gap: 3px;
+}
+
+.gate-readouts > div {
+  min-width: 0;
+  padding: 4px 5px;
+  border: 1px solid #2c322a;
+  background: #080b08;
+}
+
+.gate-readouts span,
+.gate-readouts strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gate-readouts span,
+.gate-procedure > span {
+  color: #666f60;
+  font-size: 7px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.gate-readouts strong {
+  margin-top: 2px;
+  color: #c4c8b3;
+  font-size: 9px;
+  font-weight: 400;
+}
+
+.gate-procedure {
+  padding: 5px 7px;
+  border-left: 3px solid var(--amber);
+  background: #10140f;
+}
+
+.gate-procedure p {
+  margin: 3px 0 0;
+  color: #b5bba6;
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+.gate-module .outcome {
+  top: auto;
+  right: 14px;
+  bottom: 94px;
+  left: 14px;
+  width: auto;
+  padding: 6px 8px;
+  background: rgba(5, 12, 7, 0.9);
+}
+
+.gate-module .outcome-title {
+  font-size: 13px;
+}
+
+.gate-module .outcome-code {
+  margin-top: 2px;
+  padding: 1px 4px;
+  font-size: 9px;
+}
+
+.gate-module .outcome p {
+  margin: 3px 0 0;
+  font-size: 8px;
+  line-height: 1.15;
+}
+
+.gate-module .outcome small {
+  display: none;
+}
+
 .visually-hidden {
   position: absolute !important;
   width: 1px !important;
@@ -1017,6 +1337,7 @@ summary:focus-visible {
 
 body.effects-off .video-scan,
 body.effects-off .player-scan,
+body.effects-off .gate-scan,
 body.effects-off .terminal-stage::after,
 body.effects-off::before {
   display: none;
