@@ -170,27 +170,51 @@ function concatenatePcmChunks(chunks) {
   return samples;
 }
 
+function pcm16ToFloat(samples) {
+  const result = new Float32Array(samples.length);
+  for (let index = 0; index < samples.length; index += 1) {
+    result[index] = samples[index] / 32768;
+  }
+  return result;
+}
+
 export class ESpeakWasmAdapter {
   constructor({
     moduleUrl = "/assets/vendor/espeak-ng/espeak-ng.js",
+    workerUrl = "/js/espeak-worker.js",
     importModule = (url) => import(url),
+    workerFactory = typeof globalThis.Worker === "function"
+      ? (url) => new Worker(url, { type: "module" })
+      : null,
     contextFactory = () => {
       const AudioContext = globalThis.AudioContext ?? globalThis.webkitAudioContext;
       return AudioContext ? new AudioContext() : null;
     },
     wasmSupported = Boolean(globalThis.WebAssembly),
-    fallback = new BrowserSpeechAdapter()
+    fallback = new BrowserSpeechAdapter(),
+    runtimeTimeoutMs = 12000,
+    schedule = (callback, delay) => setTimeout(callback, delay),
+    cancelSchedule = (timer) => clearTimeout(timer)
   } = {}) {
     this.moduleUrl = moduleUrl;
+    this.workerUrl = workerUrl;
     this.importModule = importModule;
+    this.workerFactory = workerFactory;
     this.contextFactory = contextFactory;
     this.wasmSupported = wasmSupported;
     this.fallback = fallback;
+    this.runtimeTimeoutMs = runtimeTimeoutMs;
+    this.schedule = schedule;
+    this.cancelSchedule = cancelSchedule;
     this.context = null;
     this.input = null;
     this.lowpass = null;
     this.master = null;
     this.runtimePromise = null;
+    this.worker = null;
+    this.workerRequests = new Map();
+    this.workerRequestId = 0;
+    this.workerReadyPromise = null;
     this.runtimeFailed = false;
     this.active = null;
     this.runId = 0;
@@ -244,21 +268,104 @@ export class ESpeakWasmAdapter {
     return this.runtimePromise;
   }
 
+  loadRuntimeWithTimeout() {
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      let timer = null;
+      const finish = (callback, value) => {
+        if (settled) return;
+        settled = true;
+        this.cancelSchedule(timer);
+        callback(value);
+      };
+      timer = this.schedule(() => {
+        const error = new Error("eSpeak runtime initialization timed out.");
+        error.code = "ESPEAK_RUNTIME_TIMEOUT";
+        finish(reject, error);
+      }, this.runtimeTimeoutMs);
+
+      this.loadRuntime().then(
+        (runtime) => finish(resolve, runtime),
+        (error) => finish(reject, error)
+      );
+    });
+  }
+
+  ensureWorker() {
+    if (this.worker) return this.worker;
+    if (!this.workerFactory) return null;
+
+    const worker = this.workerFactory(this.workerUrl);
+    worker.addEventListener("message", ({ data }) => {
+      const request = this.workerRequests.get(data?.id);
+      if (!request) return;
+      this.workerRequests.delete(data.id);
+      this.cancelSchedule(request.timer);
+      if (data.type === "error") request.reject(new Error(data.message || "eSpeak worker failed."));
+      else request.resolve(data);
+    });
+    worker.addEventListener("error", () => this.failWorker(new Error("eSpeak worker failed.")));
+    this.worker = worker;
+    return worker;
+  }
+
+  failWorker(error) {
+    const worker = this.worker;
+    this.worker = null;
+    this.workerReadyPromise = null;
+    worker?.terminate?.();
+    for (const request of this.workerRequests.values()) {
+      this.cancelSchedule(request.timer);
+      request.reject(error);
+    }
+    this.workerRequests.clear();
+  }
+
+  requestWorker(type, payload = {}) {
+    const worker = this.ensureWorker();
+    if (!worker) return Promise.reject(new Error("Web Workers are unavailable."));
+
+    return new Promise((resolve, reject) => {
+      const id = ++this.workerRequestId;
+      const timer = this.schedule(() => {
+        const error = new Error(`eSpeak worker ${type} timed out.`);
+        error.code = "ESPEAK_RUNTIME_TIMEOUT";
+        this.failWorker(error);
+      }, this.runtimeTimeoutMs);
+      this.workerRequests.set(id, { resolve, reject, timer, type });
+      try {
+        worker.postMessage({ id, type, ...payload });
+      } catch (error) {
+        this.workerRequests.delete(id);
+        this.cancelSchedule(timer);
+        reject(error);
+      }
+    });
+  }
+
+  prepareWorker() {
+    if (!this.workerReadyPromise) {
+      this.workerReadyPromise = this.requestWorker("preload").catch((error) => {
+        this.workerReadyPromise = null;
+        throw error;
+      });
+    }
+    return this.workerReadyPromise;
+  }
+
   async prepare() {
     if (!this.wasmSupported || this.runtimeFailed || !this.ensureAudioGraph()) {
       return this.fallback?.prepare?.() ?? false;
     }
 
-    const resumePromise =
-      this.context.state === "suspended"
-        ? Promise.resolve(this.context.resume()).catch(() => false)
-        : Promise.resolve(true);
-
     try {
-      await Promise.all([resumePromise, this.loadRuntime()]);
+      if (this.context.state !== "running") await this.context.resume();
+      if (this.context.state !== "running") return this.fallback?.prepare?.() ?? false;
+      if (this.workerFactory) await this.prepareWorker();
+      else await this.loadRuntimeWithTimeout();
       return true;
-    } catch {
-      this.runtimeFailed = true;
+    } catch (error) {
+      if (error?.code !== "ESPEAK_RUNTIME_TIMEOUT") this.runtimeFailed = true;
       return this.fallback?.prepare?.() ?? false;
     }
   }
@@ -291,20 +398,36 @@ export class ESpeakWasmAdapter {
     if (runId !== this.runId) return { status: "cancelled", started: false };
 
     try {
-      const { instance } = await this.loadRuntime();
-      const chunks = [];
-      instance.set_voice(voice);
-      instance.set_rate(Math.round(175 * finiteInRange(rate, 1, 0.5, 1.5)));
-      instance.set_pitch(Math.round(50 * finiteInRange(pitch, 1, 0.4, 1.4)));
-      instance.synthesize(String(text), (samples) => {
-        if (samples?.length) chunks.push(samples);
-      });
+      const resolvedRate = Math.round(175 * finiteInRange(rate, 1, 0.5, 1.5));
+      const resolvedPitch = Math.round(50 * finiteInRange(pitch, 1, 0.4, 1.4));
+      let pcm;
+      let sampleRate;
+      if (this.workerFactory) {
+        const result = await this.requestWorker("synthesize", {
+          text: String(text),
+          voice,
+          rate: resolvedRate,
+          pitch: resolvedPitch
+        });
+        pcm = pcm16ToFloat(new Int16Array(result.samples));
+        sampleRate = result.sampleRate || 22050;
+      } else {
+        const { instance } = await this.loadRuntimeWithTimeout();
+        const chunks = [];
+        instance.set_voice(voice);
+        instance.set_rate(resolvedRate);
+        instance.set_pitch(resolvedPitch);
+        instance.synthesize(String(text), (samples) => {
+          if (samples?.length) chunks.push(samples);
+        });
+        pcm = concatenatePcmChunks(chunks);
+        sampleRate = instance.samplerate || 22050;
+      }
 
-      const pcm = concatenatePcmChunks(chunks);
       if (pcm.length === 0) throw new Error("eSpeak returned no audio samples.");
       if (runId !== this.runId) return { status: "cancelled", started: false };
 
-      const buffer = this.context.createBuffer(1, pcm.length, instance.samplerate || 22050);
+      const buffer = this.context.createBuffer(1, pcm.length, sampleRate);
       buffer.copyToChannel(pcm, 0);
       const source = this.context.createBufferSource();
       source.buffer = buffer;
@@ -315,20 +438,39 @@ export class ESpeakWasmAdapter {
         this.context.currentTime
       );
 
-      return await new Promise((resolve) => {
+      const playback = await new Promise((resolve) => {
         let settled = false;
+        const durationMs = (pcm.length / buffer.sampleRate) * 1000;
+        const safetyMs = Math.min(30000, Math.max(2500, Math.ceil(durationMs + 2000)));
+        let safetyTimer = null;
         const finish = (status) => {
           if (settled) return;
           settled = true;
+          this.cancelSchedule(safetyTimer);
           if (this.active?.source === source) this.active = null;
           resolve({ status, started: true });
         };
 
         source.onended = () => finish("ended");
         this.active = { source, finish };
-        onStart({ engine: "espeak-wasm" });
         source.start();
+        onStart({ engine: "espeak-wasm" });
+        safetyTimer = this.schedule(() => {
+          source.onended = null;
+          try {
+            source.stop();
+          } catch {
+            // A stalled source may already have stopped without firing onended.
+          }
+          finish("timeout");
+        }, safetyMs);
       });
+
+      if (playback.status === "timeout") {
+        this.runtimeFailed = true;
+        return this.fallback.speak({ text, rate, pitch, volume, onStart });
+      }
+      return playback;
     } catch {
       if (runId !== this.runId) return { status: "cancelled", started: false };
       this.runtimeFailed = true;
@@ -339,6 +481,13 @@ export class ESpeakWasmAdapter {
   cancel() {
     this.runId += 1;
     let cancelled = false;
+
+    if ([...this.workerRequests.values()].some((request) => request.type === "synthesize")) {
+      const error = new Error("eSpeak request cancelled.");
+      error.code = "ESPEAK_CANCELLED";
+      this.failWorker(error);
+      cancelled = true;
+    }
 
     if (this.active) {
       const { source, finish } = this.active;

@@ -96,7 +96,13 @@ let replayRunId = 0;
 let bootRunId = 0;
 const periodAudio = new PeriodAudio();
 const speechDirector = new SpeechDirector({
-  adapter: new ESpeakWasmAdapter({ fallback: new BrowserSpeechAdapter() })
+  adapter: new ESpeakWasmAdapter({
+    fallback: new BrowserSpeechAdapter(),
+    contextFactory: () => {
+      periodAudio.ensureContext();
+      return periodAudio.context;
+    }
+  })
 });
 const delay = (durationMs) =>
   durationMs > 0

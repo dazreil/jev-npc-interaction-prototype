@@ -36,7 +36,7 @@ The Node server keeps the credential out of browser source and forwards only str
 
 ## Speech engine
 
-eSpeak NG/WASM is the preferred speech engine in every browser. The game converts its 22.05 kHz PCM output into a Web Audio buffer, then applies the same narrow-band intercom filter and compression used by the terminal effects. Arthur's persistent character profile selects a voice variant, while the authored performance controls rate, pitch, delay, and filter preset.
+eSpeak NG/WASM is the preferred speech engine in every browser. A module Web Worker loads the voice data and performs synthesis away from the interface thread. The game converts its 22.05 kHz PCM output into a Web Audio buffer, then applies the same narrow-band intercom filter and compression used by the terminal effects. Arthur's persistent character profile selects a voice variant, while the authored performance controls rate, pitch, delay, and filter preset.
 
 The **VOICE** indicator reports `WASM` after eSpeak playback begins. If WebAssembly, its voice data, or Web Audio cannot initialize, it reports `BROWSER` and uses the Web Speech API. If neither engine is available, it reports `SILENT`; captions and timed mouth animation still complete the turn. Loading, playback, and fallback all remain cancellable through **Skip** or **Reset link**.
 
@@ -127,7 +127,7 @@ If the server, network, or TypeSafe API fails, no turn or state change is applie
 - `js/layout.js` keeps the 640×480 terminal proportional, fills the available viewport, and caps enlargement at 2×.
 - `js/performance.js` maps committed turns to renderer metadata and controls the idle, typing, decision, reaction, speaking, and ending lifecycle.
 - `js/portrait.js` maps performance phases to deterministic idle, blink, listening, mouth, and emotional portrait frames with a neutral fallback.
-- `js/speech.js` supplies the default eSpeak NG/WASM PCM adapter, per-profile voices, Web Speech fallback, actual playback timing, replay, cancellation, and silent fallback timing.
+- `js/speech.js` and `js/espeak-worker.js` supply the default eSpeak NG/WASM PCM adapter, off-thread synthesis, per-profile voices, Web Speech fallback, actual playback timing, replay, cancellation, and silent fallback timing.
 - `js/audio.js` owns optional Web Audio ambience and the band-limited, compressed relay, warning, denial, lockdown, interface, and door-unlock sounds.
 - `js/app.js` renders the UI and translates browser events into game turns.
 - `js/providers/jev.js` builds and validates the Jev `choice` request and maps the selected action to deterministic game effects, including the repair path.

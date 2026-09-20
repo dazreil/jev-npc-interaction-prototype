@@ -108,6 +108,91 @@ test("eSpeak WASM adapter synthesizes PCM and resolves from real buffer playback
   assert.deepEqual(starts, ["espeak-wasm"]);
 });
 
+test("eSpeak runs synthesis in a module worker when the browser supports it", async () => {
+  const messages = [];
+  let workerUrl;
+  class FakeWorker {
+    addEventListener(type, listener) {
+      this[type] = listener;
+    }
+    postMessage(message) {
+      messages.push(message);
+      const response = message.type === "preload"
+        ? { id: message.id, type: "ready" }
+        : {
+            id: message.id,
+            type: "audio",
+            samples: new Int16Array([0, 16384, -16384]).buffer,
+            sampleRate: 22050
+          };
+      queueMicrotask(() => this.message({ data: response }));
+    }
+    terminate() {}
+  }
+  const parameter = () => ({ value: 0, setValueAtTime(value) { this.value = value; } });
+  const audioNode = () => ({ connect: () => {} });
+  let source;
+  const context = {
+    state: "running",
+    currentTime: 0,
+    destination: {},
+    createBiquadFilter: () => ({ ...audioNode(), frequency: parameter(), type: "" }),
+    createDynamicsCompressor: () => ({
+      ...audioNode(),
+      threshold: parameter(),
+      knee: parameter(),
+      ratio: parameter(),
+      attack: parameter(),
+      release: parameter()
+    }),
+    createGain: () => ({ ...audioNode(), gain: parameter() }),
+    createBuffer: (_channels, length, sampleRate) => ({
+      length,
+      sampleRate,
+      copyToChannel: () => {}
+    }),
+    createBufferSource: () => {
+      source = {
+        connect: () => {},
+        start: () => queueMicrotask(() => source.onended()),
+        stop: () => source.onended?.()
+      };
+      return source;
+    }
+  };
+  const adapter = new ESpeakWasmAdapter({
+    contextFactory: () => context,
+    workerFactory: (url) => {
+      workerUrl = url;
+      return new FakeWorker();
+    },
+    importModule: async () => {
+      throw new Error("Main-thread runtime should not load.");
+    },
+    fallback: { supported: false, cancel: () => false }
+  });
+
+  const result = await adapter.speak({
+    text: "Arthur speaking.",
+    rate: 0.8,
+    pitch: 0.7,
+    volume: 0.6,
+    voice: "en-gb+m3"
+  });
+
+  assert.deepEqual(result, { status: "ended", started: true });
+  assert.equal(workerUrl, "/js/espeak-worker.js");
+  assert.deepEqual(messages.map(({ type }) => type), ["preload", "synthesize"]);
+  assert.deepEqual(messages[1], {
+    id: 2,
+    type: "synthesize",
+    text: "Arthur speaking.",
+    voice: "en-gb+m3",
+    rate: 140,
+    pitch: 35
+  });
+});
+
 test("eSpeak load failure falls back to browser speech without blocking the turn", async () => {
   const engines = [];
   const fallback = {
@@ -137,6 +222,123 @@ test("eSpeak load failure falls back to browser speech without blocking the turn
 
   assert.deepEqual(result, { status: "ended", started: true });
   assert.deepEqual(engines, ["web-speech"]);
+});
+
+test("eSpeak falls back when Safari leaves its audio context suspended", async () => {
+  const engines = [];
+  const context = {
+    state: "suspended",
+    destination: {},
+    resume: async () => {},
+    createBiquadFilter: () => ({
+      connect: () => {},
+      frequency: { value: 0 },
+      type: ""
+    }),
+    createDynamicsCompressor: () => ({
+      connect: () => {},
+      threshold: { value: 0 },
+      knee: { value: 0 },
+      ratio: { value: 0 },
+      attack: { value: 0 },
+      release: { value: 0 }
+    }),
+    createGain: () => ({ connect: () => {} })
+  };
+  const adapter = new ESpeakWasmAdapter({
+    contextFactory: () => context,
+    fallback: {
+      supported: true,
+      cancel: () => false,
+      speak: async ({ onStart }) => {
+        onStart({ engine: "web-speech" });
+        return { status: "ended", started: true };
+      }
+    }
+  });
+
+  const result = await adapter.speak({
+    text: "Fallback line.",
+    rate: 1,
+    pitch: 1,
+    volume: 0.7,
+    onStart: ({ engine }) => engines.push(engine)
+  });
+
+  assert.deepEqual(result, { status: "ended", started: true });
+  assert.deepEqual(engines, ["web-speech"]);
+});
+
+test("stalled eSpeak buffer playback times out and falls back", async () => {
+  const timers = new Map();
+  const parameter = () => ({ value: 0, setValueAtTime(value) { this.value = value; } });
+  const audioNode = () => ({ connect: () => {} });
+  const context = {
+    state: "running",
+    currentTime: 0,
+    destination: {},
+    createBiquadFilter: () => ({ ...audioNode(), frequency: parameter(), type: "" }),
+    createDynamicsCompressor: () => ({
+      ...audioNode(),
+      threshold: parameter(),
+      knee: parameter(),
+      ratio: parameter(),
+      attack: parameter(),
+      release: parameter()
+    }),
+    createGain: () => ({ ...audioNode(), gain: parameter() }),
+    createBuffer: (_channels, length, sampleRate) => ({
+      length,
+      sampleRate,
+      duration: length / sampleRate,
+      copyToChannel: () => {}
+    }),
+    createBufferSource: () => ({
+      connect: () => {},
+      start: () => {},
+      stop: () => {}
+    })
+  };
+  class FakeWorker {
+    constructor() { this.samplerate = 22050; }
+    set_voice() {}
+    set_rate() {}
+    set_pitch() {}
+    synthesize(_text, callback) { callback(new Int16Array(2205), []); }
+  }
+  const engines = [];
+  const adapter = new ESpeakWasmAdapter({
+    contextFactory: () => context,
+    importModule: async () => ({
+      default: async () => ({ eSpeakNGWorker: FakeWorker })
+    }),
+    schedule: (callback, delay) => {
+      timers.set(delay, callback);
+      return delay;
+    },
+    cancelSchedule: (timer) => timers.delete(timer),
+    fallback: {
+      supported: true,
+      cancel: () => false,
+      speak: async ({ onStart }) => {
+        onStart({ engine: "web-speech" });
+        return { status: "ended", started: true };
+      }
+    }
+  });
+
+  const playback = adapter.speak({
+    text: "Arthur speaking.",
+    rate: 1,
+    pitch: 1,
+    volume: 0.7,
+    onStart: ({ engine }) => engines.push(engine)
+  });
+  while (!timers.has(2500)) await new Promise((resolve) => setImmediate(resolve));
+  timers.get(2500)();
+
+  assert.deepEqual(await playback, { status: "ended", started: true });
+  assert.deepEqual(engines, ["espeak-wasm", "web-speech"]);
 });
 
 test("browser speech adapter resolves from actual speech events and applies its profile", async () => {
