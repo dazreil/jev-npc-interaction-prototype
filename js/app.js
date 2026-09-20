@@ -74,7 +74,7 @@ const elements = {
   playerMessage: document.querySelector("#player-message"),
   phaseLabel: document.querySelector("#phase-label"),
   linkStatus: document.querySelector("#link-status"),
-  doorStatus: document.querySelector("#door-status"),
+  doorStatus: document.querySelector("#gate-animation-status"),
   gateFeed: document.querySelector("#gate-feed"),
   gateFrame: document.querySelector("#gate-frame"),
   gateAnimationStatus: document.querySelector("#gate-animation-status"),
@@ -240,7 +240,7 @@ function appendMessage(speaker, text, action = null) {
   elements.conversation.scrollTop = elements.conversation.scrollHeight;
 
   if (speaker === "arthur") {
-    elements.subtitleSpeaker.textContent = "Arthur / Guard Tower 04";
+    elements.subtitleSpeaker.textContent = "Arthur";
     elements.subtitleText.textContent = text;
   } else {
     elements.playerMessage.textContent = text;
@@ -482,7 +482,7 @@ function renderOutcome(outcome = "active") {
   elements.sendButton.disabled = ended;
   elements.inputHint.textContent = ended
     ? "The conversation has ended. Reset the scenario to play again."
-    : "Enter to transmit · 280 character limit";
+    : "Enter to send";
 }
 
 async function playBootSequence() {

@@ -17,7 +17,7 @@
       type="font/ttf"
       crossorigin
     />
-    <link rel="stylesheet" href="styles.css?phase=16.1" />
+    <link rel="stylesheet" href="styles.css?phase=16.3" />
   </head>
   <body>
     <div id="terminal-mount" class="terminal-mount">
@@ -50,11 +50,6 @@
               <span>Link</span>
               <strong id="link-status">Ready</strong>
             </div>
-            <div class="status-readout">
-              <span class="status-lamp status-lamp--red" aria-hidden="true"></span>
-              <span>Gate</span>
-              <strong id="door-status">Locked</strong>
-            </div>
             <time datetime="02:13">02:13</time>
           </div>
         </header>
@@ -62,7 +57,7 @@
         <section class="terminal-workspace" aria-label="South-gate security intercom">
           <section class="intercom-module" aria-labelledby="feed-title">
             <div class="module-heading">
-              <span id="feed-title">Gate intercom / Channel 04</span>
+              <span id="feed-title">Intercom 04</span>
               <span id="phase-label">Idle</span>
             </div>
 
@@ -104,7 +99,7 @@
 
             <section class="current-message-panel" aria-labelledby="subtitle-speaker">
               <div class="subtitle-heading">
-                <span id="subtitle-speaker">Arthur / Guard Tower 04</span>
+                <span id="subtitle-speaker">Arthur</span>
                 <span>Incoming</span>
               </div>
               <p id="subtitle-text" aria-live="polite">Establishing security link…</p>
@@ -127,7 +122,7 @@
             ></div>
 
             <form id="player-form" class="player-form">
-              <label for="player-input">Transmit message</label>
+              <label class="visually-hidden" for="player-input">Transmit message</label>
               <div class="input-row">
                 <input
                   id="player-input"
@@ -143,19 +138,13 @@
                   <span aria-hidden="true">▶</span>
                 </button>
               </div>
-              <p id="input-hint" class="input-hint">Enter to transmit · 280 character limit</p>
+              <p id="input-hint" class="input-hint">Enter to send</p>
             </form>
 
             <div class="intercom-controls">
-              <div class="system-lamps" aria-label="Intercom system indicators">
-                <span><i class="lamp lamp--on" aria-hidden="true"></i> Video</span>
-                <span><i class="lamp lamp--on" aria-hidden="true"></i> Text</span>
-                <span><i id="voice-lamp" class="lamp" aria-hidden="true"></i> Voice <b id="voice-engine">NEURAL</b></span>
-              </div>
-
               <div class="audio-deck" aria-label="Speech and audio controls">
                 <div class="audio-buttons">
-                  <button id="audio-toggle" type="button" aria-pressed="true">Audio</button>
+                  <button id="audio-toggle" type="button" aria-pressed="true"><i id="voice-lamp" class="lamp" aria-hidden="true"></i> Audio <b id="voice-engine">NEURAL</b></button>
                   <button id="replay-button" type="button" disabled>Replay</button>
                   <button id="skip-button" type="button" disabled>Skip</button>
                 </div>
@@ -193,15 +182,10 @@
               <span class="gate-camera-label">CAM 04-B / EXTERIOR</span>
             </div>
 
-            <div class="gate-readouts" aria-label="Gate checkpoint status">
-              <div><span>Barrier</span><strong id="gate-barrier-state">Secured</strong></div>
-              <div><span>Destination</span><strong>Guard Tower 04</strong></div>
-              <div><span>Warehouse</span><strong>Not cleared</strong></div>
-            </div>
-
-            <div class="gate-procedure">
-              <span>Checkpoint sequence</span>
-              <p>Camera check → Car-park gate → Original papers at tower</p>
+            <div class="gate-status-strip" aria-label="Gate checkpoint status">
+              <span>Barrier <strong id="gate-barrier-state">Secured</strong></span>
+              <span>Car park only</span>
+              <span>Show papers at Tower 04</span>
             </div>
 
             <div id="outcome" class="outcome" role="status" hidden></div>
@@ -209,19 +193,9 @@
         </section>
 
         <footer class="terminal-controls">
-          <div class="provider-control">
-            <label for="provider-select">Decision system</label>
-            <select id="provider-select" aria-describedby="provider-note">
-              <option value="jev" selected>Jev — checking server</option>
-              <option value="mock">Mock</option>
-            </select>
-            <span id="provider-note">TypeSafe Jev structured action selection</span>
-          </div>
-
           <p id="provider-status" class="provider-status" role="status" hidden></p>
 
           <div class="hardware-controls">
-            <button id="effects-toggle" type="button" aria-pressed="true">FX On</button>
             <button id="credits-open" type="button" aria-haspopup="dialog">Credits</button>
             <button id="debug-open" type="button" aria-haspopup="dialog">Developer <kbd>F2</kbd></button>
             <button id="reset-button" class="reset-button" type="button">Reset link</button>
@@ -245,6 +219,21 @@
         </header>
 
         <div class="debug-scroll">
+          <section class="debug-section system-settings" aria-labelledby="system-settings-title">
+            <div class="section-heading">
+              <h3 id="system-settings-title">System</h3>
+              <button id="effects-toggle" type="button" aria-pressed="true">FX On</button>
+            </div>
+            <div class="provider-control">
+              <label for="provider-select">Decision system</label>
+              <select id="provider-select" aria-describedby="provider-note">
+                <option value="jev" selected>Jev — checking server</option>
+                <option value="mock">Mock</option>
+              </select>
+              <span id="provider-note">TypeSafe Jev structured action selection</span>
+            </div>
+          </section>
+
           <section class="debug-section" aria-labelledby="state-title">
             <div class="section-heading">
               <h3 id="state-title">Emotional state</h3>
@@ -343,7 +332,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=16.2";
+        appScript.src = "js/app.js?phase=16.3";
         document.body.append(appScript);
       }
     </script>
