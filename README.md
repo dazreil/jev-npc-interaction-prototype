@@ -114,5 +114,6 @@ If the server, network, or TypeSafe API fails, no turn or state change is applie
 - `assets/arthur-reactions/` contains identity-matched blink, listening, emotional, and entry-granted portraits; the browser rasterizes them to a 96×72 source surface before enlarging them with nearest-neighbour rendering.
 - `assets/arthur-speaking.gif` is retained as a legacy source artifact and is no longer used by the interface.
 - `assets/player-shadow.jpg` is the anonymous player avatar displayed on the opposite side of the chat.
+- `assets/fonts/VT323-Regular.ttf` is the single bundled monospace pixel font used across the complete player and developer interface under the SIL Open Font License in `assets/fonts/OFL.txt`.
 
 See [ROADMAP.md](ROADMAP.md) for milestones and acceptance criteria. Phases 9–15 cover the planned retro CD-ROM vertical-slice conversion; [RETRO_CDROM_DESIGN_SPEC.md](RETRO_CDROM_DESIGN_SPEC.md) records the full visual, audio, interaction, and evaluation direction.

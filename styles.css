@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "VT323";
+  src: url("assets/fonts/VT323-Regular.ttf") format("truetype");
+  font-display: block;
+  font-style: normal;
+  font-weight: 400;
+}
+
 :root {
   color-scheme: dark;
   --black: #050706;
@@ -16,7 +24,7 @@
   --red: #b84c39;
   --blue: #739a91;
   --stage-scale: 1;
-  --terminal-font: Monaco, "Lucida Console", "Courier New", Courier, monospace;
+  --terminal-font: "VT323", monospace;
   font-family: var(--terminal-font);
   font-feature-settings: "liga" 0, "calt" 0;
   font-variant-ligatures: none;
@@ -182,7 +190,7 @@ summary:focus-visible {
   border: 1px solid #626855;
   background: #20241e;
   color: var(--amber);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   box-shadow: inset 0 0 0 2px #0c0f0c;
@@ -196,14 +204,14 @@ summary:focus-visible {
 
 .terminal-brand p {
   color: var(--muted);
-  font-size: 6px;
+  font-size: 8px;
   letter-spacing: 1.1px;
 }
 
 .terminal-brand h1 {
   margin-top: 2px;
   color: #d7d9c2;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.7px;
 }
@@ -222,7 +230,7 @@ summary:focus-visible {
   border: 1px solid #2b3028;
   background: #0c0f0c;
   color: var(--muted);
-  font-size: 6px;
+  font-size: 8px;
   line-height: 1.15;
   text-transform: uppercase;
 }
@@ -230,7 +238,7 @@ summary:focus-visible {
 .status-readout strong {
   grid-column: 2;
   color: var(--text);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 400;
 }
 
@@ -260,7 +268,7 @@ summary:focus-visible {
   align-self: center;
   padding: 0 3px 0 6px;
   color: var(--green-bright);
-  font-size: 13px;
+  font-size: 17px;
   letter-spacing: 1px;
 }
 
@@ -303,7 +311,7 @@ summary:focus-visible {
   align-items: center;
   justify-content: space-between;
   color: #a5aa93;
-  font-size: 7px;
+  font-size: 9px;
   letter-spacing: 0.7px;
   line-height: 1;
   text-transform: uppercase;
@@ -416,7 +424,7 @@ summary:focus-visible {
   padding: 2px 3px;
   background: rgba(3, 7, 4, 0.75);
   color: rgba(192, 218, 148, 0.72);
-  font-size: 6px;
+  font-size: 8px;
   text-transform: uppercase;
 }
 
@@ -436,7 +444,7 @@ summary:focus-visible {
 .identity-code {
   display: block;
   color: var(--muted);
-  font-size: 6px;
+  font-size: 8px;
   line-height: 1.35;
 }
 
@@ -444,7 +452,7 @@ summary:focus-visible {
   display: block;
   margin-top: 1px;
   color: #e2dfc7;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 1px;
 }
 
@@ -457,7 +465,7 @@ summary:focus-visible {
   gap: 11px;
   margin: 8px 5px 0;
   color: #777e6d;
-  font-size: 6px;
+  font-size: 8px;
   text-transform: uppercase;
 }
 
@@ -490,7 +498,7 @@ summary:focus-visible {
   border-radius: 0;
   background: #282d26;
   color: #c9cdb7;
-  font-size: 6px;
+  font-size: 8px;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -515,7 +523,7 @@ summary:focus-visible {
   align-items: center;
   gap: 5px;
   color: #737b69;
-  font-size: 6px;
+  font-size: 8px;
   text-transform: uppercase;
 }
 
@@ -556,7 +564,7 @@ summary:focus-visible {
   overflow: hidden;
   color: var(--green-bright);
   font-family: var(--terminal-font);
-  font-size: 11px;
+  font-size: 14px;
   letter-spacing: 0.15px;
   line-height: 1.35;
   text-shadow: 0 0 4px rgba(135, 184, 95, 0.25);
@@ -593,7 +601,7 @@ summary:focus-visible {
 
 .message-speaker {
   color: var(--amber);
-  font-size: 7px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -606,7 +614,7 @@ summary:focus-visible {
 .message-text {
   margin: 0;
   color: #aeb49e;
-  font-size: 8px;
+  font-size: 10px;
   line-height: 1.35;
 }
 
@@ -631,7 +639,7 @@ summary:focus-visible {
   display: block;
   margin: 0 0 3px 2px;
   color: #8f967f;
-  font-size: 6px;
+  font-size: 8px;
   letter-spacing: 0.6px;
   text-transform: uppercase;
 }
@@ -654,7 +662,7 @@ summary:focus-visible {
   outline: 0;
   background: #050805;
   color: var(--green-bright);
-  font-size: 10px;
+  font-size: 12px;
   caret-color: var(--amber);
 }
 
@@ -671,7 +679,7 @@ summary:focus-visible {
   border-radius: 0;
   background: #32372e;
   color: #d0d2bd;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.4px;
   text-transform: uppercase;
@@ -702,7 +710,7 @@ summary:focus-visible {
 .input-hint {
   margin: 3px 0 0 2px;
   color: #62695b;
-  font-size: 6px;
+  font-size: 8px;
 }
 
 .outcome {
@@ -715,7 +723,7 @@ summary:focus-visible {
   border: 2px solid var(--green);
   background: rgba(5, 12, 7, 0.97);
   color: var(--green-bright);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 1px;
   line-height: 1.5;
@@ -748,7 +756,7 @@ summary:focus-visible {
 
 .provider-control label {
   color: var(--muted);
-  font-size: 6px;
+  font-size: 8px;
   text-transform: uppercase;
 }
 
@@ -760,13 +768,13 @@ summary:focus-visible {
   border-radius: 0;
   background: #0b0f0b;
   color: var(--text);
-  font-size: 7px;
+  font-size: 9px;
 }
 
 #provider-note {
   overflow: hidden;
   color: #62695a;
-  font-size: 6px;
+  font-size: 8px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -782,7 +790,7 @@ summary:focus-visible {
   border: 1px solid var(--red);
   background: #1b0d0a;
   color: #dfa192;
-  font-size: 7px;
+  font-size: 9px;
 }
 
 .hardware-controls {
@@ -857,13 +865,13 @@ body.effects-off::before {
 
 .debug-header h2 {
   margin-top: 3px;
-  font-size: 15px;
+  font-size: 19px;
   text-transform: uppercase;
 }
 
 .eyebrow {
   color: var(--amber);
-  font-size: 7px;
+  font-size: 9px;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -888,7 +896,7 @@ body.effects-off::before {
 .debug-section h3 {
   margin: 0 0 12px;
   color: #babfa9;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.8px;
   text-transform: uppercase;
 }
@@ -899,7 +907,7 @@ body.effects-off::before {
 
 .section-heading > span {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .state-values {
@@ -918,7 +926,7 @@ body.effects-off::before {
 .state-label,
 .state-number {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 10px;
   text-transform: capitalize;
 }
 
@@ -956,7 +964,7 @@ body.effects-off::before {
 .decision-grid dt,
 .reason-block span {
   color: #69705f;
-  font-size: 7px;
+  font-size: 9px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -965,7 +973,7 @@ body.effects-off::before {
   margin: 2px 0 0;
   overflow-wrap: anywhere;
   color: #c5c9b4;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .code-value {
@@ -988,7 +996,7 @@ body.effects-off::before {
 .fallback-notice {
   margin-bottom: 0;
   color: #a5aa98;
-  font-size: 8px;
+  font-size: 10px;
   line-height: 1.5;
 }
 
@@ -1009,7 +1017,7 @@ body.effects-off::before {
   padding-left: 10px;
   border-left: 2px solid var(--amber);
   color: #aeb39f;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .memory-list li > span,
@@ -1020,7 +1028,7 @@ body.effects-off::before {
 .memory-list li > small {
   margin-top: 2px;
   color: #676e5e;
-  font-size: 7px;
+  font-size: 9px;
   text-transform: uppercase;
 }
 
@@ -1041,7 +1049,7 @@ details + details {
 summary {
   padding: 10px 0;
   color: #aeb39f;
-  font-size: 8px;
+  font-size: 10px;
   text-transform: uppercase;
 }
 
@@ -1052,7 +1060,7 @@ pre {
   overflow: auto;
   background: #050805;
   color: #91a478;
-  font: 8px/1.5 var(--terminal-font);
+  font: 10px/1.5 var(--terminal-font);
   white-space: pre-wrap;
   word-break: break-word;
 }
