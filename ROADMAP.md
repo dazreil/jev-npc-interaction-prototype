@@ -514,7 +514,7 @@ Measure whether the new presentation improves Arthur's legibility and dramatic p
 
 ## Phase 15 — Release Polish
 
-**Status:** Planned.
+**Status:** Complete and verified on 20 September 2026 in Safari 26.0.1 and Chrome 153.0.8010.48. Firefox and Edge were not installed on the verification machine, so they are documented as an unrun compatibility target rather than claimed as tested.
 
 Prepare the vertical slice for a new player to launch, understand, complete, and inspect across desktop browsers.
 
@@ -534,6 +534,15 @@ Prepare the vertical slice for a new player to launch, understand, complete, and
 - The player avatar has slight ambient movement without revealing or animating the face, and becomes still when reduced motion is requested.
 - A developer can still inspect the decision context, provider result, state, memory, and performance mapping.
 - The release runs without a frontend framework or unnecessary deployment infrastructure.
+
+### Verification Record
+
+- `npm run evaluate:phase15` passes all 57 automated tests, dialogue lint, and the Phase 15 release audit.
+- Arthur's neutral portrait is 360×480 JPEG at 24 KiB. The nine reaction portraits are 360×480 WebP files totalling 111 KiB, down from roughly 16 MiB of PNGs. Reaction and speech frames remain lazy-loaded; only Arthur, the player silhouette, and VT323 are immediate preloads.
+- The player avatar has a restrained stepped drift on the image layer only. A fixed shadow overlay keeps the face obscured, while FX Off and `prefers-reduced-motion: reduce` stop the motion and leave the same crop in place.
+- Safari and Chrome reached the booted ready state at `http://localhost:5173`, completed a Mock transmission, exposed the player endpoint, opened and closed Credits with focus restoration, and opened and closed the Developer telemetry dialog with state, action, confidence, provider, memory, and reason visible.
+- The Node server now accepts `HOST` for container deployment and serves WebP, font, WASM, and data MIME types. [DEPLOYMENT.md](DEPLOYMENT.md) covers static Mock hosting and server-backed Jev hosting; `Dockerfile` provides the small server image.
+- Firefox and Edge remain pending direct browser runs because neither is installed locally. The release uses standard HTML dialog, module, WebP, Web Audio, WebAssembly, and reduced-motion APIs with existing fallbacks.
 
 ## Implementation Order
 
@@ -562,4 +571,4 @@ The first eight phases established and evaluated the simulation. Continue in thi
 
 ## Immediate Next Milestone
 
-Begin Phase 14: use the successful live Jev rerun as the parity baseline, then conduct blind player sessions and tune presentation timing from the recorded feedback before changing decision rules.
+Run the documented blind human sessions and, before public hosting, repeat the smoke check in current Firefox and Edge builds. Those sessions are evaluation and release operations; no further game phase is required for the vertical slice.

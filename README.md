@@ -64,6 +64,18 @@ npm run evaluate:phase14
 
 This requires the Jev-enabled local server to be running. Provider parity is written to `PHASE14_PARITY_REPORT.md`; local browser observations, separated findings, and the remaining human gate are recorded in `PHASE14_EVALUATION.md`. Duplicate `PLAYTEST_SESSION_TEMPLATE.md` for each blind participant.
 
+## Release polish
+
+Phase 15 adds the final release pass: compressed WebP reaction portraits, a subtle shadowed player-avatar idle drift, a boot/loading state, credits, explicit reduced-motion behavior, and deployment instructions for Mock-only static hosting or a server-backed Jev deployment. The browser preloads only the two immediate portraits and the interface font; speech and reaction frames load when needed.
+
+Run the release gate with:
+
+```bash
+npm run evaluate:phase15
+```
+
+This runs all 57 automated tests, dialogue lint, and the offline release audit. The audit checks the portrait manifest, asset-size budget, lazy-loading boundary, credits and diagnostics hooks, reduced-motion rule, server MIME types, and deployment files. Browser observations are recorded in [PHASE15_RELEASE_CHECK.md](PHASE15_RELEASE_CHECK.md); open the game at [http://localhost:5173](http://localhost:5173), never from a `file://` URL.
+
 ## Interaction routes
 
 - Make a polite request and explain why you need access.

@@ -708,15 +708,35 @@ summary:focus-visible {
   height: 100%;
   object-fit: cover;
   object-position: 50% 36%;
+  transform: scale(1.035);
+  transform-origin: 50% 42%;
+  animation: player-idle 8s steps(16, end) infinite alternate;
   image-rendering: pixelated;
   filter: saturate(0.28) sepia(0.08) contrast(1.45) brightness(0.55);
+}
+
+.player-viewport::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at 51% 27%, rgba(0, 0, 0, 0.42) 0 13%, transparent 31%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.3), transparent 44%);
+  content: "";
+  pointer-events: none;
+}
+
+@keyframes player-idle {
+  0% { transform: scale(1.035) translate3d(-0.35%, 0, 0); }
+  45% { transform: scale(1.045) translate3d(0.25%, -0.35%, 0); }
+  100% { transform: scale(1.04) translate3d(0.45%, 0.3%, 0); }
 }
 
 .player-viewport > span {
   position: absolute;
   right: 5px;
   bottom: 4px;
-  z-index: 2;
+  z-index: 3;
   padding: 2px 3px;
   background: rgba(3, 7, 4, 0.75);
   color: rgba(150, 177, 166, 0.8);
@@ -727,6 +747,7 @@ summary:focus-visible {
 .player-scan {
   position: absolute;
   inset: 0;
+  z-index: 2;
   background:
     repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.24) 0 1px, transparent 1px 3px),
     linear-gradient(
@@ -1001,9 +1022,15 @@ body.effects-off::before {
   display: none;
 }
 
+body.effects-off .player-viewport img {
+  transform: scale(1.035);
+  animation: none;
+}
+
 /* Developer drawer */
 
-.debug-dialog {
+.debug-dialog,
+.credits-dialog {
   width: min(760px, calc(100vw - 28px));
   max-width: none;
   max-height: min(760px, calc(100vh - 28px));
@@ -1016,15 +1043,67 @@ body.effects-off::before {
   box-shadow: 0 24px 100px #000;
 }
 
-.debug-dialog::backdrop {
+.debug-dialog::backdrop,
+.credits-dialog::backdrop {
   background: rgba(0, 0, 0, 0.82);
   backdrop-filter: blur(2px);
 }
 
-.debug-panel {
+.debug-panel,
+.credits-panel {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   max-height: min(760px, calc(100vh - 28px));
+}
+
+.credits-dialog {
+  width: min(560px, calc(100vw - 28px));
+}
+
+.credits-scroll {
+  overflow: auto;
+  padding: 18px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.2) 2px 3px),
+    #090d09;
+}
+
+.credits-lede {
+  margin: 0 0 16px;
+  color: var(--green-bright);
+  font-size: 18px;
+}
+
+.credits-list {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  border: 1px solid #32382f;
+  background: #32382f;
+}
+
+.credits-list div {
+  display: grid;
+  grid-template-columns: 155px minmax(0, 1fr);
+  gap: 14px;
+  padding: 9px 10px;
+  background: #0d120d;
+}
+
+.credits-list dt {
+  color: var(--amber);
+  text-transform: uppercase;
+}
+
+.credits-list dd {
+  margin: 0;
+  color: #adb59e;
+}
+
+.credits-note {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .debug-header,
@@ -1265,5 +1344,10 @@ pre {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .player-viewport img {
+    transform: scale(1.035);
+    animation: none !important;
   }
 }

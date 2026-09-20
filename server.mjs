@@ -8,12 +8,14 @@ import { buildJevRequest } from "./js/providers/jev.js";
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 5173;
+const HOST = process.env.HOST || "127.0.0.1";
 const MAX_REQUEST_BYTES = 64 * 1024;
 const TYPE_SAFE_ENDPOINT = "https://api.typesafe.ai/v1/systemone";
 const PUBLIC_ROOT_FILES = new Set(["index.html", "styles.css"]);
 const PUBLIC_DIRECTORIES = ["assets/", "data/", "js/"];
 const MIME_TYPES = Object.freeze({
   ".css": "text/css; charset=utf-8",
+  ".data": "application/octet-stream",
   ".gif": "image/gif",
   ".html": "text/html; charset=utf-8",
   ".jpeg": "image/jpeg",
@@ -21,7 +23,10 @@ const MIME_TYPES = Object.freeze({
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8",
-  ".png": "image/png"
+  ".png": "image/png",
+  ".ttf": "font/ttf",
+  ".wasm": "application/wasm",
+  ".webp": "image/webp"
 });
 
 function loadLocalEnvironment() {
@@ -203,7 +208,8 @@ const server = createServer(async (request, response) => {
   await serveStatic(request, response, url);
 });
 
-server.listen(PORT, "127.0.0.1", () => {
+server.listen(PORT, HOST, () => {
   const jevStatus = process.env.TYPESAFE_API_KEY ? "configured" : "not configured";
-  console.log(`Jev NPC prototype: http://localhost:${PORT} (Jev ${jevStatus})`);
+  const displayHost = ["127.0.0.1", "::1"].includes(HOST) ? "localhost" : HOST;
+  console.log(`Jev NPC prototype: http://${displayHost}:${PORT} (Jev ${jevStatus})`);
 });

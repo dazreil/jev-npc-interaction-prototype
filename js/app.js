@@ -81,6 +81,9 @@ const elements = {
   debugDialog: document.querySelector("#debug-dialog"),
   debugOpen: document.querySelector("#debug-open"),
   debugClose: document.querySelector("#debug-close"),
+  creditsDialog: document.querySelector("#credits-dialog"),
+  creditsOpen: document.querySelector("#credits-open"),
+  creditsClose: document.querySelector("#credits-close"),
   bootSequence: document.querySelector("#boot-sequence"),
   bootMessage: document.querySelector("#boot-message"),
   bootProgressFill: document.querySelector("#boot-progress-fill")
@@ -91,6 +94,7 @@ let dialogueData;
 let activeArthurPortrait = elements.arthurPortrait;
 let activeArthurFrame = elements.arthurFrame;
 let focusBeforeDebug = null;
+let focusBeforeCredits = null;
 let lastPerformance = null;
 let replayRunId = 0;
 let bootRunId = 0;
@@ -440,6 +444,7 @@ function updateStageScale() {
 
 function openDebug() {
   if (elements.debugDialog.open) return;
+  if (elements.creditsDialog.open) elements.creditsDialog.close();
   focusBeforeDebug = document.activeElement;
   elements.debugDialog.showModal();
   elements.debugClose.focus();
@@ -447,6 +452,18 @@ function openDebug() {
 
 function closeDebug() {
   if (elements.debugDialog.open) elements.debugDialog.close();
+}
+
+function openCredits() {
+  if (elements.creditsDialog.open) return;
+  if (elements.debugDialog.open) elements.debugDialog.close();
+  focusBeforeCredits = document.activeElement;
+  elements.creditsDialog.showModal();
+  elements.creditsClose.focus();
+}
+
+function closeCredits() {
+  if (elements.creditsDialog.open) elements.creditsDialog.close();
 }
 
 function renderInitialScene() {
@@ -579,7 +596,15 @@ async function initialise() {
 
     renderInitialScene();
   } catch (error) {
-    elements.form.hidden = true;
+    elements.bootSequence.hidden = true;
+    elements.linkStatus.textContent = "Offline";
+    elements.subtitleSpeaker.textContent = "System / Link failure";
+    elements.subtitleText.textContent = error.message;
+    elements.playerMessage.textContent = "Connection unavailable.";
+    elements.input.disabled = true;
+    elements.sendButton.disabled = true;
+    elements.providerStatus.textContent = "The encounter data could not be loaded. Restart the local server, then reload this page.";
+    elements.providerStatus.hidden = false;
     elements.conversation.textContent = error.message;
   }
 }
@@ -628,6 +653,11 @@ elements.debugOpen.addEventListener("click", openDebug);
 elements.debugClose.addEventListener("click", closeDebug);
 elements.debugDialog.addEventListener("close", () => {
   if (focusBeforeDebug instanceof HTMLElement) focusBeforeDebug.focus();
+});
+elements.creditsOpen.addEventListener("click", openCredits);
+elements.creditsClose.addEventListener("click", closeCredits);
+elements.creditsDialog.addEventListener("close", () => {
+  if (focusBeforeCredits instanceof HTMLElement) focusBeforeCredits.focus();
 });
 document.addEventListener("keydown", (event) => {
   if (event.key !== "F2") return;

@@ -1,0 +1,7 @@
+.git
+.env
+.DS_Store
+node_modules
+assets/vendor/espeak-ng
+PHASE14_PARITY_REPORT.md
+PLAYTEST_REPORT.md

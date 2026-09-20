@@ -11,7 +11,9 @@
     "check": "npm test && npm run lint:dialogue",
     "playtest": "node scripts/run-playtests.mjs",
     "evaluate:parity": "node scripts/compare-phase14-baseline.mjs",
-    "evaluate:phase14": "npm run check && npm run playtest && npm run evaluate:parity"
+    "evaluate:phase14": "npm run check && npm run playtest && npm run evaluate:parity",
+    "check:release": "node scripts/check-release.mjs",
+    "evaluate:phase15": "npm run check && npm run check:release"
   },
   "dependencies": {
     "@echogarden/espeak-ng-emscripten": "0.3.5"

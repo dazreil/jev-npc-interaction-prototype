@@ -9,8 +9,7 @@
     />
     <title>Perimeter 04 — Arthur Security Link</title>
     <link rel="preload" href="assets/arthur-portrait.jpg" as="image" />
-    <link rel="preload" href="assets/arthur-speech/frame-1.jpg" as="image" />
-    <link rel="preload" href="assets/arthur-speech/frame-2.jpg" as="image" />
+    <link rel="preload" href="assets/player-shadow.jpg" as="image" />
     <link
       rel="preload"
       href="assets/fonts/VT323-Regular.ttf"
@@ -18,7 +17,7 @@
       type="font/ttf"
       crossorigin
     />
-    <link rel="stylesheet" href="styles.css?phase=13.2" />
+    <link rel="stylesheet" href="styles.css?phase=15.1" />
   </head>
   <body>
     <div id="terminal-mount" class="terminal-mount">
@@ -201,6 +200,7 @@
 
           <div class="hardware-controls">
             <button id="effects-toggle" type="button" aria-pressed="true">FX On</button>
+            <button id="credits-open" type="button" aria-haspopup="dialog">Credits</button>
             <button id="debug-open" type="button" aria-haspopup="dialog">Developer <kbd>F2</kbd></button>
             <button id="reset-button" class="reset-button" type="button">Reset link</button>
           </div>
@@ -268,6 +268,30 @@
       </div>
     </dialog>
 
+    <dialog id="credits-dialog" class="credits-dialog" aria-labelledby="credits-title">
+      <div class="credits-panel">
+        <header class="debug-header">
+          <div>
+            <p class="eyebrow">Personnel and systems record</p>
+            <h2 id="credits-title">Perimeter 04 / Credits</h2>
+          </div>
+          <button id="credits-close" type="button" aria-label="Close credits">Close</button>
+        </header>
+
+        <div class="credits-scroll">
+          <p class="credits-lede">A Jev NPC interaction prototype by Daryl Smith.</p>
+          <dl class="credits-list">
+            <div><dt>Arthur and player imagery</dt><dd>Original prototype artwork</dd></div>
+            <div><dt>NPC dialogue</dt><dd>Hand-authored for this encounter</dd></div>
+            <div><dt>Decision systems</dt><dd>Deterministic Mock and optional TypeSafe Jev</dd></div>
+            <div><dt>Local speech</dt><dd>eSpeak NG WebAssembly, GPL-3.0</dd></div>
+            <div><dt>Interface typeface</dt><dd>VT323 by Peter Hull, SIL Open Font License</dd></div>
+          </dl>
+          <p class="credits-note">Full license text and project notices are included with the source release.</p>
+        </div>
+      </div>
+    </dialog>
+
     <script>
       if (window.location.protocol === "file:") {
         const message =
@@ -291,7 +315,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=13.4";
+        appScript.src = "js/app.js?phase=15.1";
         document.body.append(appScript);
       }
     </script>
