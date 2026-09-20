@@ -577,6 +577,7 @@ summary:focus-visible {
   grid-template-columns: minmax(0, 1fr) 162px;
   gap: 6px;
   min-height: 0;
+  padding: 5px;
   overflow: hidden;
   border: 1px solid #30362c;
   background: #090c09;
@@ -584,9 +585,8 @@ summary:focus-visible {
 
 .player-copy {
   display: grid;
-  grid-template-rows: 16px auto minmax(0, 1fr);
+  grid-template-rows: 16px minmax(0, 1fr);
   min-height: 0;
-  padding: 5px;
 }
 
 .player-copy .module-heading {
@@ -597,48 +597,32 @@ summary:focus-visible {
   font: inherit;
 }
 
-.player-identity {
-  margin: 7px 2px 0;
-  padding: 7px;
-  border-left: 3px solid var(--blue);
-  background: #0d1110;
-  text-transform: uppercase;
-}
-
-.player-identity span,
-.player-identity small {
-  display: block;
-  color: var(--muted);
-  font-size: 8px;
-}
-
-.player-identity strong {
-  display: block;
-  margin: 2px 0;
-  color: var(--blue);
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: 1px;
-}
-
 .player-message {
-  align-self: end;
-  margin: 7px 2px 2px;
-  padding: 7px;
+  margin: 6px 0 0;
+  padding: 9px;
   overflow: hidden;
   border: 1px solid #29332f;
-  background: #080d0b;
-  color: #91a49d;
-  font-size: 10px;
-  line-height: 1.3;
+  background:
+    linear-gradient(180deg, rgba(90, 133, 126, 0.045), transparent 45%),
+    #080d0b;
+  color: #a9beb6;
+  font-size: 13px;
+  line-height: 1.35;
   text-wrap: pretty;
+}
+
+.player-card {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
 }
 
 .player-viewport {
   position: relative;
   min-height: 0;
   overflow: hidden;
-  border-left: 1px solid #353c33;
+  border: 2px solid #090b09;
+  outline: 1px solid #4c5d57;
   background: #020403;
 }
 
@@ -677,6 +661,16 @@ summary:focus-visible {
       rgba(97, 127, 119, 0.08)
     );
   pointer-events: none;
+}
+
+.player-identity-strip {
+  margin: 6px 0 0;
+  padding: 4px 5px;
+  border-left-color: var(--blue);
+}
+
+.player-identity-strip strong {
+  color: #b6cec5;
 }
 
 .visually-hidden {

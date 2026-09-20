@@ -116,26 +116,31 @@
             <section class="player-endpoint" aria-labelledby="player-endpoint-title">
               <div class="player-copy">
                 <div class="module-heading">
-                  <span id="player-endpoint-title">External caller</span>
+                  <span id="player-endpoint-title">Your transmission</span>
                   <span>TX <b id="turn-count-compact">00</b></span>
-                </div>
-                <div class="player-identity">
-                  <span>Identity</span>
-                  <strong>Unknown</strong>
-                  <small>Outside / South gate</small>
                 </div>
                 <p id="player-message" class="player-message">Awaiting transmission.</p>
               </div>
 
-              <div class="player-viewport">
-                <img
-                  src="assets/player-shadow.jpg"
-                  width="480"
-                  height="480"
-                  alt="Shadowed silhouette representing the player outside the warehouse"
-                />
-                <div class="player-scan" aria-hidden="true"></div>
-                <span>External feed</span>
+              <div class="player-card">
+                <div class="player-viewport">
+                  <img
+                    src="assets/player-shadow.jpg"
+                    width="480"
+                    height="480"
+                    alt="Shadowed silhouette representing the player outside the warehouse"
+                  />
+                  <div class="player-scan" aria-hidden="true"></div>
+                  <span>External feed</span>
+                </div>
+
+                <div class="identity-strip player-identity-strip">
+                  <div>
+                    <span>External caller</span>
+                    <strong>Unknown</strong>
+                  </div>
+                  <div class="identity-code">Outside<br />South gate</div>
+                </div>
               </div>
             </section>
 
