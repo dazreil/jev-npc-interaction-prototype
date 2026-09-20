@@ -1,5 +1,21 @@
 {
   "opening": "Evening, [[address]]. Sorry, but the warehouse is closed for the night.",
+  "performance": {
+    "actions": {
+      "DEESCALATE_THREAT": {
+        "portraitCue": "afraid",
+        "speech": { "preDelayMs": 90 },
+        "soundEffect": "warning"
+      },
+      "ALLOW_ENTRY": {
+        "timing": { "reactionOutMs": 360 },
+        "soundEffect": "unlock"
+      },
+      "END_CONVERSATION": {
+        "timing": { "reactionOutMs": 320 }
+      }
+    }
+  },
   "actions": {
     "ANSWER_QUESTION": {
       "neutral": [

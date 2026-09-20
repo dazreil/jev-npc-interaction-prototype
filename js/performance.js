@@ -82,7 +82,10 @@ export function createNpcPerformance({
   action,
   tone,
   line,
+  portraitCue,
+  soundEffect,
   status = "active",
+  outcome = status,
   timing = {},
   speech = {}
 }) {
@@ -100,7 +103,10 @@ export function createNpcPerformance({
     action,
     tone: resolvedTone,
     line,
-    portraitCue: getPortraitCue(action, resolvedTone),
+    portraitCue:
+      typeof portraitCue === "string" && portraitCue
+        ? portraitCue
+        : getPortraitCue(action, resolvedTone),
     speech: resolveSpeechProfile(resolvedTone, action, speech),
     timing: {
       reactionInMs: safeDuration(timing.reactionInMs, DEFAULT_PERFORMANCE_TIMING.reactionInMs),
@@ -108,7 +114,8 @@ export function createNpcPerformance({
       reactionOutMs: safeDuration(timing.reactionOutMs, DEFAULT_PERFORMANCE_TIMING.reactionOutMs)
     },
     terminal: status !== "active",
-    outcome: status
+    outcome,
+    ...(typeof soundEffect === "string" && soundEffect ? { soundEffect } : {})
   };
 }
 

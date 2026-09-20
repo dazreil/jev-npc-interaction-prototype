@@ -455,7 +455,7 @@ Add replaceable speech and sound systems while keeping captions authoritative an
 
 ## Phase 13 — Outcomes and Authored Performance Pass
 
-**Status:** Planned.
+**Status:** Complete and verified on 20 September 2026. Blind player scoring and cross-browser voice comparison remain part of Phase 14.
 
 Give the complete encounter a strong opening and four visibly distinct endings while adding performance metadata to the authored content incrementally.
 
@@ -472,6 +472,16 @@ Give the complete encounter a strong opening and four visibly distinct endings w
 - All four outcomes are visually and audibly distinct.
 - At least three established entry strategies still reach success.
 - Every authored line resolves to a valid performance without requiring duplicated dialogue text.
+
+### Verification
+
+- A five-step hardline boot sequence now gates input briefly on load and reset, reports connection progress, respects reduced-motion preferences, and returns keyboard focus to the message field.
+- The simulation preserves `active`, `success`, and `failure` while exposing `entry_granted`, `refused`, `expelled`, and `locked_out` to presentation adapters and developer snapshots.
+- Each ending has its own terminal copy, colour treatment, door readout, and synthesized sound cue: unlock, descending denial, warning, or three-tone lockdown.
+- Dialogue data can optionally override portrait cue, speech properties, timing, and sound effect by action or tone. The performance resolver supplies existing safe defaults when metadata is absent, so no dialogue text is duplicated.
+- Browser verification exercised all four endings through real player input at the responsive 640×480 presentation. The boot overlay disabled transmission until ready, terminal controls locked after each ending, and the encounter reset cleanly.
+- The full automated suite passes with 52 tests. Dialogue lint covers 4 character profiles, 12 actions, 204 fragments, 13 templates, 7 branches, and 220 possible lines. All 28 core Mock/Jev comparison assertions and both provider-failure checks pass; the existing exploratory generalization baseline remains 5 of 10 expected actions.
+- Head-office proof, detailed emergency evidence, and sustained respectful conversation remain three verified routes to entry.
 
 ## Phase 14 — Provider and Human Evaluation
 
@@ -541,4 +551,4 @@ The first eight phases established and evaluated the simulation. Continue in thi
 
 ## Immediate Next Milestone
 
-Implement Phase 13: add the connection sequence, four presentation endings, and optional per-line performance metadata while preserving every established entry route.
+Begin Phase 14: use the successful live Jev rerun as the parity baseline, then conduct blind player sessions and tune presentation timing from the recorded feedback before changing decision rules.

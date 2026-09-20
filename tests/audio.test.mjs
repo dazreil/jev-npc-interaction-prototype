@@ -8,6 +8,10 @@ test("period sound cues reserve warning and unlock sounds for authored actions",
   assert.equal(getPeriodSoundCue("BECOME_SUSPICIOUS"), "warning");
   assert.equal(getPeriodSoundCue("THREATEN_PLAYER"), "warning");
   assert.equal(getPeriodSoundCue("ALLOW_ENTRY"), "unlock");
+  assert.equal(getPeriodSoundCue("END_CONVERSATION", "refused"), "denied");
+  assert.equal(getPeriodSoundCue("END_CONVERSATION", "expelled"), "warning");
+  assert.equal(getPeriodSoundCue("END_CONVERSATION", "locked_out"), "lockdown");
+  assert.equal(getPeriodSoundCue("ASK_FOR_REASON", "active", "denied"), "denied");
 });
 
 test("unavailable Web Audio remains a silent non-blocking presentation adapter", async () => {

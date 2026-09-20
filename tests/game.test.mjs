@@ -5,11 +5,17 @@ import test from "node:test";
 import {
   AVAILABLE_ACTIONS,
   DecisionProviderError,
+  ENCOUNTER_OUTCOMES,
   MAX_MEMORIES,
   Game,
   validateDecision
 } from "../js/game.js";
-import { isNameQuestion, isWeaponThreat, selectDialogue } from "../js/dialogue.js";
+import {
+  isNameQuestion,
+  isWeaponThreat,
+  resolveDialoguePerformance,
+  selectDialogue
+} from "../js/dialogue.js";
 import { assessMessageEffort, determineTone } from "../js/npc.js";
 import { chooseNpcAction } from "../js/providers/mock.js";
 
@@ -74,6 +80,7 @@ test("a supported head-office claim can lead to authored entry dialogue", async 
   assert.equal(second.decision.action, "ALLOW_ENTRY");
   assert.equal(second.dialogue, "ALLOW_ENTRY neutral");
   assert.equal(second.status, "success");
+  assert.equal(second.outcome, ENCOUNTER_OUTCOMES.ENTRY_GRANTED);
 });
 
 test("asking Arthur's name uses the authored name response", async () => {
@@ -184,6 +191,63 @@ test("a repeated threat ends the conversation and records memory", async () => {
   const second = await game.takeTurn("I said move or you'll regret it.");
   assert.equal(second.decision.action, "END_CONVERSATION");
   assert.equal(second.status, "failure");
+  assert.equal(second.outcome, ENCOUNTER_OUTCOMES.LOCKED_OUT);
+});
+
+test("terminal failures distinguish refusal, expulsion, and security lockout", async () => {
+  const refused = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+  const refusedTurn = await refused.takeTurn("Goodbye, I'll leave now.");
+  assert.equal(refusedTurn.status, "failure");
+  assert.equal(refusedTurn.outcome, ENCOUNTER_OUTCOMES.REFUSED);
+
+  const expelled = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+  await expelled.takeTurn("You're a useless guard.");
+  const expelledTurn = await expelled.takeTurn("You're still a useless guard.");
+  assert.equal(expelledTurn.status, "failure");
+  assert.equal(expelledTurn.outcome, ENCOUNTER_OUTCOMES.EXPELLED);
+
+  const lockedOut = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+  await lockedOut.takeTurn("Move or I'll hurt you.");
+  const lockedOutTurn = await lockedOut.takeTurn("Move or you'll regret it.");
+  assert.equal(lockedOutTurn.status, "failure");
+  assert.equal(lockedOutTurn.outcome, ENCOUNTER_OUTCOMES.LOCKED_OUT);
+});
+
+test("a repaired threat does not force a later voluntary departure into lockdown", async () => {
+  const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+
+  await game.takeTurn("Move or I'll hurt you.");
+  const repair = await game.takeTurn("I'm sorry. I lost my temper.");
+  const departure = await game.takeTurn("Goodbye, I'll leave now.");
+
+  assert.equal(repair.decision.action, "REPAIR_CONVERSATION");
+  assert.equal(departure.outcome, ENCOUNTER_OUTCOMES.REFUSED);
+});
+
+test("authored performance metadata resolves by action and tone with safe defaults", () => {
+  const data = {
+    performance: {
+      default: { timing: { reactionInMs: 140 } },
+      actions: {
+        WARN_PLAYER: {
+          portraitCue: "irritated",
+          speech: { rate: 1.1 },
+          tones: { hostile: { soundEffect: "lockdown" } }
+        }
+      }
+    }
+  };
+
+  assert.deepEqual(resolveDialoguePerformance(data, "ANSWER_QUESTION", "neutral"), {
+    timing: { reactionInMs: 140 },
+    speech: {}
+  });
+  assert.deepEqual(resolveDialoguePerformance(data, "WARN_PLAYER", "hostile"), {
+    timing: { reactionInMs: 140 },
+    speech: { rate: 1.1 },
+    portraitCue: "irritated",
+    soundEffect: "lockdown"
+  });
 });
 
 test("a first gun threat uses an authored de-escalation response and serious memory", async () => {
@@ -381,6 +445,7 @@ test("terminal state removes all actions and reset clears transient state", asyn
 
   game.reset();
   assert.equal(game.status, "active");
+  assert.equal(game.outcome, ENCOUNTER_OUTCOMES.ACTIVE);
   assert.equal(game.turn, 0);
   assert.deepEqual(game.memories, []);
   assert.deepEqual(game.history, []);

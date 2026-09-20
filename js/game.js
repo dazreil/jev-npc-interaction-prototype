@@ -1,4 +1,4 @@
-import { selectDialogue } from "./dialogue.js";
+import { resolveDialoguePerformance, selectDialogue } from "./dialogue.js";
 import {
   ARTHUR_CHARACTER_IDS,
   applyArthurCharacterProfile,
@@ -35,6 +35,13 @@ export const FALLBACK_ACTION = "REFUSE_ENTRY";
 export const MAX_HISTORY_ENTRIES = 12;
 export const MAX_MEMORIES = 8;
 export const PLAYER_ADDRESS_TERMS = ARTHUR_CHARACTER_IDS;
+export const ENCOUNTER_OUTCOMES = Object.freeze({
+  ACTIVE: "active",
+  ENTRY_GRANTED: "entry_granted",
+  REFUSED: "refused",
+  EXPELLED: "expelled",
+  LOCKED_OUT: "locked_out"
+});
 
 const PLAYER_ADDRESS_TOKEN = "[[address]]";
 
@@ -46,6 +53,31 @@ function choosePlayerAddress(random) {
 
 function personalizeDialogue(line, playerAddress) {
   return String(line).replaceAll(PLAYER_ADDRESS_TOKEN, playerAddress);
+}
+
+function resolveTerminalOutcome({ action, previousAction, memories, state }) {
+  if (action === "ALLOW_ENTRY") return ENCOUNTER_OUTCOMES.ENTRY_GRANTED;
+  if (action !== "END_CONVERSATION") return ENCOUNTER_OUTCOMES.ACTIVE;
+
+  const latestRepairTurn = memories.reduce(
+    (latest, memory) =>
+      memory.tags?.includes("repair")
+        ? Math.max(latest, Number(memory.createdTurn) || 0)
+        : latest,
+    -1
+  );
+  const securityRisk = memories.some(
+    (memory) =>
+      (Number(memory.createdTurn) || 0) > latestRepairTurn &&
+      memory.tags?.some((tag) => ["threat", "weapon", "trespass"].includes(tag))
+  );
+
+  if (securityRisk || state.suspicion > 91) return ENCOUNTER_OUTCOMES.LOCKED_OUT;
+  if (previousAction === "WARN_PLAYER" || state.irritation > 82) {
+    return ENCOUNTER_OUTCOMES.EXPELLED;
+  }
+
+  return ENCOUNTER_OUTCOMES.REFUSED;
 }
 
 export class DecisionProviderError extends Error {
@@ -131,6 +163,7 @@ export class Game {
     this.history = [];
     this.turn = 0;
     this.status = "active";
+    this.outcome = ENCOUNTER_OUTCOMES.ACTIVE;
     this.reasonPrompted = false;
     this.lastDecision = null;
     this.lastContext = null;
@@ -305,6 +338,14 @@ export class Game {
       }),
       this.playerAddress
     );
+    const authoredPerformance = resolveDialoguePerformance(
+      this.dialogueData,
+      decision.action,
+      tone,
+      this.characterProfile.id
+    );
+
+    const previousAction = this.lastDecision?.action ?? null;
 
     this.turn += 1;
     if (decision.action === "ASK_FOR_REASON") this.reasonPrompted = true;
@@ -319,14 +360,24 @@ export class Game {
 
     if (decision.action === "ALLOW_ENTRY") this.status = "success";
     if (decision.action === "END_CONVERSATION") this.status = "failure";
+    this.outcome = resolveTerminalOutcome({
+      action: decision.action,
+      previousAction,
+      memories: this.memories,
+      state: this.npc.state
+    });
 
     this.lastDecision = { ...decision, tone };
     this.lastPerformance = createNpcPerformance({
       action: decision.action,
       tone,
       line: dialogue,
-      speech: this.characterProfile.speech,
-      status: this.status
+      portraitCue: authoredPerformance.portraitCue,
+      soundEffect: authoredPerformance.soundEffect,
+      speech: { ...this.characterProfile.speech, ...authoredPerformance.speech },
+      timing: authoredPerformance.timing,
+      status: this.status,
+      outcome: this.outcome
     });
 
     return {
@@ -334,7 +385,8 @@ export class Game {
       dialogue,
       decision: this.lastDecision,
       npcPerformance: structuredClone(this.lastPerformance),
-      status: this.status
+      status: this.status,
+      outcome: this.outcome
     };
   }
 
@@ -345,6 +397,7 @@ export class Game {
       history: structuredClone(this.history),
       turn: this.turn,
       status: this.status,
+      outcome: this.outcome,
       reasonPrompted: this.reasonPrompted,
       playerAddress: this.playerAddress,
       characterProfile: structuredClone(this.characterProfile),

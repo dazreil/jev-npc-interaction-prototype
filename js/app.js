@@ -79,7 +79,10 @@ const elements = {
   voiceLamp: document.querySelector("#voice-lamp"),
   debugDialog: document.querySelector("#debug-dialog"),
   debugOpen: document.querySelector("#debug-open"),
-  debugClose: document.querySelector("#debug-close")
+  debugClose: document.querySelector("#debug-close"),
+  bootSequence: document.querySelector("#boot-sequence"),
+  bootMessage: document.querySelector("#boot-message"),
+  bootProgressFill: document.querySelector("#boot-progress-fill")
 };
 
 let game;
@@ -89,6 +92,7 @@ let activeArthurFrame = elements.arthurFrame;
 let focusBeforeDebug = null;
 let lastPerformance = null;
 let replayRunId = 0;
+let bootRunId = 0;
 const periodAudio = new PeriodAudio();
 const speechDirector = new SpeechDirector({ adapter: new BrowserSpeechAdapter() });
 const delay = (durationMs) =>
@@ -306,31 +310,98 @@ async function refreshJevStatus() {
   }
 }
 
-function renderOutcome(status) {
-  elements.outcome.classList.remove("outcome--failure");
+const OUTCOME_PRESENTATIONS = Object.freeze({
+  entry_granted: {
+    title: "Access granted",
+    code: "Door unlocked",
+    copy: "Arthur releases the south-gate lock. You are inside.",
+    door: "Open"
+  },
+  refused: {
+    title: "Access refused",
+    code: "Visitor departed",
+    copy: "Arthur keeps the warehouse secured as you leave the gate.",
+    door: "Denied"
+  },
+  expelled: {
+    title: "Link terminated",
+    code: "Leave property",
+    copy: "Arthur cuts the intercom and orders you away from the entrance.",
+    door: "Secured"
+  },
+  locked_out: {
+    title: "Security lockdown",
+    code: "Perimeter sealed",
+    copy: "Arthur seals the entrance and records you as an active threat.",
+    door: "Sealed"
+  }
+});
 
-  if (status === "success") {
-    elements.outcome.textContent = "Arthur unlocks the warehouse door.\n\nYou are inside.";
-    elements.doorStatus.textContent = "Open";
+function renderOutcome(outcome = "active") {
+  elements.outcome.className = "outcome";
+  const presentation = OUTCOME_PRESENTATIONS[outcome];
+
+  if (presentation) {
+    const title = document.createElement("strong");
+    title.className = "outcome-title";
+    title.textContent = presentation.title;
+    const code = document.createElement("span");
+    code.className = "outcome-code";
+    code.textContent = presentation.code;
+    const copy = document.createElement("p");
+    copy.textContent = presentation.copy;
+    const reset = document.createElement("small");
+    reset.textContent = "Reset link to try another approach";
+
+    elements.outcome.classList.add(`outcome--${outcome.replaceAll("_", "-")}`);
+    elements.outcome.replaceChildren(title, code, copy, reset);
     elements.outcome.hidden = false;
-  } else if (status === "failure") {
-    elements.outcome.textContent =
-      "Arthur turns away and refuses to continue the conversation.\n\nReset to try again.";
-    elements.outcome.classList.add("outcome--failure");
-    elements.outcome.hidden = false;
-    elements.doorStatus.textContent = "Denied";
+    elements.doorStatus.textContent = presentation.door;
   } else {
     elements.outcome.hidden = true;
-    elements.outcome.textContent = "";
+    elements.outcome.replaceChildren();
     elements.doorStatus.textContent = "Locked";
   }
 
-  const ended = status !== "active";
+  const ended = Boolean(presentation);
   elements.input.disabled = ended;
   elements.sendButton.disabled = ended;
   elements.inputHint.textContent = ended
     ? "The conversation has ended. Reset the scenario to play again."
     : "Enter to transmit · 280 character limit";
+}
+
+async function playBootSequence() {
+  const runId = ++bootRunId;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const stepDelay = reducedMotion ? 20 : 260;
+  const steps = [
+    ["CHECKING HARDLINE CARRIER...", 18],
+    ["AUTHENTICATING CAMERA 04-A...", 43],
+    ["OPENING GATEHOUSE AUDIO CHANNEL...", 68],
+    ["SYNCING NIGHT WATCH TERMINAL...", 86],
+    ["SECURITY LINK ESTABLISHED", 100]
+  ];
+
+  elements.bootSequence.hidden = false;
+  elements.input.disabled = true;
+  elements.sendButton.disabled = true;
+  elements.linkStatus.textContent = "Booting";
+  elements.bootProgressFill.style.width = "0%";
+
+  for (const [message, progress] of steps) {
+    if (runId !== bootRunId) return;
+    elements.bootMessage.textContent = message;
+    elements.bootProgressFill.style.width = `${progress}%`;
+    await delay(stepDelay);
+  }
+
+  if (runId !== bootRunId) return;
+  elements.bootSequence.hidden = true;
+  elements.linkStatus.textContent = "Ready";
+  elements.input.disabled = false;
+  elements.sendButton.disabled = false;
+  elements.input.focus();
 }
 
 function updateStageScale() {
@@ -361,9 +432,9 @@ function renderInitialScene() {
   elements.playerMessage.textContent = "Awaiting transmission.";
   appendMessage("arthur", game.getOpeningDialogue());
   renderDebug(game.getSnapshot());
-  renderOutcome("active");
+  renderOutcome(game.outcome);
   elements.input.value = "";
-  elements.input.focus();
+  playBootSequence();
 }
 
 function setBusy(isBusy) {
@@ -426,7 +497,7 @@ async function handleSubmit(event) {
     clearProviderStatus();
     renderDebug(game.getSnapshot());
     const presentation = await performanceController.play(turn.npcPerformance);
-    if (!presentation.cancelled) renderOutcome(turn.status);
+    if (!presentation.cancelled) renderOutcome(turn.outcome);
   } catch (error) {
     performanceController.failDecision();
     const snapshot = game.getSnapshot();

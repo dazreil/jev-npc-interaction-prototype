@@ -131,6 +131,76 @@ summary:focus-visible {
   pointer-events: none;
 }
 
+.boot-sequence {
+  position: absolute;
+  inset: 8px;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  border: 1px solid #28352a;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.28) 2px 3px),
+    #030805;
+  color: var(--green-bright);
+  text-shadow: 0 0 5px rgba(135, 184, 95, 0.45);
+}
+
+.boot-sequence[hidden] {
+  display: none;
+}
+
+.boot-screen {
+  width: 390px;
+  padding: 20px;
+  border: 1px solid #40533e;
+  background: rgba(4, 11, 6, 0.94);
+  box-shadow: inset 0 0 26px #000, 0 0 24px rgba(135, 184, 95, 0.08);
+}
+
+.boot-screen p {
+  margin: 0;
+}
+
+.boot-brand,
+.boot-route {
+  color: #718269;
+  font-size: 11px;
+  letter-spacing: 0.7px;
+}
+
+.boot-message {
+  min-height: 22px;
+  margin-top: 24px !important;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+.boot-message i {
+  font-style: normal;
+  animation: boot-cursor 520ms steps(1, end) infinite;
+}
+
+.boot-progress {
+  height: 9px;
+  margin: 9px 0 24px;
+  padding: 2px;
+  border: 1px solid #40533e;
+  background: #020402;
+}
+
+.boot-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--green);
+  box-shadow: 0 0 6px rgba(135, 184, 95, 0.55);
+  transition: width 180ms steps(4, end);
+}
+
+@keyframes boot-cursor {
+  50% { opacity: 0; }
+}
+
 .terminal-rivets::before,
 .terminal-rivets::after {
   position: absolute;
@@ -774,7 +844,7 @@ summary:focus-visible {
   right: 15px;
   width: 390px;
   padding: 16px;
-  border: 2px solid var(--green);
+  border: 2px solid currentColor;
   background: rgba(5, 12, 7, 0.97);
   color: var(--green-bright);
   font-size: 13px;
@@ -783,13 +853,64 @@ summary:focus-visible {
   line-height: 1.5;
   text-align: center;
   text-transform: uppercase;
-  white-space: pre-line;
   box-shadow: 0 8px 28px #000;
 }
 
-.outcome--failure {
-  border-color: var(--red);
-  color: #e5a495;
+.outcome-title,
+.outcome-code,
+.outcome small {
+  display: block;
+}
+
+.outcome-title {
+  font-size: 21px;
+  letter-spacing: 1.5px;
+}
+
+.outcome-code {
+  margin-top: 3px;
+  padding: 3px 5px;
+  border: 1px solid currentColor;
+  font-size: 11px;
+}
+
+.outcome p {
+  margin: 12px 0;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  text-transform: none;
+}
+
+.outcome small {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 400;
+}
+
+.outcome--refused {
+  background: rgba(17, 13, 4, 0.97);
+  color: #e1b75b;
+}
+
+.outcome--expelled {
+  background: rgba(22, 8, 5, 0.97);
+  color: #e58b74;
+  animation: outcome-warning 180ms steps(2, end) 2;
+}
+
+.outcome--locked-out {
+  border-style: double;
+  border-width: 4px;
+  background:
+    repeating-linear-gradient(135deg, rgba(184, 76, 57, 0.08) 0 7px, transparent 7px 14px),
+    rgba(20, 5, 5, 0.98);
+  color: #f06a53;
+}
+
+@keyframes outcome-warning {
+  50% { filter: brightness(1.6); }
 }
 
 .terminal-controls {

@@ -19,6 +19,38 @@ export function isNameQuestion(playerInput = "") {
   );
 }
 
+function objectValue(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+export function resolveDialoguePerformance(dialogueData, action, tone, profileId = "") {
+  const root = objectValue(dialogueData.performance);
+  const rootAction = objectValue(root.actions?.[action]);
+  const rootTone = objectValue(rootAction.tones?.[tone]);
+  const profile = objectValue(dialogueData.profiles?.[profileId]?.performance);
+  const profileAction = objectValue(profile.actions?.[action]);
+  const profileTone = objectValue(profileAction.tones?.[tone]);
+  const layers = [
+    objectValue(root.default),
+    rootAction,
+    rootTone,
+    objectValue(profile.default),
+    profileAction,
+    profileTone
+  ];
+
+  return layers.reduce(
+    (resolved, layer) => {
+      if (typeof layer.portraitCue === "string") resolved.portraitCue = layer.portraitCue;
+      if (typeof layer.soundEffect === "string") resolved.soundEffect = layer.soundEffect;
+      resolved.speech = { ...resolved.speech, ...objectValue(layer.speech) };
+      resolved.timing = { ...resolved.timing, ...objectValue(layer.timing) };
+      return resolved;
+    },
+    { speech: {}, timing: {} }
+  );
+}
+
 function hasMemoryTag(dialogueContext, tag) {
   return dialogueContext.memories?.some((memory) => memory.tags?.includes(tag)) ?? false;
 }

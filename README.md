@@ -4,7 +4,7 @@ A small browser-based text game that explores whether a decision model can make 
 
 Arthur's spoken lines all come from `data/dialogue.json`. The Mock and Jev providers select only a structured action and return developer-facing decision metadata. The game validates the action before selecting an authored line.
 
-The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. Arthur occupies the gatehouse feed while a shadowed external feed represents the player. Each participant has one current message, avoiding a duplicated subtitle-and-transcript view, and developer telemetry remains available through the **Developer** control or <kbd>F2</kbd>. Browser speech, replay, mute, volume, skip, ambience, and authored interface sounds sit behind replaceable presentation adapters; the current incoming message and deterministic timing remain available when browser media APIs are missing.
+The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. A short hardline boot sequence opens the encounter; Arthur occupies the gatehouse feed while a shadowed external feed represents the player. Each participant has one current message, avoiding a duplicated subtitle-and-transcript view, and developer telemetry remains available through the **Developer** control or <kbd>F2</kbd>. Browser speech, replay, mute, volume, skip, ambience, and authored interface sounds sit behind replaceable presentation adapters; the current incoming message and deterministic timing remain available when browser media APIs are missing.
 
 ## Run locally
 
@@ -59,6 +59,8 @@ The resulting Mock-versus-Jev transcript, complete action coverage, confidence r
 
 The expandable debug views show the exact decision context and raw provider response. Provider reasons are diagnostic data only and are never displayed as Arthur's dialogue.
 
+The encounter has four terminal presentations. Credible proof or earned trust grants entry; choosing to leave records a refusal; repeated personal hostility gets the player expelled; threats or forced-entry behaviour trigger a full security lockout. The simulation retains its original `active`, `success`, and `failure` status values for provider and test compatibility while exposing the more precise outcome to the performance layer.
+
 Arthur keeps up to eight important memories separately from the latest six conversation exchanges. On each reset his form of address selects a complete character profile that remains fixed throughout the encounter:
 
 | Address | Arthur's character |
@@ -112,7 +114,7 @@ If the server, network, or TypeSafe API fails, no turn or state change is applie
 - `js/performance.js` maps committed turns to renderer metadata and controls the idle, typing, decision, reaction, speaking, and ending lifecycle.
 - `js/portrait.js` maps performance phases to deterministic idle, blink, listening, mouth, and emotional portrait frames with a neutral fallback.
 - `js/speech.js` supplies deterministic delivery profiles, the replaceable Web Speech adapter, actual speech-event timing, replay, cancellation, and silent fallback timing.
-- `js/audio.js` owns optional Web Audio ambience and the band-limited, compressed relay, warning, interface, and door-unlock sounds.
+- `js/audio.js` owns optional Web Audio ambience and the band-limited, compressed relay, warning, denial, lockdown, interface, and door-unlock sounds.
 - `js/app.js` renders the UI and translates browser events into game turns.
 - `js/providers/jev.js` builds and validates the Jev `choice` request and maps the selected action to deterministic game effects, including the repair path.
 - `server.mjs` serves the game and protects the TypeSafe credential behind the same-origin Jev endpoint.

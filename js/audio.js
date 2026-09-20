@@ -4,7 +4,14 @@ const WARNING_ACTIONS = new Set([
   "END_CONVERSATION"
 ]);
 
-export function getPeriodSoundCue(action) {
+export function getPeriodSoundCue(action, outcome = "active", authoredCue = null) {
+  if (["relay", "warning", "unlock", "denied", "lockdown"].includes(authoredCue)) {
+    return authoredCue;
+  }
+  if (outcome === "entry_granted") return "unlock";
+  if (outcome === "refused") return "denied";
+  if (outcome === "expelled") return "warning";
+  if (outcome === "locked_out") return "lockdown";
   if (action === "ALLOW_ENTRY") return "unlock";
   if (WARNING_ACTIONS.has(action)) return "warning";
   return "relay";
@@ -125,6 +132,19 @@ export class PeriodAudio {
     return first;
   }
 
+  playDenied() {
+    const first = this.tone({ frequency: 196, duration: 0.11, gain: 0.028 });
+    this.tone({ frequency: 147, duration: 0.18, gain: 0.026, delay: 0.12 });
+    return first;
+  }
+
+  playLockdown() {
+    const first = this.tone({ frequency: 392, duration: 0.1, gain: 0.04 });
+    this.tone({ frequency: 196, duration: 0.13, gain: 0.04, delay: 0.11 });
+    this.tone({ frequency: 98, duration: 0.24, gain: 0.045, delay: 0.25 });
+    return first;
+  }
+
   playUnlock() {
     const first = this.tone({ frequency: 98, duration: 0.09, gain: 0.038 });
     this.tone({ frequency: 196, duration: 0.1, gain: 0.03, delay: 0.11 });
@@ -166,9 +186,15 @@ export class PeriodAudio {
   }
 
   playPerformanceCue(performance) {
-    const cue = getPeriodSoundCue(performance?.action);
+    const cue = getPeriodSoundCue(
+      performance?.action,
+      performance?.outcome,
+      performance?.soundEffect
+    );
     if (cue === "warning") return this.playWarning();
     if (cue === "unlock") return this.playUnlock();
+    if (cue === "denied") return this.playDenied();
+    if (cue === "lockdown") return this.playLockdown();
     return this.playRelay();
   }
 }

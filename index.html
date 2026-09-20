@@ -18,12 +18,23 @@
       type="font/ttf"
       crossorigin
     />
-    <link rel="stylesheet" href="styles.css?phase=12.3" />
+    <link rel="stylesheet" href="styles.css?phase=13.1" />
   </head>
   <body>
     <div id="terminal-mount" class="terminal-mount">
       <main id="terminal-stage" class="terminal-stage" aria-labelledby="terminal-title">
         <div class="terminal-rivets" aria-hidden="true"></div>
+
+        <section id="boot-sequence" class="boot-sequence" aria-live="polite" hidden>
+          <div class="boot-screen">
+            <p class="boot-brand">WSC PERIMETER CONTROL BIOS 4.17</p>
+            <p class="boot-message"><span id="boot-message">INITIALISING SECURITY LINK...</span><i aria-hidden="true">_</i></p>
+            <div class="boot-progress" aria-hidden="true">
+              <span id="boot-progress-fill"></span>
+            </div>
+            <p class="boot-route">ROUTE: SOUTH GATE / CAMERA 04-A / GATEHOUSE</p>
+          </div>
+        </section>
 
         <header class="terminal-header">
           <div class="terminal-brand">
@@ -280,7 +291,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=12.6";
+        appScript.src = "js/app.js?phase=13.1";
         document.body.append(appScript);
       }
     </script>

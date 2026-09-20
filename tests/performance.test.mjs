@@ -96,6 +96,23 @@ test("performance lifecycle follows the explicit Phase 9 sequence", async () => 
   });
 });
 
+test("terminal performance preserves the legacy status and explicit encounter outcome", () => {
+  const performance = createNpcPerformance({
+    action: "END_CONVERSATION",
+    tone: "hostile",
+    line: "That's enough. Leave.",
+    status: "failure",
+    outcome: "expelled",
+    portraitCue: "hostile",
+    soundEffect: "warning"
+  });
+
+  assert.equal(performance.terminal, true);
+  assert.equal(performance.outcome, "expelled");
+  assert.equal(performance.portraitCue, "hostile");
+  assert.equal(performance.soundEffect, "warning");
+});
+
 test("skip completes the active performance without replaying the committed turn", async () => {
   const provider = async () => ({
     action: "ASK_FOR_REASON",
