@@ -56,6 +56,14 @@ npm run playtest
 
 The resulting Mock-versus-Jev transcript, complete action coverage, confidence review, dialogue-content audit, failure checks, and recommendation are recorded in `PLAYTEST_REPORT.md`. Use `MANUAL_PLAYTEST.md` to collect blind player feedback that automated scenarios cannot provide.
 
+Run the complete Phase 14 automated gate, including exact comparison with pre-conversion commit `de767cf`, with:
+
+```bash
+npm run evaluate:phase14
+```
+
+This requires the Jev-enabled local server to be running. Provider parity is written to `PHASE14_PARITY_REPORT.md`; local browser observations, separated findings, and the remaining human gate are recorded in `PHASE14_EVALUATION.md`. Duplicate `PLAYTEST_SESSION_TEMPLATE.md` for each blind participant.
+
 ## Interaction routes
 
 - Make a polite request and explain why you need access.

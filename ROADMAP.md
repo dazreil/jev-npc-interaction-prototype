@@ -486,7 +486,7 @@ Give the complete encounter a strong opening and four visibly distinct endings w
 
 ## Phase 14 — Provider and Human Evaluation
 
-**Status:** Planned.
+**Status:** Automated provider parity and local browser evaluation complete on 20 September 2026. Blind external sessions remain open for the human-perception exit gate.
 
 Measure whether the new presentation improves Arthur's legibility and dramatic presence without changing the structured-decision behaviour validated in Phase 8.
 
@@ -503,6 +503,14 @@ Measure whether the new presentation improves Arthur's legibility and dramatic p
 - Automated checks and provider comparison remain green.
 - Players can explain Arthur's current attitude and describe one way his memory affected the exchange without seeing diagnostics.
 - Reported confusion is separated into presentation, dialogue-content, and decision-quality findings.
+
+### Verification Record
+
+- The unchanged comparison harness passed 28/28 Mock and live Jev core checks, 2/2 failure-recovery checks, complete 12-action coverage for both providers, and dialogue lint with 220 possible lines.
+- `PHASE14_PARITY_REPORT.md` records exact action and outcome parity with pre-conversion commit `de767cf` across all 28 core rows and all 10 generalization rows.
+- Local eSpeak/WASM worker turns completed and returned input in the Codex browser, Chrome 153, and Safari 26.0.1 on macOS 26.0.1. Safari's timed silent path also completed. Firefox and Edge were unavailable on this machine and are not claimed as tested.
+- `PHASE14_EVALUATION.md` separates presentation, dialogue, and decision findings. No decision-rule or dialogue change was justified by this automated pass.
+- `MANUAL_PLAYTEST.md` and `PLAYTEST_SESSION_TEMPLATE.md` contain the blind protocol, emotional-legibility, memory, voice, timing, retro-authenticity, and apparent-agency measures. Completed blind records are still needed before marking the phase complete.
 
 ## Phase 15 — Release Polish
 
