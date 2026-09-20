@@ -451,7 +451,7 @@ Add replaceable speech and sound systems while keeping captions authoritative an
 - Replay, mute, volume, and skip controls are keyboard-accessible; the voice indicator distinguishes audible browser speech from silent fallback animation.
 - Optional Web Audio provides a low warehouse hum and authored interface, relay, warning, and door-unlock cues through a band-limited compressed effects chain. Browser media failures remain silent and non-blocking.
 - Browser verification covered responsive layout, the single incoming-message display, the restored shadowed player endpoint, fallback playback, skip, replay, mute, volume, focusable controls, and a clean console. The test browser exposed neither Web Speech nor Web Audio, so real voice and device-specific sound quality remain explicit Phase 14 checks.
-- The full automated suite passes with 44 tests plus dialogue lint covering 12 actions, 143 fragments, 13 templates, 6 branches, and 162 possible lines.
+- The full automated suite passes with 46 tests plus dialogue lint covering 12 actions, 147 fragments, 14 templates, 7 branches, and 165 possible lines. `ASK_FOR_REASON` is now a one-time prompt per conversational attempt, preventing Arthur from looping through reworded versions of the same question; a deliberate repair can reopen it.
 
 ## Phase 13 — Outcomes and Authored Performance Pass
 
@@ -464,7 +464,7 @@ Give the complete encounter a strong opening and four visibly distinct endings w
 - A short connection/boot sequence that establishes the security-terminal fiction.
 - Four presentation endings: entry granted, refused, expelled, and locked out.
 - Backwards-compatible simulation outcomes so existing rules and tests remain useful.
-- Optional dialogue metadata for portrait cue, speech preset, timing, and sound effects, with safe defaults for all 162 possible lines.
+- Optional dialogue metadata for portrait cue, speech preset, timing, and sound effects, with safe defaults for all 165 possible lines.
 - A repetition and tone audit covering common routes and terminal responses.
 
 ### Acceptance Checks

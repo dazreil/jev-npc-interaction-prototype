@@ -92,6 +92,33 @@ test("asking Arthur's name uses the authored name response", async () => {
   assert.equal(isNameQuestion("your name what is it"), true);
 });
 
+test("Arthur asks for the player's purpose once instead of repeating variations", async () => {
+  const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+
+  const prompt = await game.takeTurn("Hello.");
+  assert.equal(prompt.decision.action, "ASK_FOR_REASON");
+  assert.equal(game.getAvailableActions().includes("ASK_FOR_REASON"), false);
+
+  const vagueReply = await game.takeTurn("That's all I'm saying.");
+  assert.equal(vagueReply.decision.action, "REFUSE_ENTRY");
+  assert.equal(game.getAvailableActions().includes("ASK_FOR_REASON"), false);
+});
+
+test("repair deliberately reopens Arthur's purpose prompt", async () => {
+  const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+
+  await game.takeTurn("Hello.");
+  await game.takeTurn("You're a useless guard.");
+  const repair = await game.takeTurn("I'm sorry. I lost my temper. Let's start over.");
+
+  assert.equal(repair.decision.action, "REPAIR_CONVERSATION");
+  assert.equal(game.getAvailableActions().includes("ASK_FOR_REASON"), true);
+
+  const restartedPrompt = await game.takeTurn("All right.");
+  assert.equal(restartedPrompt.decision.action, "ASK_FOR_REASON");
+  assert.equal(game.getAvailableActions().includes("ASK_FOR_REASON"), false);
+});
+
 test("a repeated threat ends the conversation and records memory", async () => {
   const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
 

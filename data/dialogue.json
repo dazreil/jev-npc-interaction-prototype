@@ -46,6 +46,17 @@
                 "I can't risk the building over something left inside."
               ]
             }
+          },
+          {
+            "when": { "lastAction": "ASK_FOR_REASON" },
+            "template": "{unansweredBoundary}",
+            "slots": {
+              "unansweredBoundary": [
+                "I already asked why you're here. Without a clear answer, this conversation goes no further.",
+                "You still haven't given me a reason I can act on. The door stays closed.",
+                "That doesn't explain your business here. I'm not opening the door on guesswork."
+              ]
+            }
           }
         ]
       },

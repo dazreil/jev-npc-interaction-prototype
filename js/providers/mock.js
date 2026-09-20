@@ -431,6 +431,15 @@ export async function chooseNpcAction(context, availableActions) {
   if (context.playerInput.trim() === "[[invalid]]") return decision;
   if (availableActions.includes(decision.action)) return decision;
 
+  if (decision.action === "ASK_FOR_REASON") {
+    return decide(
+      "REFUSE_ENTRY",
+      Math.min(decision.confidence, 0.8),
+      "Arthur already asked for a clear purpose, so he holds the boundary instead of repeating the question.",
+      { suspicion: 3, irritation: 2 }
+    );
+  }
+
   const fallback = availableActions.includes("BECOME_SUSPICIOUS")
     ? "BECOME_SUSPICIOUS"
     : "REFUSE_ENTRY";

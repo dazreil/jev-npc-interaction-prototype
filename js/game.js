@@ -109,6 +109,7 @@ export class Game {
     this.history = [];
     this.turn = 0;
     this.status = "active";
+    this.reasonPrompted = false;
     this.lastDecision = null;
     this.lastContext = null;
     this.lastRawResponse = null;
@@ -153,6 +154,10 @@ export class Game {
     );
 
     return AVAILABLE_ACTIONS.filter((action) => {
+      if (action === "ASK_FOR_REASON" && this.reasonPrompted) {
+        return false;
+      }
+
       if (action === "ALLOW_ENTRY") {
         return hasEntryBasis && !hasUnrepairedRisk && state.suspicion < 78 && state.irritation < 71;
       }
@@ -264,6 +269,8 @@ export class Game {
     });
 
     this.turn += 1;
+    if (decision.action === "ASK_FOR_REASON") this.reasonPrompted = true;
+    if (decision.action === "REPAIR_CONVERSATION") this.reasonPrompted = false;
     this.history.push({ speaker: "player", text: input });
     this.history.push({ speaker: "arthur", text: dialogue, action: decision.action });
     this.history = this.history.slice(-MAX_HISTORY_ENTRIES);
@@ -299,6 +306,7 @@ export class Game {
       history: structuredClone(this.history),
       turn: this.turn,
       status: this.status,
+      reasonPrompted: this.reasonPrompted,
       lastDecision: this.lastDecision ? structuredClone(this.lastDecision) : null,
       lastContext: this.lastContext ? structuredClone(this.lastContext) : null,
       lastRawResponse: this.lastRawResponse ? structuredClone(this.lastRawResponse) : null,
