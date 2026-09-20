@@ -20,14 +20,28 @@ await Promise.all(
 );
 
 const browserBundle = resolve(destination, "piper-tts-web.js");
-const source = await readFile(browserBundle, "utf8");
+let source = await readFile(browserBundle, "utf8");
 const bareImport = 'import("onnxruntime-web/wasm")';
 if (!source.includes(bareImport)) {
   throw new Error("Piper bundle no longer contains the expected ONNX bare import.");
 }
+source = source.replaceAll(bareImport, 'import("./ort/ort.wasm.min.js")');
+
+// piper-tts-web forces ONNX Runtime to use every logical CPU. That requires a
+// cross-origin-isolated page and is unreliable in Safari even when isolation
+// is enabled. Keep Safari and ordinary localhost pages on ONNX's supported
+// single-threaded WASM path; isolated non-Safari deployments may use up to four.
+const forcedThreadCount = "ort.env.wasm.numThreads = navigator.hardwareConcurrency;";
+if (!source.includes(forcedThreadCount)) {
+  throw new Error("Piper bundle no longer contains the expected ONNX thread setting.");
+}
+source = source.replaceAll(
+  forcedThreadCount,
+  "ort.env.wasm.numThreads = globalThis.crossOriginIsolated && !/^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;"
+);
 await writeFile(
   browserBundle,
-  source.replaceAll(bareImport, 'import("./ort/ort.wasm.min.js")'),
+  source,
   "utf8"
 );
 
