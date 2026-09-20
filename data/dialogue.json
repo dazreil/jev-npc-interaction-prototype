@@ -1,5 +1,5 @@
 {
-  "opening": "Evening. Warehouse is closed. What do you want?",
+  "opening": "Evening. Warehouse is closed for the night.",
   "actions": {
     "ANSWER_QUESTION": {
       "neutral": [
@@ -52,9 +52,9 @@
             "template": "{unansweredBoundary}",
             "slots": {
               "unansweredBoundary": [
-                "I already asked why you're here. Without a clear answer, this conversation goes no further.",
-                "You still haven't given me a reason I can act on. The door stays closed.",
-                "That doesn't explain your business here. I'm not opening the door on guesswork."
+                "You haven't told me what you want. I'm keeping the door shut.",
+                "If you won't tell me why you're here, I can't help you.",
+                "That still doesn't tell me what you want. The door stays closed."
               ]
             }
           }
@@ -65,27 +65,18 @@
       "hostile": "No. You're not going through that door."
     },
     "ASK_FOR_REASON": {
-      "neutral": {
-        "template": "{opening} {question}",
-        "slots": {
-          "opening": [
-            "Let's start at the beginning.",
-            "Before we go any further,",
-            "All right."
-          ],
-          "question": [
-            "Why are you here at this hour?",
-            "Tell me what you need inside.",
-            "What business do you have with the warehouse?"
-          ]
-        }
-      },
-      "friendly": [
-        "All right. Tell me what brings you here this late.",
-        "I'm listening. What is it you need from the warehouse?"
+      "neutral": [
+        "All right. What do you need from the warehouse?",
+        "So, what brings you out here this late?",
+        "Tell me why you're here.",
+        "What are you looking for inside?"
       ],
-      "irritated": "Then give me one good reason you're still standing here.",
-      "hostile": "Last chance. Why are you here?"
+      "friendly": [
+        "All right. What can I help you with?",
+        "Go on, then. What do you need?"
+      ],
+      "irritated": "You're still here, so say what you want.",
+      "hostile": "Say what you came for."
     },
     "ASK_FOR_PROOF": {
       "neutral": {
@@ -273,8 +264,8 @@
             "Thank you for saying that."
           ],
           "nextStep": [
-            "We can start again, but be straight with me this time. What do you need inside?",
-            "I'm still cautious, but you have a chance to explain yourself clearly."
+            "Tell me what you actually need and we'll go from there.",
+            "Fine. Say what happened, straight."
           ]
         },
         "branches": [
@@ -287,12 +278,12 @@
                 "Thank you for being honest."
               ],
               "boundary": [
-                "The story still needs to be straight from here.",
-                "That does not erase the contradiction, but it gives us a way forward."
+                "I'm still not sure I believe you.",
+                "That story still doesn't add up."
               ],
               "nextStep": [
-                "Tell me what you really need inside.",
-                "Start again and give me the clear version."
+                "So tell me what really brought you here.",
+                "Tell me the truth about why you're here."
               ]
             }
           },
@@ -317,12 +308,12 @@
         ]
       },
       "friendly": [
-        "I appreciate the honesty. Let's start over and work out what you actually need.",
-        "All right, we can reset this. Give me the clear version and I'll listen."
+        "I appreciate the honesty. Tell me what you actually need.",
+        "All right. Say it straight and I'll hear you out."
       ],
       "irritated": [
-        "That helps, but it doesn't erase what happened. Start again and tell me the truth.",
-        "I'll give you one chance to straighten this out. What is your real reason for being here?"
+        "That helps, but it doesn't wipe out what happened. Tell me the truth.",
+        "You've got one chance. What are you really here for?"
       ],
       "hostile": "I hear the apology. Keep your distance and explain yourself carefully."
     },

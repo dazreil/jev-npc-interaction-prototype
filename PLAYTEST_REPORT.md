@@ -1,6 +1,6 @@
 # Phase 8 Content and Evaluation Playtest Report
 
-Generated: 2026-09-20T02:19:37.763Z
+Generated: 2026-09-20T02:25:16.956Z
 Jev model observed: jev-1.13.0
 
 ## Core Scenario Results
@@ -77,7 +77,7 @@ Confidence is recorded as an evaluation signal and does not by itself pass or fa
 | Provider | Turns | Average confidence | Minimum confidence | Below 0.50 | Mean top-two margin |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | mock | 34 | 0.88 | 0.78 | 0 | — |
-| jev | 34 | 0.89 | 0.45 | 2 | 0.85 |
+| jev | 34 | 0.89 | 0.43 | 2 | 0.85 |
 
 ## Dialogue Content Audit
 
@@ -85,7 +85,7 @@ Dialogue lint: PASS
 
 | Actions | Authored fragments | Template entries | Conditional branches | Possible rendered lines | Warnings |
 | ---: | ---: | ---: | ---: | ---: | ---: |
-| 12 | 147 | 14 | 7 | 165 | 0 |
+| 12 | 144 | 13 | 7 | 160 | 0 |
 
 ## Failure Handling
 
@@ -104,9 +104,9 @@ Dialogue lint: PASS
 - Confusing or unexpected action choices: none in this run.
 - Missing authored dialogue: none in this run.
 - Unresolved dialogue template slots: none in this run.
-- Low-confidence turns below 0.50: jev / Repeated hostility after a warning: END_CONVERSATION at 0.47; jev / Distress acknowledged without granting access: SHOW_SYMPATHY at 0.45.
+- Low-confidence turns below 0.50: jev / Repeated hostility after a warning: END_CONVERSATION at 0.46; jev / Distress acknowledged without granting access: SHOW_SYMPATHY at 0.43.
 - Unique authored replies observed: 18.
-- Dialogue lint: passed with no errors; 165 possible rendered lines.
+- Dialogue lint: passed with no errors; 160 possible rendered lines.
 - Mock action coverage: 12/12.
 - Jev action coverage in the comparison scenarios: 12/12.
 
@@ -120,7 +120,7 @@ Retain Jev as the optional intelligent provider: it matched the Mock provider on
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | Good evening, sir. | ASK_FOR_REASON | 0.79 | Let's start at the beginning. Why are you here at this hour? | PASS |
+| 1 | Good evening, sir. | ASK_FOR_REASON | 0.79 | All right. What do you need from the warehouse? | PASS |
 | 2 | Why is the warehouse closed? | ANSWER_QUESTION | 0.82 | The warehouse is closed until morning. My job is to make sure it stays that way. | PASS |
 | 3 | I left my phone inside. Please let me in. | REFUSE_ENTRY | 0.86 | I believe the item may be yours. A personal errand still doesn't justify opening a closed warehouse. | PASS |
 
@@ -157,7 +157,7 @@ Retain Jev as the optional intelligent provider: it matched the Mock provider on
 | ---: | --- | --- | ---: | --- | --- |
 | 1 | I'm from head office for a night inspection. | ASK_FOR_PROOF | 0.88 | If that's true, you'll have something to prove it. Identification. A work order. Anything. | PASS |
 | 2 | Actually, I need my phone from inside. | BECOME_SUSPICIOUS | 0.96 | Hold on. Your account has changed. Give me the honest version. | PASS |
-| 3 | I'm sorry. I was frustrated and should have explained myself clearly. | REPAIR_CONVERSATION | 0.94 | All right. I hear you. That does not erase the contradiction, but it gives us a way forward. Tell me what you really need inside. | PASS |
+| 3 | I'm sorry. I was frustrated and should have explained myself clearly. | REPAIR_CONVERSATION | 0.94 | All right. I hear you. That story still doesn't add up. So tell me what really brought you here. | PASS |
 | 4 | Here is my work ID badge and signed authorisation letter. | ALLOW_ENTRY | 0.91 | That checks out. Stay where I can see you and don't touch anything you haven't mentioned. | PASS |
 
 ### mock: Bribe attempt
@@ -219,39 +219,39 @@ Retain Jev as the optional intelligent provider: it matched the Mock provider on
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | The regional director sent me to audit tonight's inventory. | ASK_FOR_REASON | 0.79 | Let's start at the beginning. Why are you here at this hour? | REVIEW |
+| 1 | The regional director sent me to audit tonight's inventory. | ASK_FOR_REASON | 0.79 | All right. What do you need from the warehouse? | REVIEW |
 
 ### mock: Implied bribe without money keywords
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | Perhaps a private reward would persuade you to overlook the rules. | ASK_FOR_REASON | 0.79 | Let's start at the beginning. Why are you here at this hour? | REVIEW |
+| 1 | Perhaps a private reward would persuade you to overlook the rules. | ASK_FOR_REASON | 0.79 | All right. What do you need from the warehouse? | REVIEW |
 
 ### mock: Technical danger without emergency keywords
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | The vessel temperature is climbing past its safe limit and could rupture before dawn. | ASK_FOR_REASON | 0.79 | Let's start at the beginning. Why are you here at this hour? | REVIEW |
+| 1 | The vessel temperature is climbing past its safe limit and could rupture before dawn. | ASK_FOR_REASON | 0.79 | All right. What do you need from the warehouse? | REVIEW |
 
 ### mock: Veiled threat without explicit threat keywords
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | Someone outside is getting impatient. Refuse again and this could become unpleasant for you. | ASK_FOR_REASON | 0.79 | Let's start at the beginning. Why are you here at this hour? | REVIEW |
+| 1 | Someone outside is getting impatient. Refuse again and this could become unpleasant for you. | ASK_FOR_REASON | 0.79 | All right. What do you need from the warehouse? | REVIEW |
 
 ### mock: Departure expressed with unfamiliar wording
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | This is pointless. I'm heading home. | ASK_FOR_REASON | 0.79 | Let's start at the beginning. Why are you here at this hour? | REVIEW |
+| 1 | This is pointless. I'm heading home. | ASK_FOR_REASON | 0.79 | All right. What do you need from the warehouse? | REVIEW |
 
 ### jev: Polite visitor with no evidence
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | Good evening, sir. | ASK_FOR_REASON | 0.99 | Let's start at the beginning. Why are you here at this hour? | PASS |
-| 2 | Why is the warehouse closed? | ANSWER_QUESTION | 0.92 | The warehouse is closed until morning. My job is to make sure it stays that way. | PASS |
-| 3 | I left my phone inside. Please let me in. | REFUSE_ENTRY | 0.86 | I believe the item may be yours. A personal errand still doesn't justify opening a closed warehouse. | PASS |
+| 1 | Good evening, sir. | ASK_FOR_REASON | 0.99 | All right. What do you need from the warehouse? | PASS |
+| 2 | Why is the warehouse closed? | ANSWER_QUESTION | 0.95 | The warehouse is closed until morning. My job is to make sure it stays that way. | PASS |
+| 3 | I left my phone inside. Please let me in. | REFUSE_ENTRY | 0.80 | I believe the item may be yours. A personal errand still doesn't justify opening a closed warehouse. | PASS |
 
 ### jev: Head-office claim followed by credible proof
 
@@ -285,21 +285,21 @@ Retain Jev as the optional intelligent provider: it matched the Mock provider on
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
 | 1 | I'm from head office for a night inspection. | ASK_FOR_PROOF | 0.99 | If that's true, you'll have something to prove it. Identification. A work order. Anything. | PASS |
-| 2 | Actually, I need my phone from inside. | BECOME_SUSPICIOUS | 0.77 | Hold on. Your account has changed. Give me the honest version. | PASS |
-| 3 | I'm sorry. I was frustrated and should have explained myself clearly. | REPAIR_CONVERSATION | 1.00 | All right. I hear you. That does not erase the contradiction, but it gives us a way forward. Tell me what you really need inside. | PASS |
-| 4 | Here is my work ID badge and signed authorisation letter. | ALLOW_ENTRY | 0.70 | That checks out. Stay where I can see you and don't touch anything you haven't mentioned. | PASS |
+| 2 | Actually, I need my phone from inside. | BECOME_SUSPICIOUS | 0.76 | Hold on. Your account has changed. Give me the honest version. | PASS |
+| 3 | I'm sorry. I was frustrated and should have explained myself clearly. | REPAIR_CONVERSATION | 1.00 | All right. I hear you. That story still doesn't add up. So tell me what really brought you here. | PASS |
+| 4 | Here is my work ID badge and signed authorisation letter. | ALLOW_ENTRY | 0.79 | That checks out. Stay where I can see you and don't touch anything you haven't mentioned. | PASS |
 
 ### jev: Bribe attempt
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | I can pay you fifty quid if you quietly open the door. | BECOME_SUSPICIOUS | 0.78 | Offering me something makes this look worse. Keep your money and explain why you're really here. | PASS |
+| 1 | I can pay you fifty quid if you quietly open the door. | BECOME_SUSPICIOUS | 0.75 | Offering me something makes this look worse. Keep your money and explain why you're really here. | PASS |
 
 ### jev: Direct forced-entry threat against courageous Arthur
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | I'm going in anyway. You can't stop me. | WARN_PLAYER | 0.77 | Careful. Keep this civil and we won't have a problem. | PASS |
+| 1 | I'm going in anyway. You can't stop me. | WARN_PLAYER | 0.78 | Careful. Keep this civil and we won't have a problem. | PASS |
 
 ### jev: Gun threat at the warehouse door
 
@@ -319,30 +319,30 @@ Retain Jev as the optional intelligent provider: it matched the Mock provider on
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
 | 1 | You're a useless guard. | WARN_PLAYER | 0.96 | The insult doesn't help you. Speak civilly if you want me to keep listening. | PASS |
-| 2 | I said you're useless. Shut up and open the door. | END_CONVERSATION | 0.47 | We're done here. Leave. | PASS |
+| 2 | I said you're useless. Shut up and open the door. | END_CONVERSATION | 0.46 | We're done here. Leave. | PASS |
 
 ### jev: Distress acknowledged without granting access
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | My family is depending on me and I could lose my job. I know this isn't your fault. | SHOW_SYMPATHY | 0.45 | I understand you're in a difficult spot. I still have a duty to protect this place. | PASS |
+| 1 | My family is depending on me and I could lose my job. I know this isn't your fault. | SHOW_SYMPATHY | 0.43 | I understand you're in a difficult spot. I still have a duty to protect this place. | PASS |
 
 ### jev: Apology and recovery after an insult
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | You're a useless guard. | WARN_PLAYER | 0.97 | The insult doesn't help you. Speak civilly if you want me to keep listening. | PASS |
+| 1 | You're a useless guard. | WARN_PLAYER | 0.96 | The insult doesn't help you. Speak civilly if you want me to keep listening. | PASS |
 | 2 | I'm sorry. I lost my temper. Let's start over. | REPAIR_CONVERSATION | 1.00 | All right. I hear you. Keep it civil and we can continue. Explain what brought you here. | PASS |
-| 3 | I'm the maintenance engineer for the alarm panel. | ASK_FOR_PROOF | 0.94 | You've explained that more clearly now, so I still need something I can verify. Your ID, a work order, or a reference will do. | PASS |
+| 3 | I'm the maintenance engineer for the alarm panel. | ASK_FOR_PROOF | 0.95 | You've explained that more clearly now, so I still need something I can verify. Your ID, a work order, or a reference will do. | PASS |
 | 4 | Here is my maintenance ID and ticket reference 417. | ALLOW_ENTRY | 0.99 | That checks out. Stay where I can see you and don't touch anything you haven't mentioned. | PASS |
 
 ### jev: Sympathy-based appeal followed by cooperation
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | Please help me. I could lose my job, and I understand you have rules. | ASK_FOR_REASON | 0.61 | Let's start at the beginning. Why are you here at this hour? | PASS |
+| 1 | Please help me. I could lose my job, and I understand you have rules. | ASK_FOR_REASON | 0.56 | All right. What do you need from the warehouse? | PASS |
 | 2 | Thank you for hearing me out. I'm the maintenance engineer for the alarm panel. | ASK_FOR_PROOF | 0.99 | That sounds official, you'll have something to prove it. Identification. A work order. Anything. | PASS |
-| 3 | Here is my maintenance ID and ticket reference 417. | ALLOW_ENTRY | 0.95 | That checks out. Stay where I can see you and don't touch anything you haven't mentioned. | PASS |
+| 3 | Here is my maintenance ID and ticket reference 417. | ALLOW_ENTRY | 0.97 | That checks out. Stay where I can see you and don't touch anything you haven't mentioned. | PASS |
 
 ### jev: Unfamiliar wording for a legitimate work claim
 
@@ -354,7 +354,7 @@ Retain Jev as the optional intelligent provider: it matched the Mock provider on
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | Perhaps a private reward would persuade you to overlook the rules. | BECOME_SUSPICIOUS | 0.85 | Offering me something makes this look worse. Keep your money and explain why you're really here. | PASS |
+| 1 | Perhaps a private reward would persuade you to overlook the rules. | BECOME_SUSPICIOUS | 0.83 | Offering me something makes this look worse. Keep your money and explain why you're really here. | PASS |
 
 ### jev: Technical danger without emergency keywords
 
@@ -366,7 +366,7 @@ Retain Jev as the optional intelligent provider: it matched the Mock provider on
 
 | Turn | Player input | Selected action | Confidence | Authored reply | Check |
 | ---: | --- | --- | ---: | --- | --- |
-| 1 | Someone outside is getting impatient. Refuse again and this could become unpleasant for you. | WARN_PLAYER | 0.83 | Careful. Keep this civil and we won't have a problem. | PASS |
+| 1 | Someone outside is getting impatient. Refuse again and this could become unpleasant for you. | WARN_PLAYER | 0.87 | Careful. Keep this civil and we won't have a problem. | PASS |
 
 ### jev: Departure expressed with unfamiliar wording
 
