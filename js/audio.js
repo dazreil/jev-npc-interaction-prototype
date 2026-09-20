@@ -126,6 +126,43 @@ export class PeriodAudio {
     return first;
   }
 
+  playIntercomKeyUp() {
+    const relay = this.playRelay();
+    if (this.muted || !this.ensureContext()) return relay;
+
+    try {
+      const sampleRate = this.context.sampleRate || 44100;
+      const duration = 0.48;
+      const buffer = this.context.createBuffer(1, Math.ceil(sampleRate * duration), sampleRate);
+      const noise = buffer.getChannelData(0);
+      let seed = 41;
+      for (let index = 0; index < noise.length; index += 1) {
+        seed = (seed * 16807) % 2147483647;
+        noise[index] = ((seed / 2147483647) * 2 - 1) * 0.22;
+      }
+
+      const source = this.context.createBufferSource();
+      const bandpass = this.context.createBiquadFilter();
+      const envelope = this.context.createGain();
+      const start = this.context.currentTime + 0.08;
+      bandpass.type = "bandpass";
+      bandpass.frequency.value = 1180;
+      bandpass.Q.value = 0.75;
+      envelope.gain.setValueAtTime(0.0001, start);
+      envelope.gain.exponentialRampToValueAtTime(0.018, start + 0.025);
+      envelope.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      source.buffer = buffer;
+      source.connect(bandpass);
+      bandpass.connect(envelope);
+      envelope.connect(this.input);
+      source.start(start);
+      source.stop(start + duration + 0.02);
+      return true;
+    } catch {
+      return relay;
+    }
+  }
+
   playWarning() {
     const first = this.tone({ frequency: 330, duration: 0.12, gain: 0.035 });
     this.tone({ frequency: 247, duration: 0.15, gain: 0.035, delay: 0.13 });

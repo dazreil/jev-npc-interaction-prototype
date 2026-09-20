@@ -8,7 +8,12 @@ import {
 import { determineTone } from "./npc.js";
 import { PERFORMANCE_PHASES, PerformanceController } from "./performance.js";
 import { PortraitAnimator } from "./portrait.js";
-import { BrowserSpeechAdapter, ESpeakWasmAdapter, SpeechDirector } from "./speech.js";
+import {
+  BrowserSpeechAdapter,
+  ESpeakWasmAdapter,
+  PiperSpeechAdapter,
+  SpeechDirector
+} from "./speech.js";
 import { chooseNpcAction as chooseJevAction } from "./providers/jev.js?phase=4";
 import { chooseNpcAction as chooseMockAction } from "./providers/mock.js";
 
@@ -107,12 +112,26 @@ let bootRunId = 0;
 let gateRunId = 0;
 let gateAnimationTimer = null;
 const periodAudio = new PeriodAudio();
+const browserSpeech = new BrowserSpeechAdapter();
+const espeakSpeech = new ESpeakWasmAdapter({
+  fallback: browserSpeech,
+  contextFactory: () => {
+    periodAudio.ensureContext();
+    return periodAudio.context;
+  }
+});
 const speechDirector = new SpeechDirector({
-  adapter: new ESpeakWasmAdapter({
-    fallback: new BrowserSpeechAdapter(),
+  adapter: new PiperSpeechAdapter({
+    fallback: espeakSpeech,
     contextFactory: () => {
       periodAudio.ensureContext();
       return periodAudio.context;
+    },
+    onProgress: ({ loaded, total }) => {
+      if (!(total > 0)) return;
+      const percent = Math.min(100, Math.max(0, Math.round((loaded / total) * 100)));
+      elements.linkStatus.textContent = `Voice ${percent}%`;
+      elements.linkStatus.title = `Gatehouse link: calibrating neural voice ${percent}%`;
     }
   })
 });
@@ -124,6 +143,7 @@ const performanceController = new PerformanceController({
   wait: (durationMs, phase, performance) => {
     if (phase !== PERFORMANCE_PHASES.SPEAKING) return delay(durationMs);
 
+    periodAudio.playIntercomKeyUp();
     return speechDirector.deliver(performance, {
       onStart: ({ mode, engine }) => {
         portraitAnimator.startTalking();
@@ -149,14 +169,17 @@ const portraitAnimator = new PortraitAnimator({
 
 function renderVoiceEngine(engine) {
   const labels = {
+    piper: "NEURAL",
     "espeak-wasm": "WASM",
     "web-speech": "Browser",
     timed: "Silent",
     muted: "Muted"
   };
-  elements.voiceEngine.textContent = labels[engine] ?? "WASM";
+  elements.voiceEngine.textContent = labels[engine] ?? "NEURAL";
   elements.voiceEngine.title =
-    engine === "espeak-wasm"
+    engine === "piper"
+      ? "Piper neural voice running locally through WebAssembly"
+      : engine === "espeak-wasm"
       ? "eSpeak NG running locally through WebAssembly"
       : engine === "web-speech"
         ? "Browser speech fallback"
@@ -464,6 +487,7 @@ function renderOutcome(outcome = "active") {
 
 async function playBootSequence() {
   const runId = ++bootRunId;
+  speechDirector.prepare();
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const stepDelay = reducedMotion ? 20 : 260;
   const steps = [
@@ -588,7 +612,7 @@ async function replayLastLine() {
   elements.replayButton.disabled = true;
   speechDirector.prepare();
   await periodAudio.resume();
-  periodAudio.playRelay();
+  periodAudio.playIntercomKeyUp();
   activeArthurFrame.classList.add("is-speaking");
 
   await speechDirector.deliver(lastPerformance, {
@@ -724,7 +748,7 @@ elements.audioToggle.addEventListener("click", async () => {
     await periodAudio.resume();
     periodAudio.startAmbience();
     periodAudio.playInterfaceClick();
-    renderVoiceEngine("espeak-wasm");
+    renderVoiceEngine("piper");
   } else {
     renderVoiceEngine("muted");
   }

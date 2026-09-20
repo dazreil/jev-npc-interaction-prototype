@@ -150,7 +150,7 @@
               <div class="system-lamps" aria-label="Intercom system indicators">
                 <span><i class="lamp lamp--on" aria-hidden="true"></i> Video</span>
                 <span><i class="lamp lamp--on" aria-hidden="true"></i> Text</span>
-                <span><i id="voice-lamp" class="lamp" aria-hidden="true"></i> Voice <b id="voice-engine">WASM</b></span>
+                <span><i id="voice-lamp" class="lamp" aria-hidden="true"></i> Voice <b id="voice-engine">NEURAL</b></span>
               </div>
 
               <div class="audio-deck" aria-label="Speech and audio controls">
@@ -311,7 +311,8 @@
             <div><dt>South-gate animation</dt><dd>Original AI-assisted pixel artwork</dd></div>
             <div><dt>NPC dialogue</dt><dd>Hand-authored for this encounter</dd></div>
             <div><dt>Decision systems</dt><dd>Deterministic Mock and optional TypeSafe Jev</dd></div>
-            <div><dt>Local speech</dt><dd>eSpeak NG WebAssembly, GPL-3.0</dd></div>
+            <div><dt>Primary speech</dt><dd>Piper neural voice and ONNX Runtime WebAssembly</dd></div>
+            <div><dt>Speech fallback</dt><dd>eSpeak NG WebAssembly, GPL-3.0</dd></div>
             <div><dt>Interface typeface</dt><dd>VT323 by Peter Hull, SIL Open Font License</dd></div>
           </dl>
           <p class="credits-note">Full license text and project notices are included with the source release.</p>
@@ -342,7 +343,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=16.1";
+        appScript.src = "js/app.js?phase=16.2";
         document.body.append(appScript);
       }
     </script>

@@ -1,4 +1,5 @@
 .env
 node_modules/
 assets/vendor/espeak-ng/
+assets/vendor/piper/
 .DS_Store

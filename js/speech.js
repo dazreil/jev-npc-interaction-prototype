@@ -43,6 +43,102 @@ function finiteInRange(value, fallback, minimum, maximum) {
     : fallback;
 }
 
+const SENTENCE_ABBREVIATIONS = new Set(["mr.", "mrs.", "dr.", "st.", "no."]);
+
+function hardSplitSentence(sentence, maximumLength = 220) {
+  const chunks = [];
+  let remainder = sentence.trim();
+
+  while (remainder.length > maximumLength) {
+    const window = remainder.slice(0, maximumLength + 1);
+    let splitAt = window.lastIndexOf(",");
+    if (splitAt < Math.floor(maximumLength * 0.45)) splitAt = window.lastIndexOf(" ");
+    if (splitAt <= 0) splitAt = maximumLength;
+    else if (window[splitAt] === ",") splitAt += 1;
+
+    chunks.push(remainder.slice(0, splitAt).trim());
+    remainder = remainder.slice(splitAt).trim();
+  }
+  if (remainder) chunks.push(remainder);
+  return chunks;
+}
+
+export function splitIntoSentences(text) {
+  const input = String(text ?? "").trim();
+  if (!input) return [];
+
+  const sentences = [];
+  let start = 0;
+  for (let index = 0; index < input.length; index += 1) {
+    const character = input[index];
+    if (![".", "!", "?"].includes(character)) continue;
+
+    const next = input[index + 1];
+    if (next && !/\s/.test(next)) continue;
+    if (
+      character === "." &&
+      /\d/.test(input[index - 1] ?? "") &&
+      /\d/.test(input[index + 1] ?? "")
+    ) {
+      continue;
+    }
+
+    const fragment = input.slice(start, index + 1).trim();
+    const finalWord = fragment.match(/(?:^|\s)([^\s]+)$/)?.[1]?.toLowerCase();
+    if (character === "." && SENTENCE_ABBREVIATIONS.has(finalWord)) continue;
+
+    if (fragment) sentences.push(fragment);
+    start = index + 1;
+  }
+  const remainder = input.slice(start).trim();
+  if (remainder) sentences.push(remainder);
+
+  const merged = [];
+  for (let index = 0; index < sentences.length; index += 1) {
+    const sentence = sentences[index];
+    if (sentence.length < 12 && index + 1 < sentences.length) {
+      sentences[index + 1] = `${sentence} ${sentences[index + 1]}`;
+    } else {
+      merged.push(sentence);
+    }
+  }
+
+  return merged.flatMap((sentence) => hardSplitSentence(sentence));
+}
+
+function createIntercomAudioGraph(context) {
+  const highpass = context.createBiquadFilter();
+  const lowpass = context.createBiquadFilter();
+  const compressor = context.createDynamicsCompressor();
+  const master = context.createGain();
+
+  highpass.type = "highpass";
+  highpass.frequency.value = 170;
+  lowpass.type = "lowpass";
+  lowpass.frequency.value = 3900;
+  compressor.threshold.value = -26;
+  compressor.knee.value = 8;
+  compressor.ratio.value = 6;
+  compressor.attack.value = 0.006;
+  compressor.release.value = 0.16;
+
+  highpass.connect(lowpass);
+  lowpass.connect(compressor);
+  compressor.connect(master);
+  master.connect(context.destination);
+  return { input: highpass, lowpass, master };
+}
+
+function applyIntercomPreset({ context, lowpass }, audioPreset) {
+  if (!lowpass) return;
+  const frequency = {
+    "warm-intercom": 4300,
+    "clipped-intercom": 3300,
+    "warning-intercom": 2900
+  }[audioPreset] ?? 3900;
+  lowpass.frequency.setValueAtTime(frequency, context.currentTime);
+}
+
 export function resolveSpeechProfile(tone = "neutral", action = "", overrides = {}) {
   const base = SPEECH_PROFILES[tone] ?? SPEECH_PROFILES.neutral;
   const actionOverrides = ACTION_SPEECH_OVERRIDES[action] ?? {};
@@ -155,6 +251,307 @@ export class BrowserSpeechAdapter {
   }
 }
 
+export class PiperSpeechAdapter {
+  constructor({
+    voiceId = "en_GB-northern_english_male-medium",
+    workerUrl = "/js/piper-worker.js",
+    workerFactory = typeof globalThis.Worker === "function"
+      ? (url) => new Worker(url, { type: "module" })
+      : null,
+    contextFactory = () => {
+      const AudioContext = globalThis.AudioContext ?? globalThis.webkitAudioContext;
+      return AudioContext ? new AudioContext() : null;
+    },
+    fallback = new ESpeakWasmAdapter(),
+    runtimeTimeoutMs = 120000,
+    // The first run downloads roughly 60 MB. This watchdog measures silence,
+    // not total duration, so a slow but advancing download is never killed.
+    loadStallTimeoutMs = 90000,
+    schedule = (callback, delay) => setTimeout(callback, delay),
+    cancelSchedule = (timer) => clearTimeout(timer),
+    onProgress = () => {},
+    wasmSupported = Boolean(globalThis.WebAssembly)
+  } = {}) {
+    this.voiceId = voiceId;
+    this.workerUrl = workerUrl;
+    this.workerFactory = workerFactory;
+    this.contextFactory = contextFactory;
+    this.fallback = fallback;
+    this.runtimeTimeoutMs = runtimeTimeoutMs;
+    this.loadStallTimeoutMs = loadStallTimeoutMs;
+    this.schedule = schedule;
+    this.cancelSchedule = cancelSchedule;
+    this.onProgress = onProgress;
+    this.wasmSupported = wasmSupported;
+    this.context = null;
+    this.input = null;
+    this.lowpass = null;
+    this.master = null;
+    this.worker = null;
+    this.workerRequests = new Map();
+    this.workerRequestId = 0;
+    this.preparationState = "idle";
+    this.preparationPromise = null;
+    this.runtimeFailed = false;
+    this.active = null;
+    this.runId = 0;
+  }
+
+  get supported() {
+    const piperSupported = this.wasmSupported && Boolean(this.workerFactory) && !this.runtimeFailed;
+    return piperSupported || Boolean(this.fallback?.supported);
+  }
+
+  ensureAudioGraph() {
+    if (this.context) return true;
+    try {
+      this.context = this.contextFactory();
+      if (!this.context) return false;
+      const graph = createIntercomAudioGraph(this.context);
+      this.input = graph.input;
+      this.lowpass = graph.lowpass;
+      this.master = graph.master;
+      return true;
+    } catch {
+      this.context = null;
+      return false;
+    }
+  }
+
+  ensureWorker() {
+    if (this.worker) return this.worker;
+    if (!this.workerFactory) return null;
+
+    const worker = this.workerFactory(this.workerUrl);
+    worker.addEventListener("message", ({ data }) => {
+      if (data?.type === "progress") {
+        this.refreshPreloadWatchdog();
+        this.onProgress({ loaded: data.loaded, total: data.total });
+        return;
+      }
+      const request = this.workerRequests.get(data?.id);
+      if (!request) return;
+      this.workerRequests.delete(data.id);
+      this.cancelSchedule(request.timer);
+      if (data.type === "error") request.reject(new Error(data.message || "Piper worker failed."));
+      else request.resolve(data);
+    });
+    worker.addEventListener("error", () => this.failWorker(new Error("Piper worker failed.")));
+    this.worker = worker;
+    return worker;
+  }
+
+  failWorker(error) {
+    const worker = this.worker;
+    this.worker = null;
+    worker?.terminate?.();
+    for (const request of this.workerRequests.values()) {
+      this.cancelSchedule(request.timer);
+      request.reject(error);
+    }
+    this.workerRequests.clear();
+  }
+
+  requestWorker(type, payload = {}) {
+    const worker = this.ensureWorker();
+    if (!worker) return Promise.reject(new Error("Web Workers are unavailable."));
+
+    return new Promise((resolve, reject) => {
+      const id = ++this.workerRequestId;
+      const timeoutMs = type === "preload" ? this.loadStallTimeoutMs : this.runtimeTimeoutMs;
+      const expire = () => {
+        this.workerRequests.delete(id);
+        const error = new Error(`Piper worker ${type} timed out.`);
+        error.code = type === "synthesize" ? "PIPER_SYNTHESIS_TIMEOUT" : "PIPER_LOAD_TIMEOUT";
+        reject(error);
+      };
+      const timer = this.schedule(expire, timeoutMs);
+      this.workerRequests.set(id, { resolve, reject, timer, type, expire, timeoutMs });
+      try {
+        worker.postMessage({ id, type, voiceId: this.voiceId, ...payload });
+      } catch (error) {
+        this.workerRequests.delete(id);
+        this.cancelSchedule(timer);
+        reject(error);
+      }
+    });
+  }
+
+  /** Restarts the pending preload watchdog because the download advanced. */
+  refreshPreloadWatchdog() {
+    for (const request of this.workerRequests.values()) {
+      if (request.type !== "preload") continue;
+      this.cancelSchedule(request.timer);
+      request.timer = this.schedule(request.expire, request.timeoutMs);
+    }
+  }
+
+  prepare() {
+    if (!this.wasmSupported || !this.workerFactory || this.runtimeFailed) {
+      return Promise.resolve(this.fallback?.prepare?.() ?? false);
+    }
+    if (this.preparationState === "ready") return Promise.resolve(true);
+    if (this.preparationPromise) return this.preparationPromise;
+
+    this.preparationState = "loading";
+    this.preparationPromise = this.requestWorker("preload")
+      .then(() => {
+        this.preparationState = "ready";
+        return true;
+      })
+      .catch(async (error) => {
+        // A stalled download can be retried later. The game keeps playing on the
+        // fallback voice meanwhile and upgrades once Piper becomes available.
+        if (error?.code === "PIPER_LOAD_TIMEOUT") {
+          this.preparationState = "idle";
+        } else {
+          this.runtimeFailed = true;
+          this.preparationState = "failed";
+        }
+        this.preparationPromise = null;
+        await this.fallback?.prepare?.();
+        return false;
+      });
+    return this.preparationPromise;
+  }
+
+  stopActive(status = "cancelled") {
+    if (!this.active) return false;
+    const active = this.active;
+    this.active = null;
+    for (const timer of active.startTimers) this.cancelSchedule(timer);
+    for (const item of active.sources) {
+      item.source.onended = null;
+      try {
+        item.source.stop();
+      } catch {
+        // A source that has ended or has not started needs no further cleanup.
+      }
+      item.finish(status);
+    }
+    return true;
+  }
+
+  async speak({
+    text,
+    rate,
+    pitch,
+    volume,
+    audioPreset = "intercom",
+    onStart = () => {}
+  }) {
+    this.cancel();
+    const runId = this.runId;
+    const sentences = splitIntoSentences(text);
+    if (sentences.length === 0) return { status: "ended", started: false };
+
+    if (this.preparationState !== "ready") {
+      if (this.preparationState === "idle") this.prepare();
+      return this.fallback.speak({ text, rate, pitch, volume, audioPreset, onStart });
+    }
+
+    if (!this.ensureAudioGraph()) {
+      return this.fallback.speak({ text, rate, pitch, volume, audioPreset, onStart });
+    }
+    try {
+      if (this.context.state !== "running") await this.context.resume();
+      if (this.context.state !== "running") {
+        return this.fallback.speak({ text, rate, pitch, volume, audioPreset, onStart });
+      }
+    } catch {
+      return this.fallback.speak({ text, rate, pitch, volume, audioPreset, onStart });
+    }
+    if (runId !== this.runId) return { status: "cancelled", started: false };
+
+    applyIntercomPreset(this, audioPreset);
+    this.master.gain.setValueAtTime(
+      finiteInRange(volume, 0.72, 0, 1),
+      this.context.currentTime
+    );
+
+    const playbackRate = finiteInRange(rate, 1, 0.5, 1.5) * finiteInRange(pitch, 1, 0.4, 1.4);
+    const active = { sources: [], startTimers: [] };
+    this.active = active;
+    const completions = [];
+    let cursor = null;
+    let started = false;
+
+    try {
+      for (const sentence of sentences) {
+        const result = await this.requestWorker("synthesize", { text: sentence });
+        if (runId !== this.runId) return { status: "cancelled", started };
+
+        const pcm = new Float32Array(result.samples);
+        if (pcm.length === 0) throw new Error("Piper returned no audio samples.");
+        const sampleRate = result.sampleRate || 22050;
+        const buffer = this.context.createBuffer(1, pcm.length, sampleRate);
+        buffer.copyToChannel(pcm, 0);
+        const source = this.context.createBufferSource();
+        source.buffer = buffer;
+        source.playbackRate.value = playbackRate;
+        source.connect(this.input);
+
+        let finishPlayback;
+        const completion = new Promise((resolve) => {
+          let settled = false;
+          finishPlayback = (status) => {
+            if (settled) return;
+            settled = true;
+            resolve(status);
+          };
+        });
+        const item = { source, finish: finishPlayback };
+        active.sources.push(item);
+        completions.push(completion);
+        source.onended = () => finishPlayback("ended");
+
+        const now = this.context.currentTime;
+        const startTime = cursor === null ? now + 0.05 : Math.max(now, cursor);
+        source.start(startTime);
+        if (!started) {
+          const startTimer = this.schedule(() => {
+            if (runId !== this.runId || started) return;
+            started = true;
+            onStart({ engine: "piper" });
+          }, Math.max(0, (startTime - now) * 1000));
+          active.startTimers.push(startTimer);
+        }
+        const duration = Number.isFinite(buffer.duration)
+          ? buffer.duration
+          : pcm.length / sampleRate;
+        cursor = startTime + duration / playbackRate;
+      }
+
+      const statuses = await Promise.all(completions);
+      if (this.active === active) this.active = null;
+      if (runId !== this.runId || statuses.some((status) => status === "cancelled")) {
+        return { status: "cancelled", started };
+      }
+      return { status: "ended", started };
+    } catch (error) {
+      if (runId !== this.runId) return { status: "cancelled", started };
+      this.stopActive("cancelled");
+      if (started) return { status: error?.code === "PIPER_SYNTHESIS_TIMEOUT" ? "timeout" : "error", started };
+      return this.fallback.speak({ text, rate, pitch, volume, audioPreset, onStart });
+    }
+  }
+
+  cancel() {
+    this.runId += 1;
+    let cancelled = this.stopActive("cancelled");
+    for (const [id, request] of this.workerRequests) {
+      if (request.type !== "synthesize") continue;
+      this.workerRequests.delete(id);
+      this.cancelSchedule(request.timer);
+      const error = new Error("Piper request cancelled.");
+      error.code = "PIPER_CANCELLED";
+      request.reject(error);
+      cancelled = true;
+    }
+    return this.fallback?.cancel?.() || cancelled;
+  }
+}
+
 function concatenatePcmChunks(chunks) {
   const length = chunks.reduce((total, chunk) => total + chunk.length, 0);
   const samples = new Float32Array(length);
@@ -231,26 +628,10 @@ export class ESpeakWasmAdapter {
       this.context = this.contextFactory();
       if (!this.context) return false;
 
-      const highpass = this.context.createBiquadFilter();
-      this.lowpass = this.context.createBiquadFilter();
-      const compressor = this.context.createDynamicsCompressor();
-      this.master = this.context.createGain();
-
-      highpass.type = "highpass";
-      highpass.frequency.value = 170;
-      this.lowpass.type = "lowpass";
-      this.lowpass.frequency.value = 3900;
-      compressor.threshold.value = -26;
-      compressor.knee.value = 8;
-      compressor.ratio.value = 6;
-      compressor.attack.value = 0.006;
-      compressor.release.value = 0.16;
-
-      highpass.connect(this.lowpass);
-      this.lowpass.connect(compressor);
-      compressor.connect(this.master);
-      this.master.connect(this.context.destination);
-      this.input = highpass;
+      const graph = createIntercomAudioGraph(this.context);
+      this.input = graph.input;
+      this.lowpass = graph.lowpass;
+      this.master = graph.master;
       return true;
     } catch {
       this.context = null;
@@ -371,13 +752,7 @@ export class ESpeakWasmAdapter {
   }
 
   applyPreset(audioPreset) {
-    if (!this.lowpass) return;
-    const frequency = {
-      "warm-intercom": 4300,
-      "clipped-intercom": 3300,
-      "warning-intercom": 2900
-    }[audioPreset] ?? 3900;
-    this.lowpass.frequency.setValueAtTime(frequency, this.context.currentTime);
+    applyIntercomPreset(this, audioPreset);
   }
 
   async speak({

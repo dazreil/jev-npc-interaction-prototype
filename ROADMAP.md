@@ -569,6 +569,38 @@ The first eight phases established and evaluated the simulation. Continue in thi
 - Full generated video, multiple camera scenes, inventory systems, or quests.
 - A frontend-framework migration or mobile-first redesign.
 
+## Phase 16 — Neural Speech
+
+**Status:** Complete and verified on 20 September 2026 in the Chromium-based in-app browser. Firefox, Safari, and Edge remain an unrun compatibility target for this phase.
+
+Replace eSpeak NG as Arthur's voice so he sounds like a recorded person, without weakening any existing guarantee.
+
+### Why the voice changed
+
+eSpeak NG builds speech from rules rather than from recordings, so its robotic character cannot be tuned away. It is also GPL-3.0, which is a liability for a distributed game.
+
+Pre-rendering every authored line to audio files was evaluated and rejected: the dialogue is still being revised, and `data/dialogue.json` interpolates `[[playerName]]` and `[[address]]` from free text the player types, which cannot be recorded in advance. Speech must therefore be synthesised at runtime.
+
+Piper was chosen over Kokoro: Kokoro's delivery is recognisably the "AI narrator" voice used by social video apps, which breaks the 1995 period fiction.
+
+### What shipped
+
+- `PiperSpeechAdapter` in `js/speech.js`, behind the same interface as the existing adapters, so `SpeechDirector` is unchanged.
+- `js/piper-worker.js`, which owns the Piper session, parses the returned WAV header, and transfers Float32 PCM back to the main thread. Inference never touches the interface thread.
+- Sentence streaming. Each line is split by `splitIntoSentences`, synthesised one sentence at a time, and scheduled gaplessly on the Web Audio clock. Measured on the development machine, this cut the wait before a 7.2 second line from 2383 ms to 731 ms; each sentence is produced faster than the previous one takes to play, so playback never starves.
+- An intercom key-up click over the remaining delay, via `PeriodAudio.playIntercomKeyUp`.
+- A four-step fallback chain: Piper, then eSpeak NG, then Web Speech, then timed captions.
+- A download watchdog that measures stalled progress rather than total elapsed time. The first 60 MB download can take many minutes; a flat timeout previously expired mid-download and disabled Piper for the whole session. A stall now leaves Piper retryable, and only a genuine load error disables it.
+- `scripts/install-piper-assets.mjs`, which vendors the runtime, ONNX Runtime, and every licence file, and rewrites the library's bare `onnxruntime-web/wasm` specifier to a relative path. Import maps do not apply inside Web Workers, so that rewrite is what makes off-thread synthesis possible at all.
+
+### Verified
+
+Arthur speaks in the Piper voice with the **VOICE** indicator reading `NEURAL`; a player-typed name is spoken correctly; multi-sentence lines play without gaps; the interface stays responsive during synthesis; a new submission mid-speech cancels cleanly with no overlapping audio; muting silences speech while the turn still completes; and blocking the model leaves a fully playable game on the eSpeak fallback. `npm run check` passes with 91 tests.
+
+### Known constraint
+
+The shipped voice, `en_GB-northern_english_male-medium`, has MIT weights but was trained on a CC-BY-SA 4.0 dataset. Attribution is expected and share-alike may extend to generated audio. Review before any commercial release; the voice is one constructor argument and the adapter is replaceable. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 ## Immediate Next Milestone
 
 Run the documented blind human sessions and, before public hosting, repeat the smoke check in current Firefox and Edge builds. Those sessions are evaluation and release operations; no further game phase is required for the vertical slice.
