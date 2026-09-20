@@ -28,6 +28,19 @@ export const AVAILABLE_ACTIONS = Object.freeze([
 export const FALLBACK_ACTION = "REFUSE_ENTRY";
 export const MAX_HISTORY_ENTRIES = 12;
 export const MAX_MEMORIES = 8;
+export const PLAYER_ADDRESS_TERMS = Object.freeze(["pal", "sir", "mate", "friend"]);
+
+const PLAYER_ADDRESS_TOKEN = "[[address]]";
+
+function choosePlayerAddress(random) {
+  const roll = Number(random());
+  const normalized = Number.isFinite(roll) ? Math.min(Math.max(roll, 0), 0.999999) : 0;
+  return PLAYER_ADDRESS_TERMS[Math.floor(normalized * PLAYER_ADDRESS_TERMS.length)];
+}
+
+function personalizeDialogue(line, playerAddress) {
+  return String(line).replaceAll(PLAYER_ADDRESS_TOKEN, playerAddress);
+}
 
 export class DecisionProviderError extends Error {
   constructor(providerId, message) {
@@ -95,11 +108,12 @@ export function validateDecision(rawDecision, availableActions = AVAILABLE_ACTIO
 }
 
 export class Game {
-  constructor({ npcTemplate, dialogueData, provider, providerId = "mock" }) {
+  constructor({ npcTemplate, dialogueData, provider, providerId = "mock", random = Math.random }) {
     this.npcTemplate = npcTemplate;
     this.dialogueData = dialogueData;
     this.provider = provider;
     this.providerId = providerId;
+    this.random = random;
     this.reset();
   }
 
@@ -110,6 +124,7 @@ export class Game {
     this.turn = 0;
     this.status = "active";
     this.reasonPrompted = false;
+    this.playerAddress = choosePlayerAddress(this.random);
     this.lastDecision = null;
     this.lastContext = null;
     this.lastRawResponse = null;
@@ -125,6 +140,10 @@ export class Game {
 
     this.provider = provider;
     this.providerId = providerId;
+  }
+
+  getOpeningDialogue() {
+    return personalizeDialogue(this.dialogueData.opening, this.playerAddress);
   }
 
   getAvailableActions() {
@@ -257,16 +276,19 @@ export class Game {
       this.lastContext.availableActions
     );
     const tone = determineTone(this.npc.state);
-    const dialogue = selectDialogue(this.dialogueData, decision.action, tone, this.turn, {
-      playerInput: input,
-      dialogueContext: {
-        memories: this.memories,
-        history: this.history,
-        state: this.npc.state,
-        action: decision.action,
-        turn: this.turn + 1
-      }
-    });
+    const dialogue = personalizeDialogue(
+      selectDialogue(this.dialogueData, decision.action, tone, this.turn, {
+        playerInput: input,
+        dialogueContext: {
+          memories: this.memories,
+          history: this.history,
+          state: this.npc.state,
+          action: decision.action,
+          turn: this.turn + 1
+        }
+      }),
+      this.playerAddress
+    );
 
     this.turn += 1;
     if (decision.action === "ASK_FOR_REASON") this.reasonPrompted = true;
@@ -307,6 +329,7 @@ export class Game {
       turn: this.turn,
       status: this.status,
       reasonPrompted: this.reasonPrompted,
+      playerAddress: this.playerAddress,
       lastDecision: this.lastDecision ? structuredClone(this.lastDecision) : null,
       lastContext: this.lastContext ? structuredClone(this.lastContext) : null,
       lastRawResponse: this.lastRawResponse ? structuredClone(this.lastRawResponse) : null,

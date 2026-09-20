@@ -1,14 +1,14 @@
 {
-  "opening": "Evening. Warehouse is closed for the night.",
+  "opening": "Evening, [[address]]. Sorry, but the warehouse is closed for the night.",
   "actions": {
     "ANSWER_QUESTION": {
       "neutral": [
-        "Night shift. I watch the door, and the door stays shut unless someone belongs here.",
+        "Night shift, [[address]]. I watch the door, and the door stays shut unless someone belongs here.",
         "The warehouse is closed until morning. My job is to make sure it stays that way."
       ],
       "name": [
-        "Arthur. I'm the night guard here. What do you need?",
-        "Name's Arthur. I keep watch here after dark. Who are you?"
+        "Arthur, [[address]]. I'm the night guard here. What do you need?",
+        "Name's Arthur, [[address]]. I keep watch here after dark. Who are you?"
       ],
       "friendly": "Just keeping an eye on the place. Quiet night, mostly — and I'd like to keep it that way.",
       "irritated": "You can ask questions all night. It won't make the warehouse open.",
@@ -60,20 +60,20 @@
           }
         ]
       },
-      "friendly": "I'd help if I could, but I can't risk letting you through.",
+      "friendly": "I'd help if I could, [[address]], but I can't risk letting you through.",
       "irritated": "I've already told you. You're not getting in.",
       "hostile": "No. You're not going through that door."
     },
     "ASK_FOR_REASON": {
       "neutral": [
-        "All right. What do you need from the warehouse?",
-        "So, what brings you out here this late?",
-        "Tell me why you're here.",
-        "What are you looking for inside?"
+        "All right, [[address]]. What do you need from the warehouse?",
+        "So, [[address]], what brings you out here this late?",
+        "Tell me why you're here, [[address]].",
+        "What are you looking for inside, [[address]]?"
       ],
       "friendly": [
-        "All right. What can I help you with?",
-        "Go on, then. What do you need?"
+        "All right, [[address]]. What can I help you with?",
+        "Go on, then, [[address]]. What do you need?"
       ],
       "irritated": "You're still here, so say what you want.",
       "hostile": "Say what you came for."
@@ -93,7 +93,7 @@
           ],
           "close": [
             "Identification. A work order. Anything.",
-            "What have you got?",
+            "What have you got, [[address]]?",
             "Give me a pass, a reference, or a document."
           ]
         },
@@ -126,7 +126,7 @@
       "hostile": "Proof. Now. Or this conversation is over."
     },
     "ALLOW_ENTRY": {
-      "neutral": "That checks out. Stay where I can see you and don't touch anything you haven't mentioned.",
+      "neutral": "That checks out, [[address]]. Stay where I can see you and don't touch anything you haven't mentioned.",
       "friendly": "All right. You've been straight with me. I'll let you through.",
       "irritated": "Fine. In, do the job, and come straight back out.",
       "hostile": "You're going in under my watch. One wrong move and you're back outside."
@@ -179,7 +179,7 @@
       "irritated": "I hear you. Keep the weapon down and stay where you are. We can sort this out if you tell me what you need.",
       "hostile": "Easy. Keep the gun down and don't move closer. Tell me what you want and we'll take this one step at a time.",
       "weapon": [
-        "Keep the weapon pointed at the ground. I'm not going to make any sudden moves. Tell me what you need.",
+        "Keep the weapon pointed at the ground, [[address]]. I'm not going to make any sudden moves. Tell me what you need.",
         "All right. Keep the gun lowered and take a breath. Nobody needs to get hurt; tell me what brought you here.",
         "I hear you. Keep the weapon down and stay where you are. We can sort this out if you tell me what you need."
       ]
@@ -200,7 +200,7 @@
         "slots": {
           "acknowledgement": [
             "I understand you're in a difficult spot.",
-            "I hear you.",
+            "I hear you, [[address]].",
             "I don't want this to cost you your job."
           ],
           "boundary": [
@@ -223,7 +223,7 @@
         "slots": {
           "challenge": [
             "Something about that doesn't add up.",
-            "Hold on. Your account has changed.",
+            "Hold on, [[address]]. Your account has changed.",
             "That's not the reason you gave me before."
           ],
           "request": [
@@ -260,7 +260,7 @@
         "template": "{acknowledgement} {nextStep}",
         "slots": {
           "acknowledgement": [
-            "All right. I hear you.",
+            "All right, [[address]]. I hear you.",
             "Thank you for saying that."
           ],
           "nextStep": [
@@ -274,7 +274,7 @@
             "template": "{acknowledgement} {boundary} {nextStep}",
             "slots": {
               "acknowledgement": [
-                "All right. I hear you.",
+                "All right, [[address]]. I hear you.",
                 "Thank you for being honest."
               ],
               "boundary": [
@@ -293,7 +293,7 @@
             "slots": {
               "acknowledgement": [
                 "I appreciate the apology.",
-                "All right. I hear you."
+                "All right, [[address]]. I hear you."
               ],
               "boundary": [
                 "Keep it civil and we can continue.",
@@ -319,7 +319,7 @@
     },
     "END_CONVERSATION": {
       "neutral": "We're done here. Leave.",
-      "friendly": "I can't help you. Please go home.",
+      "friendly": "I can't help you, [[address]]. Please go home.",
       "irritated": "That's enough. We're done. Leave the property.",
       "hostile": "Conversation over. Get off the property before I call the police.",
       "weapon": "Keep the weapon lowered and step away from the door. I'm ending this conversation so nobody gets hurt."

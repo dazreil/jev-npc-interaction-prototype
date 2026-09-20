@@ -359,7 +359,7 @@ function renderInitialScene() {
   lastPerformance = null;
   elements.conversation.replaceChildren();
   elements.playerMessage.textContent = "Awaiting transmission.";
-  appendMessage("arthur", dialogueData.opening);
+  appendMessage("arthur", game.getOpeningDialogue());
   renderDebug(game.getSnapshot());
   renderOutcome("active");
   elements.input.value = "";

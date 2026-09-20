@@ -92,6 +92,29 @@ test("asking Arthur's name uses the authored name response", async () => {
   assert.equal(isNameQuestion("your name what is it"), true);
 });
 
+test("Arthur keeps one randomly selected form of address until reset", async () => {
+  const personalizedDialogueData = structuredClone(dialogueData);
+  personalizedDialogueData.opening = "Evening, [[address]].";
+  personalizedDialogueData.actions.ANSWER_QUESTION.neutral = "Still here, [[address]].";
+  const randomValues = [0, 0.6];
+  const game = new Game({
+    npcTemplate,
+    dialogueData: personalizedDialogueData,
+    provider: chooseNpcAction,
+    random: () => randomValues.shift()
+  });
+
+  assert.equal(game.getOpeningDialogue(), "Evening, pal.");
+  assert.equal(game.getSnapshot().playerAddress, "pal");
+  assert.equal((await game.takeTurn("What time is it?")).dialogue, "Still here, pal.");
+  assert.equal((await game.takeTurn("Who are you?")).dialogue, "Still here, pal.");
+
+  game.reset();
+
+  assert.equal(game.getOpeningDialogue(), "Evening, mate.");
+  assert.equal(game.getSnapshot().playerAddress, "mate");
+});
+
 test("Arthur asks for the player's purpose once instead of repeating variations", async () => {
   const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
 

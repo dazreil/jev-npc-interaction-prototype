@@ -155,8 +155,18 @@ test("presentation failure reaches a safe phase and leaves game state applied on
 });
 
 test("rendering-disabled and lifecycle-driven scenarios keep identical simulation results", async () => {
-  const withoutRenderer = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
-  const withLifecycle = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+  const withoutRenderer = new Game({
+    npcTemplate,
+    dialogueData,
+    provider: chooseNpcAction,
+    random: () => 0
+  });
+  const withLifecycle = new Game({
+    npcTemplate,
+    dialogueData,
+    provider: chooseNpcAction,
+    random: () => 0
+  });
   const controller = instantController();
   const inputs = [
     "I'm from head office and need access, please.",
