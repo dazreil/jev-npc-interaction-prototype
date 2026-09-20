@@ -132,10 +132,10 @@ function chooseRawDecision(context) {
       return decide(
         "DEESCALATE_THREAT",
         0.96,
-        "Arthur sees the weapon on the exterior camera. He remains inside the locked gatehouse, makes clear that threatening the intercom cannot open the secured entrance, and calmly asks the player to lower it.",
+        "Arthur sees the weapon on the gate intercom camera. He remains inside Guard Tower 04, makes clear that threatening the intercom cannot open the car-park gate, and calmly asks the player to lower it.",
         { trust: -2, suspicion: 12, irritation: 4, fear: 4 },
         {
-          fact: "Player displayed a weapon outside the locked gatehouse and threatened Arthur over the intercom",
+          fact: "Player displayed a weapon outside the locked car-park gate and threatened Arthur over the intercom",
           importance: 95,
           tags: ["threat", "weapon", "hostility"]
         }
@@ -287,7 +287,7 @@ function chooseRawDecision(context) {
     return decide(
       "ALLOW_ENTRY",
       0.91,
-      "The player's evidence supports an earlier work-related claim, reducing the risk enough for supervised entry.",
+      "The player's evidence supports an earlier work-related claim well enough for Arthur to open the car-park gate and inspect the originals at Guard Tower 04.",
       { trust: 25, suspicion: -24, irritation: -7 },
       {
         fact:

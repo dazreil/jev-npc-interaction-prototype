@@ -23,6 +23,10 @@ import { chooseNpcAction } from "../js/providers/mock.js";
 const npcTemplate = {
   id: "arthur",
   name: "Arthur",
+  cognition: {
+    estimatedIq: 95,
+    style: "Practical and ordinary. Uses simple reasoning and everyday language."
+  },
   personality: { patience: 35, greed: 25, courage: 70, sympathy: 55, ruleFollowing: 80 },
   state: { trust: 20, suspicion: 40, irritation: 10, fear: 5 },
   goals: [{ id: "protect_warehouse", label: "Protect warehouse", priority: 100 }]
@@ -221,7 +225,7 @@ test("ordinary repair language gets a contextual human proof request", async () 
 
   assert.equal(
     game.getOpeningDialogue(),
-    "Good evening, sir. You're outside at the south-gate intercom; I'm inside the locked gatehouse. We're closed for the night, so what brings you here?"
+    "Good evening, sir. South gate is closed. What brings you here?"
   );
 
   const purpose = await game.takeTurn(
@@ -230,7 +234,7 @@ test("ordinary repair language gets a contextual human proof request", async () 
   assert.equal(purpose.decision.action, "ASK_FOR_PROOF");
   assert.equal(
     purpose.dialogue,
-    "David. Thank you. Coffee machines at this hour? All right, sir. Let me see the work order and your ID."
+    "David. Thank you. Coffee machines at this hour? All right, sir. Hold the work order and your ID up to the camera."
   );
   assert.equal(game.getSnapshot().playerName, "David");
   assert.equal(game.getSnapshot().lastContext.player.name, "David");
@@ -240,12 +244,13 @@ test("ordinary repair language gets a contextual human proof request", async () 
   assert.equal(repeatedPurpose.decision.action, "ASK_FOR_PROOF");
   assert.equal(
     repeatedPurpose.dialogue,
-    "I understand, sir. What I need now is the work order or your ID."
+    "I understand, sir. Hold the work order or your ID up to the camera."
   );
 
   const proof = await game.takeTurn("I have a work order here.");
   assert.equal(proof.decision.action, "ALLOW_ENTRY");
-  assert.match(proof.dialogue, /matches up|let you through|cleared to go in/i);
+  assert.match(proof.dialogue, /car-park access|car-park gate/i);
+  assert.match(proof.dialogue, /Guard Tower 04|original/i);
   assert.doesNotMatch(proof.dialogue, /documents are in order|authorise|supervision/i);
 });
 
@@ -359,11 +364,15 @@ test("a first gun threat uses an authored de-escalation response and serious mem
 
   assert.equal(isWeaponThreat(turn.playerInput), true);
   assert.equal(turn.decision.action, "DEESCALATE_THREAT");
-  assert.match(turn.dialogue, /outside camera|outside the south gate/i);
-  assert.match(turn.dialogue, /inside a locked gatehouse|behind the security door/i);
-  assert.match(turn.dialogue, /won't open this door|can't make this intercom unlock/i);
-  assert.equal(game.getSnapshot().lastContext.world.playerLocation, "outside the locked south gate");
-  assert.match(game.getSnapshot().lastContext.world.physicalSeparation, /locked security door/i);
+  assert.match(turn.dialogue, /gate camera|outside the car-park gate/i);
+  assert.match(turn.dialogue, /guard tower|in the tower/i);
+  assert.match(turn.dialogue, /won't open the car-park gate|can't make this intercom unlock/i);
+  assert.equal(
+    game.getSnapshot().lastContext.world.playerLocation,
+    "outside the locked warehouse car-park gate"
+  );
+  assert.match(game.getSnapshot().lastContext.world.physicalSeparation, /car-park perimeter gate/i);
+  assert.match(game.getSnapshot().lastContext.world.entryScope, /does not grant warehouse entry/i);
   assert.ok(game.memories[0].tags.includes("weapon"));
 });
 

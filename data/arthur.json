@@ -1,7 +1,11 @@
 {
   "id": "arthur",
   "name": "Arthur",
-  "role": "Night security guard",
+  "role": "South-gate night security guard",
+  "cognition": {
+    "estimatedIq": 95,
+    "style": "Practical and ordinary. Uses simple reasoning and everyday language, and assumes late-night visitors already understand the basic gate procedure."
+  },
   "personality": {
     "patience": 35,
     "greed": 25,
@@ -18,7 +22,7 @@
   "goals": [
     {
       "id": "protect_warehouse",
-      "label": "Protect warehouse",
+      "label": "Protect warehouse grounds",
       "priority": 100
     },
     {

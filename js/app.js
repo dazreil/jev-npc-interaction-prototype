@@ -346,15 +346,15 @@ async function refreshJevStatus() {
 
 const OUTCOME_PRESENTATIONS = Object.freeze({
   entry_granted: {
-    title: "Access granted",
-    code: "Door unlocked",
-    copy: "Arthur releases the south-gate lock. You are inside.",
+    title: "Car park access granted",
+    code: "South gate opening",
+    copy: "Arthur opens the car-park gate. Report to Guard Tower 04 with the original documents.",
     door: "Open"
   },
   refused: {
     title: "Access refused",
     code: "Visitor departed",
-    copy: "Arthur keeps the warehouse secured as you leave the gate.",
+    copy: "Arthur keeps the car-park gate closed as you leave.",
     door: "Denied"
   },
   expelled: {

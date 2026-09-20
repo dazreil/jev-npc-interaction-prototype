@@ -11,6 +11,10 @@ import {
 const context = {
   npc: {
     id: "arthur",
+    cognition: {
+      estimatedIq: 95,
+      style: "Practical and ordinary. Uses simple reasoning and everyday language."
+    },
     personality: { patience: 35, greed: 25, courage: 70, sympathy: 55, ruleFollowing: 80 },
     state: { trust: 20, suspicion: 40, irritation: 10, fear: 5 },
     goals: [{ id: "protect_warehouse", label: "Protect warehouse", priority: 100 }],
@@ -21,13 +25,19 @@ const context = {
     }
   },
   world: {
-    location: "south gate security intercom",
+    location: "warehouse car-park south-gate intercom",
     time: "02:13",
     warehouseOpen: false,
-    playerLocation: "outside the locked south gate",
-    npcLocation: "inside the secure gatehouse within the warehouse perimeter",
+    carParkGateOpen: false,
+    warehouseAccessGranted: false,
+    playerLocation: "outside the locked warehouse car-park gate",
+    npcLocation: "inside Guard Tower 04 beyond the car-park gate",
     communicationChannel: "two-way audio and camera intercom",
-    physicalSeparation: "locked security door and warehouse perimeter separate the player from Arthur"
+    physicalSeparation: "locked car-park perimeter gate separates the player from Arthur",
+    documentCheck:
+      "Arthur can make only a preliminary visual check through the intercom camera; original documents must be shown at Guard Tower 04 after the car-park gate opens",
+    entryScope:
+      "ALLOW_ENTRY opens only the car-park gate and requires the visitor to report to Guard Tower 04; it does not grant warehouse entry"
   },
   player: { name: "David" },
   memories: [],
@@ -66,10 +76,15 @@ test("Jev request contains one Choice over exactly the available actions", () =>
   assert.equal(request.questions.next_action.criteria.ALLOW_ENTRY, undefined);
   assert.equal(request.state.latestPlayerMessage, context.playerInput);
   assert.deepEqual(request.state.npc.currentState, context.npc.state);
+  assert.deepEqual(request.state.npc.cognition, context.npc.cognition);
   assert.deepEqual(request.state.npc.characterProfile, context.npc.characterProfile);
   assert.deepEqual(request.state.player, { name: "David" });
-  assert.equal(request.state.scene.playerLocation, "outside the locked south gate");
-  assert.match(request.questions.next_action.instructions, /Never reason as though they are standing face to face/);
+  assert.equal(request.state.scene.playerLocation, "outside the locked warehouse car-park gate");
+  assert.match(request.state.scene.documentCheck, /preliminary visual check/i);
+  assert.match(
+    request.questions.next_action.instructions,
+    /Never reason as though Arthur and the player are standing face to face/
+  );
 });
 
 test("Jev receives an explicit signal when a pronoun answers Arthur's proof request", () => {
@@ -104,6 +119,8 @@ test("Jev receives an explicit signal when a pronoun answers Arthur's proof requ
     unresolvedSuspicion: false
   });
   assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /I have them/i);
+  assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /car-park gate/i);
+  assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /Guard Tower 04/i);
 });
 
 test("valid Jev choices become deterministic game decisions", () => {

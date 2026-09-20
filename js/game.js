@@ -310,6 +310,7 @@ export class Game {
     const context = {
       npc: {
         id: contextNpc.id,
+        cognition: structuredClone(contextNpc.cognition ?? null),
         personality: structuredClone(contextNpc.personality),
         state: structuredClone(contextNpc.state),
         goals: structuredClone(contextNpc.goals),
@@ -320,13 +321,19 @@ export class Game {
         }
       },
       world: {
-        location: "south gate security intercom",
+        location: "warehouse car-park south-gate intercom",
         time: "02:13",
         warehouseOpen: false,
-        playerLocation: "outside the locked south gate",
-        npcLocation: "inside the secure gatehouse within the warehouse perimeter",
+        carParkGateOpen: false,
+        warehouseAccessGranted: false,
+        playerLocation: "outside the locked warehouse car-park gate",
+        npcLocation: "inside Guard Tower 04 beyond the car-park gate",
         communicationChannel: "two-way audio and camera intercom",
-        physicalSeparation: "locked security door and warehouse perimeter separate the player from Arthur"
+        physicalSeparation: "locked car-park perimeter gate separates the player from Arthur",
+        documentCheck:
+          "Arthur can make only a preliminary visual check through the intercom camera; original documents must be shown at Guard Tower 04 after the car-park gate opens",
+        entryScope:
+          "ALLOW_ENTRY opens only the car-park gate and requires the visitor to report to Guard Tower 04; it does not grant warehouse entry"
       },
       player: {
         name: introducedPlayerName ?? this.playerName
