@@ -136,7 +136,7 @@ summary:focus-visible {
   inset: 8px;
   z-index: 40;
   display: grid;
-  place-items: center;
+  place-items: stretch;
   border: 1px solid #28352a;
   background:
     repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.28) 2px 3px),
@@ -150,29 +150,128 @@ summary:focus-visible {
 }
 
 .boot-screen {
-  width: 390px;
-  padding: 20px;
-  border: 1px solid #40533e;
-  background: rgba(4, 11, 6, 0.94);
-  box-shadow: inset 0 0 26px #000, 0 0 24px rgba(135, 184, 95, 0.08);
+  display: grid;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  gap: 14px;
+  width: min(560px, 100%);
+  height: 100%;
+  padding: 30px 32px 26px;
 }
 
 .boot-screen p {
   margin: 0;
 }
 
-.boot-brand,
-.boot-route {
-  color: #718269;
+.boot-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #3c5139;
+}
+
+.boot-vendor {
+  grid-column: 1 / -1;
+  color: var(--amber);
   font-size: 11px;
-  letter-spacing: 0.7px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.boot-bios {
+  margin-top: 2px !important;
+  color: var(--green-bright);
+  font-size: 23px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.boot-node {
+  color: #6f8268;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+/* The self-test rows persist as they report, so a long voice download reads as
+   a machine working through a list rather than one line sitting still. */
+.boot-checks {
+  display: grid;
+  gap: 5px;
+  min-height: 92px;
+  margin: 0;
+  padding: 0;
+  align-content: start;
+  list-style: none;
+}
+
+.boot-checks li {
+  display: grid;
+  grid-template-columns: auto minmax(14px, 1fr) auto;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  animation: boot-check-in 140ms steps(2, end);
+}
+
+.boot-check-label {
+  color: #9fb392;
+}
+
+.boot-check-leader {
+  height: 1px;
+  border-bottom: 1px dotted #43563f;
+  transform: translateY(-3px);
+}
+
+.boot-check-status {
+  min-width: 62px;
+  color: var(--green-bright);
+  text-align: right;
+}
+
+.boot-checks li[data-state="busy"] .boot-check-status {
+  color: var(--amber);
+}
+
+.boot-checks li[data-state="busy"] .boot-check-label {
+  color: var(--text);
+}
+
+.boot-checks li[data-state="warn"] .boot-check-status {
+  color: #e58b74;
+}
+
+.boot-route {
+  align-self: end;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  padding-top: 10px;
+  border-top: 1px solid #2c3a2a;
+  color: #6b7a63;
+  font-size: 10px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.boot-route b {
+  color: #93a888;
+  font-weight: 400;
+}
+
+@keyframes boot-check-in {
+  from { opacity: 0; }
 }
 
 .boot-message {
-  min-height: 22px;
-  margin-top: 24px !important;
-  font-size: 16px;
-  letter-spacing: 0.5px;
+  min-height: 18px;
+  color: #b9ceaa;
+  font-size: 13px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
 }
 
 .boot-message i {
@@ -181,11 +280,11 @@ summary:focus-visible {
 }
 
 .boot-progress {
-  height: 9px;
-  margin: 9px 0 24px;
+  height: 14px;
   padding: 2px;
   border: 1px solid #40533e;
   background: #020402;
+  box-shadow: inset 0 0 10px #000;
 }
 
 .boot-progress span {
@@ -346,7 +445,7 @@ summary:focus-visible {
 
 .terminal-workspace {
   display: grid;
-  grid-template-columns: 268px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 212px;
   gap: 6px;
   min-height: 0;
 }
@@ -566,6 +665,13 @@ summary:focus-visible {
   gap: 3px;
 }
 
+#audio-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
 .audio-deck button {
   min-width: 0;
   height: 22px;
@@ -714,7 +820,7 @@ summary:focus-visible {
   transform-origin: 50% 42%;
   animation: player-idle 8s steps(16, end) infinite alternate;
   image-rendering: pixelated;
-  filter: saturate(0.28) sepia(0.08) contrast(1.45) brightness(0.55);
+  filter: saturate(0.28) sepia(0.08) contrast(1.38) brightness(0.82);
 }
 
 .player-viewport::after {
@@ -783,7 +889,7 @@ summary:focus-visible {
 
 .intercom-module {
   display: grid;
-  grid-template-rows: 16px 104px 76px 46px 42px minmax(0, 1fr);
+  grid-template-rows: 16px minmax(0, 1fr) 68px 46px 42px 48px;
   gap: 4px;
   overflow: hidden;
   background:
@@ -793,14 +899,14 @@ summary:focus-visible {
 
 .intercom-feeds {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.85fr);
+  grid-template-columns: minmax(0, 1fr) 96px;
   gap: 5px;
   min-height: 0;
 }
 
 .channel-card {
   display: grid;
-  grid-template-rows: 80px 20px;
+  grid-template-rows: minmax(0, 1fr) 20px;
   gap: 3px;
   min-width: 0;
   min-height: 0;
@@ -808,21 +914,21 @@ summary:focus-visible {
 
 .intercom-module .arthur-viewport {
   width: 100%;
-  height: 80px;
+  height: 100%;
   margin: 0;
 }
 
 .intercom-module .arthur-viewport img {
-  width: 50%;
-  height: 50%;
-  object-position: 50% 28%;
-  transform: scale(2);
+  width: 54%;
+  height: 54%;
+  object-position: 50% 29%;
+  transform: scale(1.86);
 }
 
 .intercom-module .tracking-corners {
-  inset: 5px;
-  width: 9px;
-  height: 9px;
+  inset: 7px;
+  width: 13px;
+  height: 13px;
 }
 
 .intercom-module .tracking-corners::after {
@@ -830,11 +936,11 @@ summary:focus-visible {
 }
 
 .intercom-module .player-card {
-  grid-template-rows: 80px 20px;
+  grid-template-rows: minmax(0, 1fr) 20px;
 }
 
 .intercom-module .player-viewport {
-  min-height: 80px;
+  min-height: 0;
 }
 
 .channel-id {
@@ -910,7 +1016,7 @@ summary:focus-visible {
 
 .intercom-module .input-hint {
   margin-top: 2px;
-  font-size: 7px;
+  font-size: 9px;
 }
 
 .intercom-controls {
@@ -974,7 +1080,11 @@ summary:focus-visible {
   height: 100%;
   object-fit: cover;
   image-rendering: pixelated;
-  filter: saturate(0.72) contrast(1.2) brightness(0.83);
+  object-fit: contain;
+  /* The plate is a genuine night exposure: mean luma 27/255, only 2% of pixels
+     above 60. At this monitor size it needs the gain a low-light CCTV camera
+     would actually be running, not a tasteful grade. */
+  filter: saturate(0.6) contrast(1.32) brightness(1.85);
 }
 
 .gate-scan {
@@ -1037,17 +1147,26 @@ summary:focus-visible {
 }
 
 .gate-module .outcome {
-  top: auto;
+  top: 32px;
   right: 14px;
-  bottom: 45px;
+  bottom: 42px;
   left: 14px;
   width: auto;
   padding: 6px 8px;
   background: rgba(5, 12, 7, 0.9);
 }
 
+.gate-module .outcome {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 7px;
+  padding: 16px 14px;
+}
+
 .gate-module .outcome-title {
-  font-size: 13px;
+  font-size: 19px;
+  line-height: 1.05;
 }
 
 .gate-module .outcome-code {
@@ -1057,13 +1176,23 @@ summary:focus-visible {
 }
 
 .gate-module .outcome p {
-  margin: 3px 0 0;
-  font-size: 8px;
-  line-height: 1.15;
+  margin: 0;
+  font-size: 9px;
+  line-height: 1.35;
 }
 
+/* The one line telling a player how to play again was hidden here and unreadable
+   in its backup location, so the encounter ended with no way forward. */
 .gate-module .outcome small {
-  display: none;
+  display: block;
+  margin-top: 2px;
+  padding-top: 7px;
+  border-top: 1px solid currentColor;
+  color: currentColor;
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  opacity: 0.92;
 }
 
 .visually-hidden {
@@ -1156,8 +1285,13 @@ summary:focus-visible {
 
 .input-hint {
   margin: 3px 0 0 2px;
-  color: #62695b;
+  color: var(--amber);
   font-size: 8px;
+  letter-spacing: 0.4px;
+}
+
+.input-hint[data-tone="warn"] {
+  color: #e2705a;
 }
 
 .outcome {
@@ -1176,7 +1310,12 @@ summary:focus-visible {
   line-height: 1.5;
   text-align: center;
   text-transform: uppercase;
-  box-shadow: 0 8px 28px #000;
+  box-shadow: 0 8px 28px #000, inset 0 0 34px rgba(0, 0, 0, 0.75);
+  animation: outcome-stamp 220ms steps(3, end);
+}
+
+@keyframes outcome-stamp {
+  from { opacity: 0; transform: scale(1.06); }
 }
 
 .outcome-title,
@@ -1188,6 +1327,7 @@ summary:focus-visible {
 .outcome-title {
   font-size: 21px;
   letter-spacing: 1.5px;
+  text-shadow: 0 0 12px currentColor;
 }
 
 .outcome-code {
@@ -1213,14 +1353,27 @@ summary:focus-visible {
 }
 
 .outcome--refused {
-  background: rgba(17, 13, 4, 0.97);
+  border-width: 2px 2px 2px 6px;
+  background:
+    repeating-linear-gradient(135deg, rgba(225, 183, 91, 0.07) 0 7px, transparent 7px 14px),
+    rgba(17, 13, 4, 0.97);
   color: #e1b75b;
 }
 
 .outcome--expelled {
-  background: rgba(22, 8, 5, 0.97);
+  border-width: 3px;
+  background:
+    repeating-linear-gradient(45deg, rgba(229, 139, 116, 0.09) 0 6px, transparent 6px 12px),
+    rgba(22, 8, 5, 0.97);
   color: #e58b74;
-  animation: outcome-warning 180ms steps(2, end) 2;
+  animation: outcome-stamp 220ms steps(3, end), outcome-warning 180ms steps(2, end) 2 220ms;
+}
+
+.outcome--entry-granted {
+  border-style: double;
+  border-width: 4px;
+  background: rgba(5, 14, 7, 0.97);
+  color: #9fd66d;
 }
 
 .outcome--locked-out {
@@ -1428,13 +1581,6 @@ body.effects-off .player-viewport img {
   text-transform: uppercase;
 }
 
-.eyebrow {
-  color: var(--amber);
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
 .debug-header button {
   padding: 8px 12px;
 }
@@ -1557,7 +1703,7 @@ body.effects-off .player-viewport img {
 
 .decision-grid dt,
 .reason-block span {
-  color: #69705f;
+  color: #8b9280;
   font-size: 9px;
   letter-spacing: 0.5px;
   text-transform: uppercase;

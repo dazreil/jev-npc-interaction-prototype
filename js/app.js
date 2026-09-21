@@ -47,6 +47,8 @@ const elements = {
   input: document.querySelector("#player-input"),
   sendButton: document.querySelector("#send-button"),
   inputHint: document.querySelector("#input-hint"),
+  bootChecks: document.querySelector("#boot-checks"),
+  audioToggleLabel: document.querySelector("#audio-toggle-label"),
   outcome: document.querySelector("#outcome"),
   stateValues: document.querySelector("#state-values"),
   turnCount: document.querySelector("#turn-count"),
@@ -132,8 +134,8 @@ const speechDirector = new SpeechDirector({
       const percent = Math.min(100, Math.max(0, Math.round((loaded / total) * 100)));
       elements.linkStatus.textContent = `Voice ${percent}%`;
       elements.linkStatus.title = `Gatehouse link: calibrating neural voice ${percent}%`;
-      elements.bootMessage.textContent = `LOADING ARTHUR VOICE MODEL... ${percent}%`;
-      elements.bootProgressFill.style.width = `${35 + Math.round(percent * 0.6)}%`;
+      setBootCheckStatus("voice", `${percent}%`, "busy");
+      elements.bootProgressFill.style.width = `${40 + Math.round(percent * 0.58)}%`;
     }
   })
 });
@@ -161,6 +163,7 @@ const performanceController = new PerformanceController({
 });
 const portraitAnimator = new PortraitAnimator({
   onFrame: ({ cue, src, glitch }) => {
+    activeArthurPortrait.alt = PORTRAIT_ALT[cue] ?? PORTRAIT_ALT.neutral;
     activeArthurPortrait.src = src;
     activeArthurFrame.dataset.portraitCue = cue;
     activeArthurFrame.classList.toggle("is-glitching", glitch);
@@ -375,6 +378,24 @@ async function refreshJevStatus() {
   }
 }
 
+/** What Arthur's face is doing, so the performance reaches a screen reader too. */
+const PORTRAIT_ALT = Object.freeze({
+  neutral: "Arthur watching the gate camera, unreadable",
+  blink: "Arthur watching the gate camera, unreadable",
+  listening: "Arthur leaning toward the intercom, listening",
+  suspicious: "Arthur narrowing his eyes, unconvinced",
+  irritated: "Arthur jaw set, patience thinning",
+  hostile: "Arthur squared up to the camera, hostile",
+  friendly: "Arthur's face easing, warmer",
+  afraid: "Arthur drawing back from the camera, alarmed",
+  dismissive: "Arthur turning away, done with the exchange",
+  "entry-granted": "Arthur reaching for the gate release",
+  "talk-a": "Arthur speaking",
+  "talk-b": "Arthur speaking",
+  "talk-c": "Arthur speaking",
+  "talk-d": "Arthur speaking"
+});
+
 const OUTCOME_PRESENTATIONS = Object.freeze({
   entry_granted: {
     title: "Car park access granted",
@@ -482,49 +503,98 @@ function renderOutcome(outcome = "active") {
   const ended = Boolean(presentation);
   elements.input.disabled = ended;
   elements.sendButton.disabled = ended;
-  elements.inputHint.textContent = ended
-    ? "The conversation has ended. Reset the scenario to play again."
-    : "Enter to send";
+  if (ended) setInputHint("ENCOUNTER CLOSED — RESET LINK TO PLAY AGAIN", "warn");
+  else setInputHint();
+}
+
+const DEFAULT_INPUT_HINT = "Enter to send";
+
+/** Single owner of the hint line so its tone resets when the next turn starts. */
+function setInputHint(message = DEFAULT_INPUT_HINT, tone = "default") {
+  elements.inputHint.textContent = message;
+  elements.inputHint.dataset.tone = tone;
+}
+
+const BOOT_CHECKS = Object.freeze([
+  { id: "carrier", label: "Hardline carrier", progress: 12 },
+  { id: "cameras", label: "Camera 04-A / 04-B", progress: 24 },
+  { id: "audio", label: "Guard tower audio channel", progress: 36 }
+]);
+
+/** Adds a self-test row that stays on screen once it has reported. */
+function addBootCheck({ id, label }) {
+  const row = document.createElement("li");
+  row.dataset.check = id;
+  row.dataset.state = "busy";
+
+  const name = document.createElement("span");
+  name.className = "boot-check-label";
+  name.textContent = label;
+
+  const leader = document.createElement("i");
+  leader.className = "boot-check-leader";
+  leader.setAttribute("aria-hidden", "true");
+
+  const status = document.createElement("b");
+  status.className = "boot-check-status";
+  status.textContent = "····";
+
+  row.append(name, leader, status);
+  elements.bootChecks.append(row);
+  return row;
+}
+
+function setBootCheckStatus(id, text, state) {
+  const row = elements.bootChecks.querySelector(`[data-check="${id}"]`);
+  if (!row) return;
+  row.dataset.state = state;
+  row.querySelector(".boot-check-status").textContent = text;
 }
 
 async function playBootSequence() {
   const runId = ++bootRunId;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const stepDelay = reducedMotion ? 20 : 260;
-  const steps = [
-    ["CHECKING HARDLINE CARRIER...", 12],
-    ["AUTHENTICATING CAMERAS 04-A / 04-B...", 24],
-    ["OPENING GUARD TOWER AUDIO CHANNEL...", 35]
-  ];
 
   elements.bootSequence.hidden = false;
+  elements.bootChecks.replaceChildren();
   elements.input.disabled = true;
   elements.sendButton.disabled = true;
   elements.linkStatus.textContent = "Booting";
+  elements.bootMessage.textContent = "Running perimeter self-test";
   elements.bootProgressFill.style.width = "0%";
 
-  for (const [message, progress] of steps) {
+  for (const check of BOOT_CHECKS) {
     if (runId !== bootRunId) return;
-    elements.bootMessage.textContent = message;
-    elements.bootProgressFill.style.width = `${progress}%`;
+    addBootCheck(check);
+    elements.bootProgressFill.style.width = `${check.progress}%`;
     await delay(stepDelay);
+    if (runId !== bootRunId) return;
+    setBootCheckStatus(check.id, "OK", "ok");
+    periodAudio.playInterfaceClick();
   }
 
   if (runId !== bootRunId) return;
-  elements.bootMessage.textContent = "INITIALISING LOCAL PIPER VOICE...";
+  addBootCheck({ id: "voice", label: "Arthur voice model" });
+  elements.bootMessage.textContent = "Loading local neural voice";
   elements.linkStatus.textContent = "Voice init";
+  elements.bootProgressFill.style.width = "40%";
   const piperReady = await speechDirector.prepare();
 
   if (runId !== bootRunId) return;
+  setBootCheckStatus("voice", piperReady ? "OK" : "FALLBACK", piperReady ? "ok" : "warn");
   elements.bootMessage.textContent = piperReady
-    ? "ARTHUR VOICE MODEL READY"
-    : "NEURAL VOICE OFFLINE — FALLBACK READY";
-  elements.bootProgressFill.style.width = "96%";
+    ? "Arthur voice model ready"
+    : "Neural voice offline — fallback ready";
+  elements.bootProgressFill.style.width = "98%";
   await delay(stepDelay);
 
   if (runId !== bootRunId) return;
-  elements.bootMessage.textContent = "SECURITY LINK ESTABLISHED";
+  addBootCheck({ id: "link", label: "Security link" });
+  setBootCheckStatus("link", "OK", "ok");
+  elements.bootMessage.textContent = "Security link established";
   elements.bootProgressFill.style.width = "100%";
+  periodAudio.playRelay();
   await delay(stepDelay);
 
   if (runId !== bootRunId) return;
@@ -655,7 +725,16 @@ async function replayLastLine() {
 async function handleSubmit(event) {
   event.preventDefault();
   const input = elements.input.value.trim();
-  if (!input || !game || game.status !== "active") return;
+  if (!game || game.status !== "active") return;
+  if (!input) {
+    // The gate answers an empty transmission itself rather than handing the
+    // player a browser validation bubble inside the terminal.
+    setInputHint("NO CARRIER — TYPE A MESSAGE", "warn");
+    periodAudio.playDenied();
+    elements.input.focus();
+    return;
+  }
+  setInputHint();
 
   replayRunId += 1;
   speechDirector.cancel();
@@ -686,10 +765,12 @@ async function handleSubmit(event) {
       elements.providerStatus.textContent =
         `${failedProvider} failed: ${snapshot.lastProviderError} No turn was consumed.`;
       elements.providerStatus.hidden = false;
-      elements.inputHint.textContent =
-        "The provider failed. Your message is still here; check the Jev server and try again.";
+      setInputHint("LINK FAULT — YOUR MESSAGE IS INTACT. TRY AGAIN.", "warn");
     } else {
-      elements.inputHint.textContent = error.message;
+      // A raw exception string is not game copy; the fault strip owns it.
+      elements.providerStatus.textContent = `Terminal fault: ${error.message}`;
+      elements.providerStatus.hidden = false;
+      setInputHint("TERMINAL FAULT — SEE STATUS STRIP", "warn");
     }
 
     elements.input.value = input;
@@ -756,7 +837,9 @@ elements.audioToggle.addEventListener("click", async () => {
   speechDirector.setMuted(muted);
   periodAudio.setMuted(muted);
   elements.audioToggle.setAttribute("aria-pressed", String(!muted));
-  elements.audioToggle.textContent = muted ? "Audio off" : "Audio on";
+  // Writing to the button itself would remove #voice-lamp and #voice-engine,
+  // leaving every later render writing to a detached node.
+  elements.audioToggleLabel.textContent = muted ? "Audio off" : "Audio";
   elements.voiceLamp.classList.remove("lamp--on");
 
   if (!muted) {

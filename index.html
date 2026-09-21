@@ -17,7 +17,7 @@
       type="font/ttf"
       crossorigin
     />
-    <link rel="stylesheet" href="styles.css?phase=16.3" />
+    <link rel="stylesheet" href="styles.css?phase=17.8" />
   </head>
   <body>
     <div id="terminal-mount" class="terminal-mount">
@@ -26,12 +26,24 @@
 
         <section id="boot-sequence" class="boot-sequence" aria-live="polite" hidden>
           <div class="boot-screen">
-            <p class="boot-brand">WSC PERIMETER CONTROL BIOS 4.17</p>
-            <p class="boot-message"><span id="boot-message">INITIALISING SECURITY LINK...</span><i aria-hidden="true">_</i></p>
+            <div class="boot-banner">
+              <p class="boot-vendor">West Shipping Concern</p>
+              <p class="boot-bios">Perimeter Control BIOS 4.17</p>
+              <p class="boot-node">Node 04</p>
+            </div>
+
+            <ul id="boot-checks" class="boot-checks"></ul>
+
             <div class="boot-progress" aria-hidden="true">
               <span id="boot-progress-fill"></span>
             </div>
-            <p class="boot-route">INTERCOM: CAR PARK SOUTH GATE → GUARD TOWER 04</p>
+
+            <p class="boot-message"><span id="boot-message">Initialising security link</span><i aria-hidden="true">_</i></p>
+
+            <p class="boot-route">
+              <span>Intercom</span>
+              <b>Car park south gate → Guard Tower 04</b>
+            </p>
           </div>
         </section>
 
@@ -121,7 +133,7 @@
               aria-label="Conversation history with Arthur"
             ></div>
 
-            <form id="player-form" class="player-form">
+            <form id="player-form" class="player-form" novalidate>
               <label class="visually-hidden" for="player-input">Transmit message</label>
               <div class="input-row">
                 <input
@@ -131,7 +143,6 @@
                   autocomplete="off"
                   maxlength="280"
                   placeholder="TYPE MESSAGE_"
-                  required
                 />
                 <button id="send-button" type="submit">
                   <span>Send</span>
@@ -144,7 +155,7 @@
             <div class="intercom-controls">
               <div class="audio-deck" aria-label="Speech and audio controls">
                 <div class="audio-buttons">
-                  <button id="audio-toggle" type="button" aria-pressed="true"><i id="voice-lamp" class="lamp" aria-hidden="true"></i> Audio <b id="voice-engine">NEURAL</b></button>
+                  <button id="audio-toggle" type="button" aria-pressed="true"><i id="voice-lamp" class="lamp" aria-hidden="true"></i><span id="audio-toggle-label">Audio</span><b id="voice-engine">NEURAL</b></button>
                   <button id="replay-button" type="button" disabled>Replay</button>
                   <button id="skip-button" type="button" disabled>Skip</button>
                 </div>
@@ -207,10 +218,7 @@
     <dialog id="debug-dialog" class="debug-dialog" aria-labelledby="debug-title">
       <div class="debug-panel">
         <header class="debug-header">
-          <div>
-            <p class="eyebrow">Developer inspection</p>
-            <h2 id="debug-title">Arthur / Decision telemetry</h2>
-          </div>
+          <h2 id="debug-title">Arthur / Decision telemetry</h2>
           <div class="debug-header-actions">
             <span id="debug-log-status" role="status">0 records</span>
             <button id="debug-export" type="button">Export log</button>
@@ -287,7 +295,6 @@
       <div class="credits-panel">
         <header class="debug-header">
           <div>
-            <p class="eyebrow">Personnel and systems record</p>
             <h2 id="credits-title">Perimeter 04 / Credits</h2>
           </div>
           <button id="credits-close" type="button" aria-label="Close credits">Close</button>
@@ -300,7 +307,8 @@
             <div><dt>South-gate animation</dt><dd>Original AI-assisted pixel artwork</dd></div>
             <div><dt>NPC dialogue</dt><dd>Hand-authored for this encounter</dd></div>
             <div><dt>Decision systems</dt><dd>Deterministic Mock and optional TypeSafe Jev</dd></div>
-            <div><dt>Primary speech</dt><dd>Piper neural voice and ONNX Runtime WebAssembly</dd></div>
+            <div><dt>Primary speech</dt><dd>Piper neural voice and ONNX Runtime WebAssembly, MIT</dd></div>
+            <div><dt>Voice model</dt><dd>en_US-danny-low, Rhasspy Piper; trained on a CC-BY-SA 4.0 dataset</dd></div>
             <div><dt>Speech fallback</dt><dd>eSpeak NG WebAssembly, GPL-3.0</dd></div>
             <div><dt>Interface typeface</dt><dd>VT323 by Peter Hull, SIL Open Font License</dd></div>
           </dl>
@@ -332,7 +340,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=16.3";
+        appScript.src = "js/app.js?phase=17.3";
         document.body.append(appScript);
       }
     </script>
