@@ -4,7 +4,7 @@ A small browser-based text game that explores whether a decision model can make 
 
 Arthur's spoken lines all come from `data/dialogue.json`. The Mock and Jev providers select only a structured action and return developer-facing decision metadata. The game validates the action before selecting an authored line.
 
-The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. A short hardline boot sequence opens a two-way intercom at the warehouse car-park gate. The left panel is the compact intercom: Arthur's camera, the player's shadowed camera image, both current messages, and the transmission controls. The right panel is the exterior security feed. When Arthur grants access, its four-frame WebP sequence shows the car-park gate opening, then holds on the open gate while directing the visitor to Guard Tower 04. Arthur can make only a preliminary visual check of a work order on the camera; warehouse access has not yet been granted. Developer telemetry remains available through the **Developer** control or <kbd>F2</kbd>. Arthur's default voice is a Piper neural voice generated locally through WebAssembly, with eSpeak NG as its fallback, and with replay, mute, volume, skip, ambience, and authored interface sounds behind replaceable presentation adapters. Piper audio plays at the model's native speed and pitch so the performance profile does not make it sound like slowed tape. The current incoming message and deterministic timing remain available when browser media APIs are missing.
+The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. A short hardline boot sequence opens a two-way intercom at the warehouse car-park gate. The left panel is the compact intercom: Arthur's camera standing beside his incoming line, the player's own transmission below them, and the controls. The right panel is the exterior security feed. When Arthur grants access, its four-frame WebP sequence shows the car-park gate opening, then holds on the open gate while directing the visitor to Guard Tower 04. Arthur can make only a preliminary visual check of a work order on the camera; warehouse access has not yet been granted. Developer telemetry remains available through the **Developer** control or <kbd>F2</kbd>. Arthur's default voice is a Piper neural voice generated locally through WebAssembly, with eSpeak NG as its fallback, and with replay, mute, volume, skip, ambience, and authored interface sounds behind replaceable presentation adapters. Piper audio plays at the model's native speed and pitch so the performance profile does not make it sound like slowed tape. The current incoming message and deterministic timing remain available when browser media APIs are missing.
 
 ## Run locally
 
@@ -70,7 +70,7 @@ This requires the Jev-enabled local server to be running. Provider parity is wri
 
 ## Release polish
 
-Phase 15 adds the final release pass: compressed WebP reaction portraits, a subtle shadowed player-avatar idle drift, a boot/loading state, credits, explicit reduced-motion behavior, and deployment instructions for Mock-only static hosting or a server-backed Jev deployment. The browser preloads only the two immediate portraits and the interface font; speech and reaction frames load when needed.
+Phase 15 adds the final release pass: compressed WebP reaction portraits, a boot/loading state, credits, explicit reduced-motion behavior, and deployment instructions for Mock-only static hosting or a server-backed Jev deployment. The browser preloads only Arthur's portrait and the interface font; speech and reaction frames load when needed.
 
 The gate-screen extension places that intercom beside a landscape exterior view. The entry-granted outcome plays `assets/gates/gate-opening.webp`, a four-frame closed-to-open animation, then replaces it with the final open frame. Browsers that request reduced motion go directly to the open frame.
 
@@ -166,7 +166,6 @@ If the server, network, or TypeSafe API fails, no turn or state change is applie
 - `assets/arthur-speech/frame-1.jpg` through `frame-4.jpg` are sequenced at eight frames per second while Arthur speaks.
 - `assets/arthur-reactions/` contains identity-matched blink, listening, emotional, and entry-granted portraits; the browser rasterizes them to a 96×72 source surface before enlarging them with nearest-neighbour rendering.
 - `assets/arthur-speaking.gif` is retained as a legacy source artifact and is no longer used by the interface.
-- `assets/player-shadow.jpg` is the anonymous player avatar displayed on the opposite side of the chat.
 - `assets/gates/` contains the closed and open exterior views, the four source frames, and the animated WebP played when Arthur opens the car-park gate.
 - `assets/fonts/VT323-Regular.ttf` is the single bundled monospace pixel font used across the complete player and developer interface under the SIL Open Font License in `assets/fonts/OFL.txt`.
 - `scripts/install-piper-assets.mjs` installs the pinned Piper runtime, ONNX Runtime, and their licences into `assets/vendor/piper/`.

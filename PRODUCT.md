@@ -100,7 +100,7 @@ Real, in-repository:
   223 possible rendered lines.
 - `data/arthur.json` — personality, goals, and starting state.
 - `assets/` — Arthur portrait, four speaking frames, nine reaction frames, the
-  player silhouette, the gate animation, and the bundled VT323 font.
+  gate animation, and the bundled VT323 font.
 - `RETRO_CDROM_DESIGN_SPEC.md` — the authored design specification and roadmap.
 - `PLAYTEST_REPORT.md`, `PHASE14_EVALUATION.md`, `PHASE14_PARITY_REPORT.md` —
   generated evaluation output.

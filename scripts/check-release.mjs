@@ -31,7 +31,6 @@ const preloadAssets = [...html.matchAll(/<link\s+rel="preload"\s+href="([^"]+)"/
 );
 const expectedPreloads = [
   "assets/arthur-portrait.jpg",
-  "assets/player-shadow.jpg",
   "assets/fonts/VT323-Regular.ttf"
 ];
 
@@ -60,11 +59,6 @@ check(html.includes('id="debug-dialog"'), "Developer diagnostics dialog is missi
 check(html.includes('id="debug-export"'), "Conversation log export control is missing");
 check(html.includes('id="gate-feed"'), "Exterior gate feed is missing");
 check(html.includes('id="gate-animation-status"'), "Gate animation status is missing");
-check(css.includes("@keyframes player-idle"), "Player idle animation is missing");
-check(
-  /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.player-viewport img[\s\S]*?animation: none/.test(css),
-  "Reduced-motion mode must stop the player avatar"
-);
 check(server.includes('".webp": "image/webp"'), "Server must send the WebP MIME type");
 check(server.includes('process.env.HOST || "127.0.0.1"'), "Server must allow a deployment host binding");
 check(

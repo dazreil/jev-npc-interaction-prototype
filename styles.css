@@ -795,89 +795,6 @@ summary:focus-visible {
   text-wrap: pretty;
 }
 
-.player-card {
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  min-height: 0;
-}
-
-.player-viewport {
-  position: relative;
-  min-height: 0;
-  overflow: hidden;
-  border: 2px solid #090b09;
-  outline: 1px solid #4c5d57;
-  background: #020403;
-}
-
-.player-viewport img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 36%;
-  transform: scale(1.035);
-  transform-origin: 50% 42%;
-  animation: player-idle 8s steps(16, end) infinite alternate;
-  image-rendering: pixelated;
-  filter: saturate(0.28) sepia(0.08) contrast(1.38) brightness(0.82);
-}
-
-.player-viewport::after {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background:
-    radial-gradient(ellipse at 51% 27%, rgba(0, 0, 0, 0.42) 0 13%, transparent 31%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.3), transparent 44%);
-  content: "";
-  pointer-events: none;
-}
-
-@keyframes player-idle {
-  0% { transform: scale(1.035) translate3d(-0.35%, 0, 0); }
-  45% { transform: scale(1.045) translate3d(0.25%, -0.35%, 0); }
-  100% { transform: scale(1.04) translate3d(0.45%, 0.3%, 0); }
-}
-
-.player-viewport > span {
-  position: absolute;
-  right: 5px;
-  bottom: 4px;
-  z-index: 3;
-  padding: 2px 3px;
-  background: rgba(3, 7, 4, 0.75);
-  color: rgba(150, 177, 166, 0.8);
-  font-size: 8px;
-  text-transform: uppercase;
-}
-
-.player-scan {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background:
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.24) 0 1px, transparent 1px 3px),
-    linear-gradient(
-      90deg,
-      rgba(97, 127, 119, 0.08),
-      transparent 26%,
-      transparent 74%,
-      rgba(97, 127, 119, 0.08)
-    );
-  pointer-events: none;
-}
-
-.player-identity-strip {
-  margin: 6px 0 0;
-  padding: 4px 5px;
-  border-left-color: var(--blue);
-}
-
-.player-identity-strip strong {
-  color: #b6cec5;
-}
-
 /* Phase 16: compact intercom beside the exterior gate feed */
 
 .intercom-module,
@@ -889,7 +806,8 @@ summary:focus-visible {
 
 .intercom-module {
   display: grid;
-  grid-template-rows: 16px minmax(0, 1fr) 68px 46px 42px 48px;
+  grid-template-columns: 152px minmax(0, 1fr);
+  grid-template-rows: 16px minmax(0, 1fr) 46px 42px 48px;
   gap: 4px;
   overflow: hidden;
   background:
@@ -898,10 +816,23 @@ summary:focus-visible {
 }
 
 .intercom-feeds {
+  grid-column: 1;
+  grid-row: 2;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 96px;
-  gap: 5px;
+  grid-template-columns: minmax(0, 1fr);
   min-height: 0;
+}
+
+.intercom-module .module-heading,
+.intercom-module .player-endpoint,
+.intercom-module .player-form,
+.intercom-module .intercom-controls {
+  grid-column: 1 / -1;
+}
+
+.intercom-module .current-message-panel {
+  grid-column: 2;
+  grid-row: 2;
 }
 
 .channel-card {
@@ -919,10 +850,10 @@ summary:focus-visible {
 }
 
 .intercom-module .arthur-viewport img {
-  width: 54%;
-  height: 54%;
-  object-position: 50% 29%;
-  transform: scale(1.86);
+  width: 62%;
+  height: 62%;
+  object-position: 50% 24%;
+  transform: scale(1.61);
 }
 
 .intercom-module .tracking-corners {
@@ -933,14 +864,6 @@ summary:focus-visible {
 
 .intercom-module .tracking-corners::after {
   display: none;
-}
-
-.intercom-module .player-card {
-  grid-template-rows: minmax(0, 1fr) 20px;
-}
-
-.intercom-module .player-viewport {
-  min-height: 0;
 }
 
 .channel-id {
@@ -965,14 +888,6 @@ summary:focus-visible {
   font-weight: 400;
   letter-spacing: 0.5px;
   text-overflow: ellipsis;
-}
-
-.channel-id--player {
-  border-left-color: var(--blue);
-}
-
-.channel-id--player strong {
-  color: #b6cec5;
 }
 
 .intercom-module .current-message-panel {
@@ -1466,16 +1381,10 @@ summary:focus-visible {
 }
 
 body.effects-off .video-scan,
-body.effects-off .player-scan,
 body.effects-off .gate-scan,
 body.effects-off .terminal-stage::after,
 body.effects-off::before {
   display: none;
-}
-
-body.effects-off .player-viewport img {
-  transform: scale(1.035);
-  animation: none;
 }
 
 /* Developer drawer */
@@ -1823,10 +1732,5 @@ pre {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-  }
-
-  .player-viewport img {
-    transform: scale(1.035);
-    animation: none !important;
   }
 }
