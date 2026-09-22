@@ -43,6 +43,24 @@ docker run --rm -p 5173:5173 -e TYPESAFE_API_KEY jev-npc
 
 After deployment, open the public HTTP(S) address, confirm the boot sequence completes, send one Mock transmission, switch to Jev, send one live transmission, and verify that mute, replay, skip, reset, credits, and the F2 developer panel work.
 
+## Vercel hosting
+
+Vercel serves the game as static files and runs the two Jev routes as functions. The routes live in `api/jev/status.js` and `api/jev/decision.js`. They share `lib/jev-proxy.mjs` with the local Node server, so both hosts behave the same way.
+
+`vercel.json` tells Vercel to run `npm ci`, then `npm run build`. The build copies only `index.html`, `styles.css`, `assets/`, `data/`, and `js/` into `dist/`. Server code, tests, and notes are never published.
+
+First deploy:
+
+```bash
+vercel link --yes
+vercel env add TYPESAFE_API_KEY production
+vercel deploy --prod
+```
+
+The `env add` command asks for the key. Paste it there. Do not put the key in `vercel.json` or in a command line.
+
+The Jev route is public. Anyone with the address can send it requests, and each request uses TypeSafe credit. Share the address only with people you trust, or remove the key to fall back to Mock.
+
 ## Release check
 
 Run the offline release gate before publishing:

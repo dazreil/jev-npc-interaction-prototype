@@ -4,13 +4,11 @@ import { readFile, stat } from "node:fs/promises";
 import { dirname, extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { buildJevRequest } from "./js/providers/jev.js";
+import { jevStatus, MAX_REQUEST_BYTES, parseJevBody, proxyJevDecision } from "./lib/jev-proxy.mjs";
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 5173;
 const HOST = process.env.HOST || "127.0.0.1";
-const MAX_REQUEST_BYTES = 64 * 1024;
-const TYPE_SAFE_ENDPOINT = "https://api.typesafe.ai/v1/systemone";
 const PUBLIC_ROOT_FILES = new Set(["index.html", "styles.css"]);
 const PUBLIC_DIRECTORIES = ["assets/", "data/", "js/"];
 const MIME_TYPES = Object.freeze({
@@ -60,7 +58,7 @@ function sendJson(response, status, value) {
   response.end(JSON.stringify(value));
 }
 
-async function readJsonBody(request) {
+async function readBody(request) {
   const chunks = [];
   let size = 0;
 
@@ -72,75 +70,20 @@ async function readJsonBody(request) {
     chunks.push(chunk);
   }
 
-  try {
-    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
-  } catch {
-    throw new Error("Request body must be valid JSON.");
-  }
+  return Buffer.concat(chunks).toString("utf8");
 }
 
 async function handleJevDecision(request, response) {
-  const apiKey = process.env.TYPESAFE_API_KEY;
-  if (!apiKey) {
-    sendJson(response, 503, { error: "Jev is not configured on this server." });
-    return;
-  }
-
   let body;
   try {
-    body = await readJsonBody(request);
+    body = parseJevBody(await readBody(request));
   } catch (error) {
     sendJson(response, 400, { error: error.message });
     return;
   }
 
-  let upstreamRequest;
-  try {
-    upstreamRequest = buildJevRequest(body?.context, body?.availableActions);
-  } catch (error) {
-    sendJson(response, 400, { error: error.message });
-    return;
-  }
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 7500);
-
-  try {
-    const upstreamResponse = await fetch(TYPE_SAFE_ENDPOINT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(upstreamRequest),
-      signal: controller.signal
-    });
-
-    if (!upstreamResponse.ok) {
-      sendJson(response, 502, {
-        error: `TypeSafe rejected the request with HTTP ${upstreamResponse.status}.`
-      });
-      return;
-    }
-
-    let payload;
-    try {
-      payload = await upstreamResponse.json();
-    } catch {
-      sendJson(response, 502, { error: "TypeSafe returned unreadable JSON." });
-      return;
-    }
-
-    sendJson(response, 200, payload);
-  } catch (error) {
-    const message =
-      error?.name === "AbortError"
-        ? "TypeSafe did not respond before the server timeout."
-        : "The server could not reach TypeSafe.";
-    sendJson(response, 502, { error: message });
-  } finally {
-    clearTimeout(timeout);
-  }
+  const result = await proxyJevDecision(body, process.env.TYPESAFE_API_KEY);
+  sendJson(response, result.status, result.body);
 }
 
 async function serveStatic(request, response, url) {
@@ -188,10 +131,7 @@ const server = createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
 
   if (request.method === "GET" && url.pathname === "/api/jev/status") {
-    sendJson(response, 200, {
-      configured: Boolean(process.env.TYPESAFE_API_KEY),
-      model: "jev-latest"
-    });
+    sendJson(response, 200, jevStatus(process.env.TYPESAFE_API_KEY));
     return;
   }
 

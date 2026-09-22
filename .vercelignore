@@ -1,0 +1,12 @@
+# Vercel runs npm ci and the build itself. Never upload local secrets,
+# installed packages, or generated files.
+.env
+.env.*
+!.env.example
+node_modules
+dist
+assets/vendor/espeak-ng
+assets/vendor/piper
+.impeccable
+.DS_Store
+tests

@@ -4,3 +4,7 @@ assets/vendor/espeak-ng/
 assets/vendor/piper/
 .DS_Store
 .impeccable/live/
+dist/
+.vercel
+.env*
+!.env.example
