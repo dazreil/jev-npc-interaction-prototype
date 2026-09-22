@@ -43,7 +43,7 @@ test("a pending question outlives the turns that dodged it", () => {
   assert.equal(dodged.pendingRequest.turnsOutstanding, 1);
   assert.equal(dodged.proofOffered, false);
 
-  // The same reply, two turns after Arthur last mentioned papers, still counts.
+  // The same vague reply still refers to Arthur's request, but it is not proof.
   const answeredLate = deriveConversationSignals({
     playerInput: "I have them",
     recentConversation: [{ speaker: "arthur", text: "Not tonight.", action: "REFUSE_ENTRY" }],
@@ -52,14 +52,14 @@ test("a pending question outlives the turns that dodged it", () => {
     turn: 6
   });
 
-  assert.equal(answeredLate.responseStatus, "satisfied");
-  assert.equal(answeredLate.proofOffered, true);
+  assert.equal(answeredLate.responseStatus, "unclear");
+  assert.equal(answeredLate.proofOffered, false);
   assert.equal(answeredLate.proofReference, "contextual");
   assert.equal(answeredLate.pendingRequest.turnsOutstanding, 3);
 });
 
-test("classifyResponse reports refusal, evidence, and honest uncertainty", () => {
-  assert.equal(classifyResponse("I have them", proofRequest), "satisfied");
+test("classifyResponse reports refusal, named evidence, and honest uncertainty", () => {
+  assert.equal(classifyResponse("I have them", proofRequest), "unclear");
   assert.equal(classifyResponse("here is my id badge", proofRequest), "satisfied");
   assert.equal(classifyResponse("I don't have any papers", proofRequest), "refused");
   assert.equal(classifyResponse("none of your business", proofRequest), "refused");
@@ -88,6 +88,7 @@ test("callers that track no pending question keep the previous behaviour", () =>
   });
 
   assert.equal(signals.proofWasRequested, true);
-  assert.equal(signals.proofOffered, true);
+  assert.equal(signals.proofOffered, false);
+  assert.equal(signals.proofReference, "contextual");
   assert.equal(signals.pendingRequest.askedTurn, 1);
 });

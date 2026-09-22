@@ -9,6 +9,7 @@ import { createNpcPerformance } from "./performance.js";
 import {
   deriveConversationSignals,
   hasUnresolvedSuspicion,
+  inferPurpose,
   resolvePendingRequest
 } from "./conversation-signals.js";
 import {
@@ -278,10 +279,11 @@ export class Game {
         (Number(memory.createdTurn) || 0) > latestRepairTurn
     );
     const suspicionAlreadyRaised = hasUnresolvedSuspicion(this.memories);
-    const suppliedRequestedProof =
-      conversationSignals?.proofOffered === true &&
-      ["authority", "delivery"].includes(conversationSignals.activePurpose);
-
+    const startingState = this.characterProfile.initialState ?? {};
+    const tensionRaised =
+      state.suspicion > (Number(startingState.suspicion) || 0) + 8 ||
+      state.irritation > (Number(startingState.irritation) || 0) + 12;
+    const hasDamageToRepair = suspicionAlreadyRaised || hasUnrepairedRisk || tensionRaised;
     return AVAILABLE_ACTIONS.filter((action) => {
       if (action === "ASK_FOR_REASON" && this.reasonPrompted) {
         return false;
@@ -291,11 +293,16 @@ export class Game {
         return false;
       }
 
+      if (action === "REPAIR_CONVERSATION" && !hasDamageToRepair) {
+        return false;
+      }
+
       if (action === "ALLOW_ENTRY") {
         return (
           hasEntryBasis &&
           !hasUnrepairedRisk &&
-          (suppliedRequestedProof || (state.suspicion < 78 && state.irritation < 71))
+          state.suspicion < 78 &&
+          state.irritation < 71
         );
       }
 
@@ -335,10 +342,10 @@ export class Game {
         npcLocation: "inside Guard Tower 04 beyond the car-park gate",
         communicationChannel: "two-way audio and camera intercom",
         physicalSeparation: "locked car-park perimeter gate separates the player from Arthur",
-        documentCheck:
-          "Arthur can make only a preliminary visual check through the intercom camera; original documents must be shown at Guard Tower 04 after the car-park gate opens",
+        entryAssessment:
+          "Arthur judges whether the player's spoken case is coherent and persuasive; the game has no inventory or physical-document check",
         entryScope:
-          "ALLOW_ENTRY opens only the car-park gate and requires the visitor to report to Guard Tower 04; it does not grant warehouse entry"
+          "ALLOW_ENTRY opens only the car-park gate and requires the visitor to report directly to Guard Tower 04; it does not grant warehouse entry"
       },
       player: {
         name: introducedPlayerName ?? this.playerName
@@ -356,17 +363,28 @@ export class Game {
     });
     context.availableActions = this.getAvailableActions(context.conversationSignals);
 
-    const suppliedRequestedProof =
-      context.conversationSignals.proofOffered &&
-      ["authority", "delivery"].includes(context.conversationSignals.activePurpose) &&
-      context.availableActions.includes("ALLOW_ENTRY");
-    if (suppliedRequestedProof) {
-      context.availableActions = context.availableActions.filter(
-        (action) => !["REFUSE_ENTRY", "ASK_FOR_PROOF"].includes(action)
-      );
-    }
-
     return context;
+  }
+
+  /**
+   * A purpose used to be recorded only when the provider happened to attach it,
+   * which meant a player who said why they were there on a turn that carried its
+   * own memory was never credited and could not reach ALLOW_ENTRY.
+   */
+  recordStatedPurpose(input) {
+    if (this.memories.some((memory) => memory?.topic === "purpose")) return;
+
+    const purpose = inferPurpose(String(input ?? ""));
+    if (!purpose) return;
+
+    const article = /^[aeiou]/i.test(purpose) ? "an" : "a";
+    this.addMemory({
+      fact: `Player stated ${article} ${purpose} reason for being at the gate`,
+      importance: purpose === "emergency" ? 70 : 60,
+      tags: [purpose, "claim"],
+      topic: "purpose",
+      value: purpose
+    });
   }
 
   addMemory(memory) {
@@ -492,6 +510,7 @@ export class Game {
     applyStateChanges(this.npc, decision.stateChanges);
     applyStateChanges(this.npc, this.lastContext.messageEffort?.stateChanges);
     this.addMemory(decision.memory);
+    this.recordStatedPurpose(input);
 
     if (decision.action === "ALLOW_ENTRY") this.status = "success";
     if (decision.action === "END_CONVERSATION") this.status = "failure";

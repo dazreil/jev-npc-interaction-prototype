@@ -9,7 +9,7 @@ const WITHHOLDING_PATTERN =
 
 export const PURPOSE_PATTERNS = Object.freeze({
   emergency: /\b(boiler|gas|leak|fire|smoke|alarm|pressure|flood|emergency|burst|electrical|sparks)\b/i,
-  authority: /\b(head office|management|manager|inspector|inspection|contractor|engineer|technician|maintenance|maintanance|mantenice|boss(?:es)? sent me|sent by (?:the )?(?:boss|management)|work here|employee|fix(?:ing)? (?:the )?(?:coffee )?machines?)\b/i,
+  authority: /\b(head office|management|manager|inspector|inspection|contractor|engineer|technician|maintenance|maintanance|mantenice|boss(?:es)? sent me|sent by (?:the )?(?:boss|management)|work(?:s| here)?\b|working|job|shift|call(?:ed)?[- ]out|service call|work order|employee|staff|fix(?:ing)? (?:the )?(?:coffee )?machines?)\b/i,
   delivery: /\b(delivery|courier|package|parcel|shipment|drop off|driver)\b/i,
   personal: /\b(left my|forgot my|my bag|my phone|meet someone|friend inside|personal item)\b/i
 });
@@ -96,7 +96,9 @@ export function classifyResponse(playerInput, pendingRequest) {
 
   if (pendingRequest.topic === "proof") {
     if (PROOF_DENIAL_PATTERN.test(input)) return "refused";
-    if (NAMED_PROOF_PATTERN.test(input) || REFERENTIAL_PROOF_PATTERN.test(input)) return "satisfied";
+    // A vague reference such as "I have them" acknowledges the request but
+    // does not give Arthur anything concrete to inspect through the camera.
+    if (NAMED_PROOF_PATTERN.test(input)) return "satisfied";
     return "unclear";
   }
 
@@ -144,7 +146,7 @@ export function deriveConversationSignals({
       : null,
     responseStatus,
     proofWasRequested,
-    proofOffered: namesProof || refersToRequestedProof,
+    proofOffered: namesProof,
     proofReference: namesProof ? "named" : refersToRequestedProof ? "contextual" : "none",
     unresolvedSuspicion: hasUnresolvedSuspicion(memories)
   };

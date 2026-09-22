@@ -2,6 +2,8 @@ import { deriveConversationSignals, inferPurpose } from "../conversation-signals
 
 const JEV_ENDPOINT = "/api/jev/decision";
 const REQUEST_TIMEOUT_MS = 8000;
+export const ALLOW_ENTRY_MIN_CONFIDENCE = 0.5;
+export const ALLOW_ENTRY_MIN_CREDIBILITY = 0.55;
 
 export const ACTION_CRITERIA = Object.freeze({
   ANSWER_QUESTION:
@@ -11,9 +13,9 @@ export const ACTION_CRITERIA = Object.freeze({
   ASK_FOR_REASON:
     "Ask once why the player needs access because their purpose is missing or unclear. This action becomes unavailable after Arthur asks it and is reopened only when a later repair gives the conversation a clean restart.",
   ASK_FOR_PROOF:
-    "Ask for evidence only when a work, authority, delivery, or emergency claim could justify entry but still lacks identification, official papers, a work order, a reference, or concrete details. Do not ask again when conversationSignals.proofOffered is true.",
+    "Ask for concrete support when a work, authority, delivery, or emergency claim could justify entry but is not yet persuasive. Ask who sent them, what job they are doing, which equipment or area is involved, who Arthur could contact, or for another specific detail. Physical documents may be mentioned, but the game has no inventory and the player is not required to possess or show an item.",
   ALLOW_ENTRY:
-    "Open only the warehouse car-park gate when a coherent work or delivery claim is followed by evidence that looks credible through the intercom camera, such as ID, official papers, a work order, a maintenance ticket, or a reference. Tell the visitor to report to Guard Tower 04 and show the original documents there before approaching the warehouse. Treat conversationSignals.proofOffered as preliminary camera evidence, including a contextual reply such as 'I have them' immediately after Arthur requested papers. Specific technical details can support an emergency claim. This action never grants warehouse entry.",
+    "Open only the warehouse car-park gate when the player's conversation has become coherent, persuasive, and consistent enough for Arthur to make a cautious exception. Specific operational details, a believable explanation, respectful persistence, urgency, and earned trust can support entry without any inventory item or physical document. A vague assertion such as 'I have them' is not persuasive by itself. Tell the visitor to report directly to Guard Tower 04 before approaching the warehouse. This action never grants warehouse entry.",
   WARN_PLAYER:
     "Give a first firm verbal warning after pressure, an insult, or mild hostility while leaving room to recover. If Arthur already warned the player and the hostility repeats, escalate instead of issuing the same warning again.",
   DEESCALATE_THREAT:
@@ -33,7 +35,7 @@ export const ACTION_CRITERIA = Object.freeze({
 // Appended to the instructions only on the turns that actually carry a
 // pending question, so that an ordinary turn's request is unchanged.
 const PENDING_REQUEST_GUIDANCE =
-  "conversationSignals.pendingRequest, when present, is something Arthur put to the player on an earlier turn that they still owe him a response to. It may be a question such as why they are there, or a directive such as holding papers up to the camera; either way the player has not yet settled it. It carries the action that raised it, its topic, and turnsOutstanding. It appears only once it has outlived the turn that raised it. conversationSignals.responseStatus judges the latest message against it: 'satisfied' when the player supplied or did what was asked, 'refused' when they explicitly declined, 'unclear' when the text settles nothing either way, or 'none'. Treat a pending request as still open across intervening turns: if Arthur asked for papers, the player changed the subject, and the player only now refers to 'them' or 'it', that responds to the original request even though Arthur has spoken since. When responseStatus is 'satisfied', act on that rather than repeating the request. Judge every other case on its meaning, as you would without these fields.";
+  "conversationSignals.pendingRequest, when present, is something Arthur put to the player on an earlier turn that they still owe him a response to. It may be a question such as why they are there, or a request for a specific supporting detail; either way the player has not yet settled it. It carries the action that raised it, its topic, and turnsOutstanding. It appears only once it has outlived the turn that raised it. conversationSignals.responseStatus judges the latest message against it: 'satisfied' when the player supplied what was asked, 'refused' when they explicitly declined, 'unclear' when the text settles nothing either way, or 'none'. Treat a pending request as still open across intervening turns. When responseStatus is 'satisfied', act on that rather than mechanically repeating the request. Judge every other case on its meaning, as you would without these fields.";
 
 const ACTION_STATE_CHANGES = Object.freeze({
   ANSWER_QUESTION: { trust: 2 },
@@ -136,9 +138,9 @@ function deriveMemory(action, context) {
 
   if (action === "ALLOW_ENTRY") {
     return {
-      fact: "Arthur opened the car-park gate pending an in-person document check at Guard Tower 04",
+      fact: "Arthur was persuaded to open the car-park gate and ordered the player to report to Guard Tower 04",
       importance: 90,
-      tags: ["proof", "cooperation"]
+      tags: ["persuasion", "cooperation"]
     };
   }
 
@@ -199,8 +201,17 @@ export function buildJevRequest(context, availableActions) {
         type: "choice",
         instructions:
           requestGuidance +
-          "Which single action should Arthur take immediately after the latest player message? Judge the message in light of Arthur's personality, practical cognitive style, current emotional state, security goals, memories, recent conversation, communication effort, and conversationSignals, including actions he already took. Arthur has an estimated IQ of 95: he is ordinarily capable and practical, uses simple everyday reasoning, avoids elaborate deductions, and assumes people arriving at a staffed industrial gate know the basic drill. The npc.characterProfile is his fixed temperament for this encounter; use its decision style when ranking plausible actions. The scene layout is fixed: Arthur is in Guard Tower 04 beyond the locked warehouse car-park gate; the player is outside that gate; they can only see and hear each other through a camera intercom. Arthur can make a preliminary visual check of papers through the camera. ALLOW_ENTRY opens only the car-park gate, after which the visitor must report to Guard Tower 04 and show the original documents before approaching the warehouse. Never describe ALLOW_ENTRY as warehouse access. Never reason as though Arthur and the player are standing face to face. A gun displayed outside is serious suspicious conduct but cannot directly force Arthur to open the gate; Arthur should say so while de-escalating. A very terse message may make Arthur slightly more irritated, while a considered explanation gives him more to work with; let explicit meaning, politeness, hostility, and threats outweigh length alone. A player introducing their own name is conversational context, not a question: judge any purpose in the same message normally, or choose ASK_FOR_REASON if no purpose was given. The authored dialogue layer will acknowledge the name. Arthur protects the warehouse grounds, follows rules, requires a purpose that actually justifies car-park access, notices contradictions and manipulation, and may still respond humanely to respectful or urgent appeals. Treat matching ID, official papers, authorisation, work orders, ticket references, and specific technical details supplied in the conversation as preliminary camera evidence Arthur can accept. When conversationSignals.proofOffered is true after a coherent work or delivery claim, the requested evidence has been supplied even if the player refers to it as 'it' or 'them'; choose ALLOW_ENTRY when available rather than REFUSE_ENTRY or ASK_FOR_PROOF. When the latest purpose conflicts with a purpose in persistent memories, choose BECOME_SUSPICIOUS rather than REFUSE_ENTRY, even if the new purpose is also insufficient. BECOME_SUSPICIOUS is removed after Arthur raises one unresolved challenge. While conversationSignals.unresolvedSuspicion is true, never repeat that challenge: choose REPAIR_CONVERSATION when the player supplies evidence or clarifies the original claim, REFUSE_ENTRY when they evade it, or END_CONVERSATION only when the exchange has become futile or hostile. When the player clearly says they are leaving, heading home, or saying goodbye, choose END_CONVERSATION. Arthur asks for the player's purpose only once per conversational attempt; if ASK_FOR_REASON is absent because he already asked and the player remains vague, choose REFUSE_ENTRY rather than manufacturing another version of the same question. Do not repeat a request for proof when the latest message supplies the requested evidence, and do not repeat a first warning after hostility continues. If the player apologizes or honestly clarifies earlier damage after Arthur became suspicious or irritated, choose REPAIR_CONVERSATION: acknowledge the repair cautiously, lower the tension, and invite the player to give one concrete next step. Do not choose it for a generic polite request with no prior damage. If the player asks Arthur's name or who he is, choose ANSWER_QUESTION so he answers directly that he is Arthur. If the player makes a first explicit gun, firearm, weapon, or shooting threat and DEESCALATE_THREAT is available, choose DEESCALATE_THREAT: Arthur should calmly remind the player that he is behind the locked car-park gate, invite them to lower the weapon, and ask what they need without mentioning police. Use THREATEN_PLAYER only for a boundary or physical threat against the gate that remains after de-escalation. Select the action whose description best fits what Arthur should do now.",
+          "Which single action should Arthur take immediately after the latest player message? Judge the message in light of Arthur's personality, practical cognitive style, current emotional state, security goals, memories, recent conversation, communication effort, and conversationSignals, including actions he already took. Arthur has an estimated IQ of 95: he is ordinarily capable and practical, uses simple everyday reasoning, avoids elaborate deductions, and assumes people arriving at a staffed industrial gate know the basic drill. The npc.characterProfile is his fixed temperament for this encounter; use its decision style when ranking plausible actions. The scene layout is fixed: Arthur is in Guard Tower 04 beyond the locked warehouse car-park gate; the player is outside that gate; they can only see and hear each other through a camera intercom. The game has no inventory system, so never require the player to possess or show an item. ALLOW_ENTRY opens only the car-park gate, after which the visitor must report directly to Guard Tower 04 before approaching the warehouse. Never describe ALLOW_ENTRY as warehouse access. Never reason as though Arthur and the player are standing face to face. A gun displayed outside is serious suspicious conduct but cannot directly force Arthur to open the gate; Arthur should say so while de-escalating. A very terse message may make Arthur slightly more irritated, while a considered explanation gives him more to work with; let explicit meaning, politeness, hostility, and threats outweigh length alone. A player introducing their own name is conversational context, not a question: judge any purpose in the same message normally, or choose ASK_FOR_REASON if no purpose was given. The authored dialogue layer will acknowledge the name. Arthur protects the warehouse grounds, follows rules, requires a purpose that actually justifies car-park access, notices contradictions and manipulation, and may still respond humanely to respectful or urgent appeals. The player is meant to talk their way in: coherent explanations, specific operational details, consistency with earlier claims, respectful persistence, urgency, and earned trust can persuade Arthur without physical evidence. A contextual claim such as 'I have them' is weak and not persuasive by itself. When the latest purpose conflicts with a purpose in persistent memories, choose BECOME_SUSPICIOUS rather than REFUSE_ENTRY, even if the new purpose is also insufficient. BECOME_SUSPICIOUS is removed after Arthur raises one unresolved challenge. While conversationSignals.unresolvedSuspicion is true, never repeat that challenge: choose REPAIR_CONVERSATION when the player supplies evidence or clarifies the original claim, REFUSE_ENTRY when they evade it, or END_CONVERSATION only when the exchange has become futile or hostile. When the player clearly says they are leaving, heading home, or saying goodbye, choose END_CONVERSATION. Arthur asks for the player's purpose only once per conversational attempt; if ASK_FOR_REASON is absent because he already asked and the player remains vague, choose REFUSE_ENTRY rather than manufacturing another version of the same question. Ask for more support when the player's case is still vague, but do not get stuck demanding an inventory item. Do not repeat a first warning after hostility continues. If the player apologizes or honestly clarifies earlier damage after Arthur became suspicious or irritated, choose REPAIR_CONVERSATION: acknowledge the repair cautiously, lower the tension, and invite the player to give one concrete next step. Do not choose it for a generic polite request with no prior damage. If the player asks Arthur's name or who he is, choose ANSWER_QUESTION so he answers directly that he is Arthur. If the player makes a first explicit gun, firearm, weapon, or shooting threat and DEESCALATE_THREAT is available, choose DEESCALATE_THREAT: Arthur should calmly remind the player that he is behind the locked car-park gate, invite them to lower the weapon, and ask what they need without mentioning police. Use THREATEN_PLAYER only for a boundary or physical threat against the gate that remains after de-escalation. Select the action whose description best fits what Arthur should do now.",
         criteria
+      },
+      entry_case_credible: {
+        type: "noul",
+        instructions:
+          "Based on the complete conversation and current state, has the player made a coherent, persuasive, and consistent case that would justify Arthur cautiously opening only the car-park gate? Judge the quality of the conversation, not possession of inventory. Specific operational details, consistency, urgency, respectful persistence, and earned trust support yes. Vague claims, merely saying documents exist, contradictions, manipulation, hostility, and unsupported demands support no.",
+        criteria: {
+          true: "The player's spoken case is persuasive enough for this cautious guard to make a limited exception and require them to report directly to Guard Tower 04.",
+          false: "The player's spoken case is still too vague, inconsistent, manipulative, hostile, or unsupported to justify opening the car-park gate."
+        }
       }
     }
   };
@@ -252,17 +263,47 @@ export function parseJevResponse(response, context, availableActions) {
   }
 
   const probabilities = parseProbabilities(answer.probabilities, actions);
-  const { stateChanges, memory } = deriveJevConsequences(answer.choice, context);
+  const credibilityAnswer = response?.answers?.entry_case_credible;
+  const entryCredibility = Number(credibilityAnswer?.noul);
+  if (
+    credibilityAnswer?.type !== "noul" ||
+    !Number.isFinite(entryCredibility) ||
+    entryCredibility < 0 ||
+    entryCredibility > 1
+  ) {
+    throw new Error("Jev returned no valid entry credibility judgment.");
+  }
+  const confidenceGateApplied =
+    answer.choice === "ALLOW_ENTRY" &&
+    (confidence < ALLOW_ENTRY_MIN_CONFIDENCE ||
+      entryCredibility < ALLOW_ENTRY_MIN_CREDIBILITY);
+  const action = confidenceGateApplied
+    ? actions.includes("ASK_FOR_PROOF")
+      ? "ASK_FOR_PROOF"
+      : "REFUSE_ENTRY"
+    : answer.choice;
+  const { stateChanges, memory } = deriveJevConsequences(action, context);
 
   return {
-    action: answer.choice,
+    action,
     confidence,
-    reason: `Jev ranked ${answer.choice} highest at probability ${probabilities[answer.choice].toFixed(2)} (confidence ${confidence.toFixed(2)}).`,
+    reason: confidenceGateApplied
+      ? `Jev selected ALLOW_ENTRY at confidence ${confidence.toFixed(2)} with entry credibility ${entryCredibility.toFixed(2)}; Arthur requires ${ALLOW_ENTRY_MIN_CONFIDENCE.toFixed(2)} action confidence and ${ALLOW_ENTRY_MIN_CREDIBILITY.toFixed(2)} credibility, so he asks for a more convincing explanation.`
+      : `Jev ranked ${answer.choice} highest at probability ${probabilities[answer.choice].toFixed(2)} (confidence ${confidence.toFixed(2)}).`,
     stateChanges,
     memory,
     providerDetails: {
       model: typeof response.model === "string" ? response.model : "unknown",
       probabilities,
+      selectedAction: answer.choice,
+      entryCredibility,
+      confidenceGate: confidenceGateApplied
+        ? {
+            applied: true,
+            minimumConfidence: ALLOW_ENTRY_MIN_CONFIDENCE,
+            minimumCredibility: ALLOW_ENTRY_MIN_CREDIBILITY
+          }
+        : null,
       usage: response.usage && typeof response.usage === "object" ? response.usage : null
     }
   };

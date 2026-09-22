@@ -283,11 +283,20 @@ function chooseRawDecision(context) {
   const priorDeliveryClaim = priorPurpose === "delivery" || memoryWithTag(context, "delivery");
   const wasAskedForProof = previousActions.includes("ASK_FOR_PROOF");
 
+  if (conversationSignals.proofReference === "contextual" && wasAskedForProof) {
+    return decide(
+      "ASK_FOR_PROOF",
+      0.9,
+      "The player vaguely claims to have support but has not supplied a concrete detail Arthur can evaluate.",
+      { trust: 0, suspicion: 2, irritation: 2 }
+    );
+  }
+
   if (offersProof && (claimsAuthority || priorAuthorityClaim || claimsDelivery || priorDeliveryClaim)) {
     return decide(
       "ALLOW_ENTRY",
       0.91,
-      "The player's evidence supports an earlier work-related claim well enough for Arthur to open the car-park gate and inspect the originals at Guard Tower 04.",
+      "The player's specific support makes the earlier work-related claim persuasive enough for Arthur to open the car-park gate and require a report at Guard Tower 04.",
       { trust: 25, suspicion: -24, irritation: -7 },
       {
         fact:
@@ -296,6 +305,20 @@ function chooseRawDecision(context) {
             : "Player supplied credible work identification",
         importance: 90,
         tags: ["proof", claimsDelivery || priorDeliveryClaim ? "delivery" : "authority"]
+      }
+    );
+  }
+
+  if (givesSpecificDetail && (priorAuthorityClaim || priorDeliveryClaim)) {
+    return decide(
+      "ALLOW_ENTRY",
+      0.86,
+      "The player's specific operational details make the earlier work-related story persuasive enough for limited car-park access.",
+      { trust: 20, suspicion: -18, irritation: -5 },
+      {
+        fact: "Player persuaded Arthur with specific and consistent operational details",
+        importance: 88,
+        tags: ["persuasion", "cooperation"]
       }
     );
   }

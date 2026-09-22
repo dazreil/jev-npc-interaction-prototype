@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  ALLOW_ENTRY_MIN_CONFIDENCE,
+  ALLOW_ENTRY_MIN_CREDIBILITY,
   buildJevRequest,
   chooseNpcAction,
   deriveJevConsequences,
@@ -34,10 +36,10 @@ const context = {
     npcLocation: "inside Guard Tower 04 beyond the car-park gate",
     communicationChannel: "two-way audio and camera intercom",
     physicalSeparation: "locked car-park perimeter gate separates the player from Arthur",
-    documentCheck:
-      "Arthur can make only a preliminary visual check through the intercom camera; original documents must be shown at Guard Tower 04 after the car-park gate opens",
+    entryAssessment:
+      "Arthur judges whether the player's spoken case is coherent and persuasive; the game has no inventory or physical-document check",
     entryScope:
-      "ALLOW_ENTRY opens only the car-park gate and requires the visitor to report to Guard Tower 04; it does not grant warehouse entry"
+      "ALLOW_ENTRY opens only the car-park gate and requires the visitor to report directly to Guard Tower 04; it does not grant warehouse entry"
   },
   player: { name: "David" },
   memories: [],
@@ -61,6 +63,10 @@ function validResponse(choice = "ASK_FOR_PROOF") {
           ASK_FOR_REASON: 0.18,
           ASK_FOR_PROOF: 0.7
         }
+      },
+      entry_case_credible: {
+        type: "noul",
+        noul: 0.42
       }
     },
     usage: { input_tokens: 200, output_tokens: 20 }
@@ -80,14 +86,16 @@ test("Jev request contains one Choice over exactly the available actions", () =>
   assert.deepEqual(request.state.npc.characterProfile, context.npc.characterProfile);
   assert.deepEqual(request.state.player, { name: "David" });
   assert.equal(request.state.scene.playerLocation, "outside the locked warehouse car-park gate");
-  assert.match(request.state.scene.documentCheck, /preliminary visual check/i);
+  assert.match(request.state.scene.entryAssessment, /spoken case/i);
+  assert.equal(request.questions.entry_case_credible.type, "noul");
+  assert.match(request.questions.entry_case_credible.instructions, /not possession of inventory/i);
   assert.match(
     request.questions.next_action.instructions,
     /Never reason as though Arthur and the player are standing face to face/
   );
 });
 
-test("Jev receives an explicit signal when a pronoun answers Arthur's proof request", () => {
+test("Jev distinguishes a vague proof reference from conversational support", () => {
   const proofContext = {
     ...context,
     memories: [
@@ -114,13 +122,110 @@ test("Jev receives an explicit signal when a pronoun answers Arthur's proof requ
     lastArthurAction: "ASK_FOR_PROOF",
     activePurpose: "authority",
     proofWasRequested: true,
-    proofOffered: true,
+    proofOffered: false,
     proofReference: "contextual",
     unresolvedSuspicion: false
   });
   assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /I have them/i);
+  assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /not persuasive/i);
+  assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /without any inventory item/i);
   assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /car-park gate/i);
   assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /Guard Tower 04/i);
+});
+
+test("low-confidence entry is converted into another proof request", () => {
+  const proofActions = ["REFUSE_ENTRY", "ASK_FOR_PROOF", "ALLOW_ENTRY"];
+  const response = {
+    model: "jev-1.13.0",
+    answers: {
+      next_action: {
+        type: "choice",
+        choice: "ALLOW_ENTRY",
+        confidence: ALLOW_ENTRY_MIN_CONFIDENCE - 0.01,
+        probabilities: {
+          REFUSE_ENTRY: 0.1,
+          ASK_FOR_PROOF: 0.2,
+          ALLOW_ENTRY: 0.7
+        }
+      },
+      entry_case_credible: {
+        type: "noul",
+        noul: 0.95
+      }
+    }
+  };
+
+  const decision = parseJevResponse(response, context, proofActions);
+
+  assert.equal(decision.action, "ASK_FOR_PROOF");
+  assert.deepEqual(decision.stateChanges, { trust: 2, suspicion: 3 });
+  assert.equal(decision.providerDetails.selectedAction, "ALLOW_ENTRY");
+  assert.deepEqual(decision.providerDetails.confidenceGate, {
+    applied: true,
+    minimumConfidence: ALLOW_ENTRY_MIN_CONFIDENCE,
+    minimumCredibility: ALLOW_ENTRY_MIN_CREDIBILITY
+  });
+  assert.match(decision.reason, /requires 0\.50 action confidence and 0\.55 credibility/i);
+});
+
+test("an unpersuasive entry case is held even when the action choice is confident", () => {
+  const proofActions = ["REFUSE_ENTRY", "ASK_FOR_PROOF", "ALLOW_ENTRY"];
+  const response = {
+    model: "jev-1.13.0",
+    answers: {
+      next_action: {
+        type: "choice",
+        choice: "ALLOW_ENTRY",
+        confidence: 0.95,
+        probabilities: {
+          REFUSE_ENTRY: 0.02,
+          ASK_FOR_PROOF: 0.03,
+          ALLOW_ENTRY: 0.95
+        }
+      },
+      entry_case_credible: {
+        type: "noul",
+        noul: ALLOW_ENTRY_MIN_CREDIBILITY - 0.01
+      }
+    }
+  };
+
+  const decision = parseJevResponse(response, context, proofActions);
+
+  assert.equal(decision.action, "ASK_FOR_PROOF");
+  assert.equal(
+    decision.providerDetails.entryCredibility,
+    ALLOW_ENTRY_MIN_CREDIBILITY - 0.01
+  );
+  assert.equal(decision.providerDetails.selectedAction, "ALLOW_ENTRY");
+});
+
+test("entry at the confidence threshold remains allowed", () => {
+  const proofActions = ["REFUSE_ENTRY", "ASK_FOR_PROOF", "ALLOW_ENTRY"];
+  const response = {
+    model: "jev-1.13.0",
+    answers: {
+      next_action: {
+        type: "choice",
+        choice: "ALLOW_ENTRY",
+        confidence: ALLOW_ENTRY_MIN_CONFIDENCE,
+        probabilities: {
+          REFUSE_ENTRY: 0.05,
+          ASK_FOR_PROOF: 0.1,
+          ALLOW_ENTRY: 0.85
+        }
+      },
+      entry_case_credible: {
+        type: "noul",
+        noul: ALLOW_ENTRY_MIN_CREDIBILITY
+      }
+    }
+  };
+
+  const decision = parseJevResponse(response, context, proofActions);
+
+  assert.equal(decision.action, "ALLOW_ENTRY");
+  assert.equal(decision.providerDetails.confidenceGate, null);
 });
 
 test("valid Jev choices become deterministic game decisions", () => {

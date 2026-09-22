@@ -400,7 +400,7 @@ const OUTCOME_PRESENTATIONS = Object.freeze({
   entry_granted: {
     title: "Car park access granted",
     code: "South gate open",
-    copy: "Arthur opens the car-park gate. Report to Guard Tower 04 with the original documents.",
+    copy: "Arthur opens the car-park gate. Report directly to Guard Tower 04.",
     door: "Open"
   },
   refused: {

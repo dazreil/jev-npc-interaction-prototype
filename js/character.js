@@ -18,7 +18,7 @@ export const ARTHUR_CHARACTER_PROFILES = Object.freeze({
     id: "sir",
     label: "Formal New England rule-keeper",
     decisionStyle:
-      "Formal, restrained, precise, and strongly bound to procedure. He expects clear answers and documentary proof.",
+      "Formal, restrained, precise, and strongly bound to procedure. He expects clear, consistent answers and specific details.",
     personality: Object.freeze({
       patience: 46,
       greed: 12,

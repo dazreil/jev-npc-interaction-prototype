@@ -97,27 +97,28 @@ test("a supported head-office claim can lead to authored entry dialogue", async 
   assert.equal(second.outcome, ENCOUNTER_OUTCOMES.ENTRY_GRANTED);
 });
 
-test("a contextual reply resolves requested official papers instead of looping", async () => {
+test("a vague contextual claim is not persuasive by itself", async () => {
   const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
 
   const request = await game.takeTurn("I'm from head office and need access.");
   assert.equal(request.decision.action, "ASK_FOR_PROOF");
 
   const proof = await game.takeTurn("I have them.");
-  assert.equal(proof.decision.action, "ALLOW_ENTRY");
-  assert.equal(proof.outcome, ENCOUNTER_OUTCOMES.ENTRY_GRANTED);
-  assert.equal(proof.decision.memory.tags.includes("proof"), true);
+  assert.equal(proof.decision.action, "ASK_FOR_PROOF");
+  assert.equal(proof.outcome, ENCOUNTER_OUTCOMES.ACTIVE);
+  assert.equal(proof.decision.memory, null);
 
   const log = game.getConversationLog();
   assert.equal(log.entries.length, 2);
-  assert.equal(log.entries[1].context.conversationSignals.proofOffered, true);
+  assert.equal(log.entries[1].context.conversationSignals.proofOffered, false);
   assert.equal(log.entries[1].context.conversationSignals.proofReference, "contextual");
-  assert.equal(log.entries[1].decision.action, "ALLOW_ENTRY");
-  assert.equal(log.entries[1].dialogue, "ALLOW_ENTRY neutral");
+  assert.equal(log.entries[1].context.availableActions.includes("ALLOW_ENTRY"), true);
+  assert.equal(log.entries[1].decision.action, "ASK_FOR_PROOF");
+  assert.equal(log.entries[1].dialogue, "ASK_FOR_PROOF neutral");
   assert.deepEqual(log.entries[1].stateAfter, game.npc.state);
 });
 
-test("named work papers and an ID badge cannot be routed back to refusal", async () => {
+test("specific named support leaves cautious alternatives available", async () => {
   const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
 
   await game.takeTurn("I'm a maintenance contractor here for a night inspection.");
@@ -126,9 +127,24 @@ test("named work papers and an ID badge cannot be routed back to refusal", async
 
   assert.equal(context.conversationSignals.proofOffered, true);
   assert.equal(context.conversationSignals.proofReference, "named");
-  assert.equal(context.availableActions.includes("REFUSE_ENTRY"), false);
-  assert.equal(context.availableActions.includes("ASK_FOR_PROOF"), false);
+  assert.equal(context.availableActions.includes("REFUSE_ENTRY"), true);
+  assert.equal(context.availableActions.includes("ASK_FOR_PROOF"), true);
   assert.equal(proof.decision.action, "ALLOW_ENTRY");
+});
+
+test("specific operational details can talk Arthur into limited entry without inventory", async () => {
+  const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+
+  const claim = await game.takeTurn("I'm the maintenance contractor for the night shift.");
+  assert.equal(claim.decision.action, "ASK_FOR_PROOF");
+
+  const persuasion = await game.takeTurn(
+    "The alarm fault is in unit B, bay 3. The night engineer called me for job number 417."
+  );
+
+  assert.equal(persuasion.decision.action, "ALLOW_ENTRY");
+  assert.equal(persuasion.outcome, ENCOUNTER_OUTCOMES.ENTRY_GRANTED);
+  assert.ok(persuasion.decision.memory.tags.includes("persuasion"));
 });
 
 test("denying possession after a proof request does not count as evidence", async () => {
@@ -234,7 +250,7 @@ test("ordinary repair language gets a contextual human proof request", async () 
   assert.equal(purpose.decision.action, "ASK_FOR_PROOF");
   assert.equal(
     purpose.dialogue,
-    "David. Thank you. Coffee machines at this hour? All right, sir. Hold the work order and your ID up to the camera."
+    "David. Thank you. Coffee machines at this hour? All right, sir. Which machine, and who called you out?"
   );
   assert.equal(game.getSnapshot().playerName, "David");
   assert.equal(game.getSnapshot().lastContext.player.name, "David");
@@ -244,13 +260,13 @@ test("ordinary repair language gets a contextual human proof request", async () 
   assert.equal(repeatedPurpose.decision.action, "ASK_FOR_PROOF");
   assert.equal(
     repeatedPurpose.dialogue,
-    "I understand, sir. Hold the work order or your ID up to the camera."
+    "I understand, sir. I still need a specific name, place, or job detail."
   );
 
   const proof = await game.takeTurn("I have a work order here.");
   assert.equal(proof.decision.action, "ALLOW_ENTRY");
   assert.match(proof.dialogue, /car-park access|car-park gate/i);
-  assert.match(proof.dialogue, /Guard Tower 04|original/i);
+  assert.match(proof.dialogue, /Guard Tower 04|car-park access/i);
   assert.doesNotMatch(proof.dialogue, /documents are in order|authorise|supervision/i);
 });
 
@@ -630,7 +646,7 @@ test("a proof request survives a deflection and is still answerable later", asyn
   assert.equal(game.getSnapshot().pendingRequest.topic, "proof");
 
   // The player changes the subject. Arthur answers something else, but the
-  // request for papers is still outstanding.
+  // request for a convincing supporting detail is still outstanding.
   const deflection = await game.takeTurn("it is freezing out here tonight");
   assert.notEqual(deflection.decision.action, "ALLOW_ENTRY");
   assert.equal(game.getSnapshot().pendingRequest.topic, "proof");
@@ -639,15 +655,17 @@ test("a proof request survives a deflection and is still answerable later", asyn
   assert.equal(signals.responseStatus, "unclear");
   assert.equal(signals.pendingRequest.turnsOutstanding, 1);
 
-  // The same contextual reply that only worked on the very next turn before.
+  // A vague contextual reply acknowledges the request but is not camera proof.
   const late = await game.takeTurn("I have them.");
   const lateSignals = game.getSnapshot().lastContext.conversationSignals;
 
-  assert.equal(lateSignals.responseStatus, "satisfied");
-  assert.equal(lateSignals.proofOffered, true);
+  assert.equal(lateSignals.responseStatus, "unclear");
+  assert.equal(lateSignals.proofOffered, false);
   assert.equal(lateSignals.proofReference, "contextual");
-  assert.equal(late.decision.action, "ALLOW_ENTRY");
-  assert.equal(late.outcome, ENCOUNTER_OUTCOMES.ENTRY_GRANTED);
+  assert.equal(game.getSnapshot().lastContext.availableActions.includes("ALLOW_ENTRY"), true);
+  assert.equal(late.decision.action, "ASK_FOR_PROOF");
+  assert.equal(late.outcome, ENCOUNTER_OUTCOMES.ACTIVE);
+  assert.equal(game.getSnapshot().pendingRequest.topic, "proof");
 });
 
 test("a satisfied request stops being pending and reset clears it", async () => {

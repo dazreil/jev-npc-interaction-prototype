@@ -105,13 +105,13 @@
             "I understand, but"
           ],
           "evidence": [
-            "you'll have something to prove it.",
-            "I need something I can see before the gate opens."
+            "you'll need to give me something solid to go on.",
+            "I need enough detail to believe you before the gate opens."
           ],
           "close": [
-            "Hold your ID or work order up to the camera.",
-            "What have you got, [[address]]?",
-            "Show the pass or work order to the camera."
+            "Who sent you, and what exactly is the job?",
+            "Give me the details, [[address]].",
+            "Tell me something I can check."
           ]
         },
         "branches": [
@@ -128,25 +128,25 @@
                 "I still need something I can verify."
               ],
               "close": [
-                "Your ID, a work order, or a reference will do.",
-                "What can you show me?"
+                "A name, a department, or a specific job detail will do.",
+                "What else can you tell me?"
               ]
             }
           }
         ]
       },
       "friendly": [
-        "Show me something official and I may be able to help you.",
-        "Give me a name, a pass, or a reference I can check and we'll take it from there."
+        "Give me enough detail to believe you and I may be able to help.",
+        "Give me a name, a department, or a detail I can check and we'll take it from there."
       ],
-      "irritated": "A story isn't authorisation. Show me proof.",
-      "hostile": "Proof. Now. Or this conversation is over."
+      "irritated": "That story isn't enough. Give me something specific.",
+      "hostile": "One solid detail. Now. Or this conversation is over."
     },
     "ALLOW_ENTRY": {
-      "neutral": "Looks right on camera, [[address]]. I'll open the car-park gate. Bring the original to Guard Tower 04.",
-      "friendly": "Looks good from here. I'll open the car-park gate; bring the original to the tower and I'll check it properly.",
-      "irritated": "Fine. Car-park gate only. Bring the original straight to Guard Tower 04.",
-      "hostile": "I'm opening the car-park gate, nothing else. Come straight to Guard Tower 04 with the original."
+      "neutral": "All right, [[address]]. Your story holds together. I'll open the car-park gate. Report directly to Guard Tower 04.",
+      "friendly": "You've given me enough to go on. I'll open the car-park gate; come straight to the tower.",
+      "irritated": "Fine. Car-park gate only. Report straight to Guard Tower 04 and explain yourself there.",
+      "hostile": "I'm opening the car-park gate, nothing else. Come straight to Guard Tower 04."
     },
     "WARN_PLAYER": {
       "neutral": {
@@ -305,12 +305,33 @@
             }
           },
           {
-            "when": { "lastAction": "WARN_PLAYER" },
+            "when": {
+              "lastAction": "WARN_PLAYER",
+              "playerContains": ["sorry", "apolog", "my bad", "out of order", "shouldn't have", "shouldnt have", "didn't mean", "didnt mean", "no offence", "no offense"]
+            },
             "template": "{acknowledgement} {boundary} {nextStep}",
             "slots": {
               "acknowledgement": [
                 "I appreciate the apology.",
-                "All right, [[address]]. I hear you."
+                "All right, [[address]]. Apology heard."
+              ],
+              "boundary": [
+                "Keep it civil and we can continue.",
+                "Let's leave the shouting there."
+              ],
+              "nextStep": [
+                "What is it you need from the warehouse?",
+                "Explain what brought you here."
+              ]
+            }
+          },
+          {
+            "when": { "lastAction": "WARN_PLAYER" },
+            "template": "{acknowledgement} {boundary} {nextStep}",
+            "slots": {
+              "acknowledgement": [
+                "All right, [[address]]. I hear you.",
+                "Understood."
               ],
               "boundary": [
                 "Keep it civil and we can continue.",
@@ -332,7 +353,21 @@
         "That helps, but it doesn't wipe out what happened. Tell me the truth.",
         "You've got one chance. What are you really here for?"
       ],
-      "hostile": "I hear the apology. Keep your distance and explain yourself carefully."
+      "hostile": {
+        "templates": [
+          "I hear you. Keep your distance and explain yourself carefully."
+        ],
+        "branches": [
+          {
+            "when": {
+              "playerContains": ["sorry", "apolog", "my bad", "out of order", "shouldn't have", "shouldnt have", "didn't mean", "didnt mean", "no offence", "no offense"]
+            },
+            "templates": [
+              "I hear the apology. Keep your distance and explain yourself carefully."
+            ]
+          }
+        ]
+      }
     },
     "END_CONVERSATION": {
       "neutral": "We're done here. Leave.",
@@ -356,12 +391,12 @@
           "Make it quick, pal. Why are you here?"
         ],
         "ASK_FOR_PROOF": [
-          "Okay, pal. Hold your badge or work order up to the camera.",
-          "You say it's official. Fine. Show it to the camera."
+          "Okay, pal. Who sent you, and what exactly are you here to do?",
+          "You say it's official. Fine. Give me one detail I can check."
         ],
         "ALLOW_ENTRY": [
-          "Looks good enough on camera, pal. Gate's opening. Bring the original to Guard Tower 04.",
-          "Okay, pal. Car park only. Come straight to the tower and show me the real thing."
+          "All right, pal. Your story holds together. Gate's opening. Come straight to Guard Tower 04.",
+          "Okay, pal. You've convinced me enough for the car park. Report straight to the tower."
         ],
         "SHOW_SYMPATHY": [
           "Yeah, I hear you, pal. Doesn't mean I can pop the gate.",
@@ -371,10 +406,23 @@
           "Hold it, pal. That's not the story you gave me.",
           "Come on. Now you're changing it. What's really going on?"
         ],
-        "REPAIR_CONVERSATION": [
-          "All right, pal, apology heard. Now give it to me straight.",
-          "Fine. We keep talking. No more games."
-        ]
+        "REPAIR_CONVERSATION": {
+          "templates": [
+            "All right, pal, I hear you. Now give it to me straight.",
+            "Fine. Let's start again and you tell me what you need."
+          ],
+          "branches": [
+            {
+              "when": {
+                "playerContains": ["sorry", "apolog", "my bad", "out of order", "shouldn't have", "shouldnt have", "didn't mean", "didnt mean", "no offence", "no offense"]
+              },
+              "templates": [
+                "All right, pal, apology heard. Now give it to me straight.",
+                "Apology taken, pal. Now give it to me straight."
+              ]
+            }
+          ]
+        }
       }
     },
     "sir": {
@@ -393,31 +441,26 @@
           "template": "{request}",
           "slots": {
             "request": [
-              "All right. Hold the work order or your ID up to the camera.",
-              "If you're here on a job, show your badge or work order to the camera."
+              "All right. Tell me who sent you and what the job involves.",
+              "If you're here on a job, give me a specific detail I can check."
             ]
           },
           "branches": [
             {
-              "when": {
-                "lastAction": "ASK_FOR_PROOF"
-              },
-              "template": "I understand, sir. Hold the work order or your ID up to the camera."
+              "when": { "lastAction": "ASK_FOR_PROOF" },
+              "template": "I understand, sir. I still need a specific name, place, or job detail."
             },
             {
               "when": {
-                "playerContains": [
-                  "coffee machine",
-                  "coffee machines"
-                ]
+                "playerContains": ["coffee machine", "coffee machines"]
               },
-              "template": "Coffee machines at this hour? All right, sir. Hold the work order and your ID up to the camera."
+              "template": "Coffee machines at this hour? All right, sir. Which machine, and who called you out?"
             }
           ]
         },
         "ALLOW_ENTRY": [
-          "That looks right on camera. I'll open the car-park gate; bring the original to Guard Tower 04.",
-          "All right, sir. Car-park access only. Report to Guard Tower 04 with the original."
+          "Your account is consistent. I'll open the car-park gate; report directly to Guard Tower 04.",
+          "All right, sir. You've made your case. Car-park access only; report to Guard Tower 04."
         ],
         "SHOW_SYMPATHY": [
           "I understand, sir. I still need something I can check before I open the gate.",
@@ -427,10 +470,23 @@
           "Hold on, sir. That's not what you told me a moment ago. Which version is true?",
           "Your story's changed. Tell me plainly what's going on."
         ],
-        "REPAIR_CONVERSATION": [
-          "All right, sir. I appreciate the apology. Tell me what actually happened.",
-          "Okay. We can keep talking, but I need the straight story from here."
-        ]
+        "REPAIR_CONVERSATION": {
+          "templates": [
+            "All right, sir. Let's start again. Tell me what actually happened.",
+            "Okay. We can keep talking, but I need the straight story from here."
+          ],
+          "branches": [
+            {
+              "when": {
+                "playerContains": ["sorry", "apolog", "my bad", "out of order", "shouldn't have", "shouldnt have", "didn't mean", "didnt mean", "no offence", "no offense"]
+              },
+              "templates": [
+                "All right, sir. I appreciate the apology. Tell me what actually happened.",
+                "Apology noted, sir. Now tell me what actually happened."
+              ]
+            }
+          ]
+        }
       }
     },
     "mate": {
@@ -446,12 +502,12 @@
           "Take your time and tell me what you need inside. Better I hear it properly than guess, isn't it?"
         ],
         "ASK_FOR_PROOF": [
-          "That might be fair enough, mate. Hold a badge or work order up to the camera for me.",
-          "Help me help you here. Show the work order to the camera and we'll see where we are."
+          "That might be fair enough, mate. Tell me who sent you and what needs doing.",
+          "Help me help you here. Give me one solid detail and we'll see where we are."
         ],
         "ALLOW_ENTRY": [
-          "There we are, mate. Looks good on camera. I'll open the car-park gate; bring the original to Guard Tower 04.",
-          "Right, that's enough for the gate. Come straight to the tower and show me the real thing when you're through."
+          "There we are, mate. That all hangs together. I'll open the car-park gate; come straight to Guard Tower 04.",
+          "Right, you've given me enough for the gate. Come straight to the tower when you're through."
         ],
         "SHOW_SYMPATHY": [
           "Ah, mate, that's a rough spot to be in. I can't promise the gate, but give me something I can verify and I'll do what I can.",
@@ -461,10 +517,23 @@
           "Hold on now, mate. That's not quite what you told me before, and I need to know which version I'm meant to believe.",
           "You've lost me there. The story changed halfway through, so talk me through what really happened."
         ],
-        "REPAIR_CONVERSATION": [
-          "Fair enough, mate, apology accepted. Let's keep it straight from here and tell me what you actually need.",
-          "All right, I appreciate you saying that. We can keep talking, but give me the honest version this time."
-        ]
+        "REPAIR_CONVERSATION": {
+          "templates": [
+            "Fair enough, mate. Let's keep it straight from here and tell me what you actually need.",
+            "All right, mate. Start again and tell me what you're after."
+          ],
+          "branches": [
+            {
+              "when": {
+                "playerContains": ["sorry", "apolog", "my bad", "out of order", "shouldn't have", "shouldnt have", "didn't mean", "didnt mean", "no offence", "no offense"]
+              },
+              "templates": [
+                "Fair enough, mate, apology accepted. Let's keep it straight from here and tell me what you actually need.",
+                "Apology accepted, mate. Now tell me what you actually need."
+              ]
+            }
+          ]
+        }
       }
     },
     "friend": {
@@ -480,15 +549,15 @@
           "Tell me. Why are you here?"
         ],
         "ASK_FOR_PROOF": [
-          "You have papers? Hold to camera.",
-          "Official job. Show work order to camera."
+          "Who sent you? What job? Give details.",
+          "Official job. Tell me one thing I can check."
         ],
         "ALLOW_ENTRY": [
-          "Looks good on camera. I open car-park gate. Bring original to Guard Tower 04.",
-          "All right, friend. Car park only. Come to tower with real paper."
+          "Story makes sense. I open car-park gate. Come to Guard Tower 04.",
+          "All right, friend. Car park only. Come straight to tower."
         ],
         "SHOW_SYMPATHY": [
-          "I understand. Still no entry without proof.",
+          "I understand. Still no entry until your story makes sense.",
           "Bad situation, friend. Rules do not change."
         ],
         "BECOME_SUSPICIOUS": {
@@ -504,7 +573,7 @@
               "when": {
                 "playerContains": ["letter from the king", "from the king"]
               },
-              "template": "Letter from king? No jokes. Show warehouse work order and real ID."
+              "template": "Letter from king? No jokes. Tell me who actually sent you and why."
             }
           ]
         },
