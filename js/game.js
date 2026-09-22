@@ -39,6 +39,16 @@ export const AVAILABLE_ACTIONS = Object.freeze([
 
 export const FALLBACK_ACTION = "REFUSE_ENTRY";
 export const MAX_HISTORY_ENTRIES = 12;
+/** Arthur presses for a better case twice; after that he has to decide. */
+export const MAX_SUPPORT_REQUESTS = 2;
+/**
+ * Arthur turns a visitor away this many times before the night is over. It
+ * also keeps the encounter inside the authored corpus: there are seven
+ * distinct refusals to draw on, so the door closes before he repeats one.
+ */
+export const MAX_REFUSALS = 6;
+/** How far to walk an action's variants looking for one Arthur has not used. */
+export const MAX_VARIANT_WALK = 8;
 export const MAX_MEMORIES = 8;
 export const PLAYER_ADDRESS_TERMS = ARTHUR_CHARACTER_IDS;
 export const ENCOUNTER_OUTCOMES = Object.freeze({
@@ -115,9 +125,9 @@ function acknowledgePlayerName(line, playerName, profileId, action, dialogueData
   return `${String(acknowledgement).replaceAll(PLAYER_NAME_TOKEN, playerName)} ${line}`;
 }
 
-function resolveTerminalOutcome({ action, previousAction, memories, state }) {
+function resolveTerminalOutcome({ action, previousAction, memories, state, refusalsSpent }) {
   if (action === "ALLOW_ENTRY") return ENCOUNTER_OUTCOMES.ENTRY_GRANTED;
-  if (action !== "END_CONVERSATION") return ENCOUNTER_OUTCOMES.ACTIVE;
+  if (action !== "END_CONVERSATION" && !refusalsSpent) return ENCOUNTER_OUTCOMES.ACTIVE;
 
   const latestRepairTurn = memories.reduce(
     (latest, memory) =>
@@ -226,6 +236,10 @@ export class Game {
     this.status = "active";
     this.outcome = ENCOUNTER_OUTCOMES.ACTIVE;
     this.reasonPrompted = false;
+    this.supportRequests = 0;
+    this.refusals = 0;
+    this.actionUses = new Map();
+    this.spokenLines = new Set();
     this.pendingRequest = null;
     this.lastDecision = null;
     this.lastContext = null;
@@ -286,6 +300,12 @@ export class Game {
     const hasDamageToRepair = suspicionAlreadyRaised || hasUnrepairedRisk || tensionRaised;
     return AVAILABLE_ACTIONS.filter((action) => {
       if (action === "ASK_FOR_REASON" && this.reasonPrompted) {
+        return false;
+      }
+
+      // ASK_FOR_PROOF was the one request with no limit, so Arthur could keep
+      // demanding a better case forever and never rule on the one he had.
+      if (action === "ASK_FOR_PROOF" && this.supportRequests >= MAX_SUPPORT_REQUESTS) {
         return false;
       }
 
@@ -387,6 +407,40 @@ export class Game {
     });
   }
 
+  /**
+   * Picks the next authored variant for this action and keeps stepping while the
+   * corpus hands back something Arthur has already said this encounter. A
+   * character profile carries only a couple of lines per action, so the walk
+   * gives up once every variant has been seen rather than looping forever.
+   */
+  selectFreshDialogue(action, tone, options) {
+    const uses = this.actionUses.get(action) ?? 0;
+    this.actionUses.set(action, uses + 1);
+
+    // A profile's handful of lines is searched first so Arthur keeps his voice,
+    // then the templated root corpus, which is far larger and personalises the
+    // same form of address. Only when both are exhausted does a line repeat.
+    const sources = [options, { ...options, profileId: "" }];
+    const tried = new Set();
+    let line = null;
+
+    for (const source of sources) {
+      for (let step = 0; step <= MAX_VARIANT_WALK; step += 1) {
+        const candidate = selectDialogue(this.dialogueData, action, tone, uses + step, source);
+        if (line === null) line = candidate;
+        if (tried.has(candidate)) continue;
+        tried.add(candidate);
+        if (!this.spokenLines.has(candidate)) {
+          this.spokenLines.add(candidate);
+          return candidate;
+        }
+      }
+    }
+
+    this.spokenLines.add(line);
+    return line;
+  }
+
   addMemory(memory) {
     if (!memory) return;
 
@@ -461,18 +515,19 @@ export class Game {
       this.lastContext.availableActions
     );
     const tone = determineTone(this.npc.state);
+    const dialogueOptions = {
+      playerInput: input,
+      profileId: this.characterProfile.id,
+      dialogueContext: {
+        memories: this.memories,
+        history: this.history,
+        state: this.npc.state,
+        action: decision.action,
+        turn: this.turn + 1
+      }
+    };
     const personalizedDialogue = personalizeDialogue(
-      selectDialogue(this.dialogueData, decision.action, tone, this.turn, {
-        playerInput: input,
-        profileId: this.characterProfile.id,
-        dialogueContext: {
-          memories: this.memories,
-          history: this.history,
-          state: this.npc.state,
-          action: decision.action,
-          turn: this.turn + 1
-        }
-      }),
+      this.selectFreshDialogue(decision.action, tone, dialogueOptions),
       this.playerAddress
     );
     const dialogue = acknowledgePlayerName(
@@ -494,7 +549,11 @@ export class Game {
     this.turn += 1;
     if (introducedPlayerName) this.playerName = introducedPlayerName;
     if (decision.action === "ASK_FOR_REASON") this.reasonPrompted = true;
-    if (decision.action === "REPAIR_CONVERSATION") this.reasonPrompted = false;
+    if (decision.action === "ASK_FOR_PROOF") this.supportRequests += 1;
+    if (decision.action === "REPAIR_CONVERSATION") {
+      this.reasonPrompted = false;
+      this.supportRequests = 0;
+    }
 
     // A question Arthur asked stays outstanding until the player actually
     // settles it, so a deflected question survives the turn that dodged it.
@@ -512,13 +571,19 @@ export class Game {
     this.addMemory(decision.memory);
     this.recordStatedPurpose(input);
 
+    if (decision.action === "REFUSE_ENTRY") this.refusals += 1;
+    // A visitor turned away this many times has had the night's answer, and the
+    // encounter closes rather than circling.
+    const refusalsSpent = this.refusals >= MAX_REFUSALS;
+
     if (decision.action === "ALLOW_ENTRY") this.status = "success";
-    if (decision.action === "END_CONVERSATION") this.status = "failure";
+    if (decision.action === "END_CONVERSATION" || refusalsSpent) this.status = "failure";
     this.outcome = resolveTerminalOutcome({
       action: decision.action,
       previousAction,
       memories: this.memories,
-      state: this.npc.state
+      state: this.npc.state,
+      refusalsSpent
     });
 
     this.lastDecision = { ...decision, tone };
@@ -570,6 +635,9 @@ export class Game {
       status: this.status,
       outcome: this.outcome,
       reasonPrompted: this.reasonPrompted,
+      supportRequests: this.supportRequests,
+      refusals: this.refusals,
+      actionUses: Object.fromEntries(this.actionUses),
       pendingRequest: this.pendingRequest ? structuredClone(this.pendingRequest) : null,
       playerAddress: this.playerAddress,
       playerName: this.playerName,

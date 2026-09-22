@@ -4,11 +4,19 @@ const PROOF_DENIAL_PATTERN =
   /\b(?:do not|don't|did not|didn't|have no|haven't|have not|without|lost|forgot|cannot|can't)\b/i;
 const REFERENTIAL_PROOF_PATTERN =
   /\b(?:i (?:have|got) (?:it|them|those|that)|i(?:'ve| have) got (?:it|them|those)|here (?:it is|they are)|they(?:'re| are) right here|it(?:'s| is) right here|i do)\b/i;
+// The support Arthur asks for is a checkable detail, not a possession, so a
+// specific one settles his request as squarely as naming a document used to.
+const SPECIFIC_DETAIL_PATTERN =
+  /\b(pressure valve|isolation valve|control room|plant room|alarm panel|night engineer|night desk|duty manager|monitoring company|ticket \w+|job number \w+|reference \w+|panel \w+|unit [a-z0-9-]+|bay [a-z0-9-]+|callout|called out)\b/i;
+
 const WITHHOLDING_PATTERN =
   /\b(?:none of your (?:business|concern)|not telling you|won't say|will not say|why should i|mind your own|that's my business|no comment|doesn't matter|does not matter|not your problem)\b/i;
 
 export const PURPOSE_PATTERNS = Object.freeze({
-  emergency: /\b(boiler|gas|leak|fire|smoke|alarm|pressure|flood|emergency|burst|electrical|sparks)\b/i,
+  // "alarm" and "fire" name equipment as often as they name an incident, so a
+  // contractor who services the fire alarm panel is not reporting an emergency.
+  emergency:
+    /\b(boiler|gas|leak|smoke|pressure|flood|emergency|burst|electrical|sparks|fire(?!\s+(?:alarm|panel|system|door|exit|extinguisher|point))|alarm(?!\s+(?:panel|system|board|cabinet|box|sensor|point|contract|maintenance|engineer)))\b/i,
   authority: /\b(head office|management|manager|inspector|inspection|contractor|engineer|technician|maintenance|maintanance|mantenice|boss(?:es)? sent me|sent by (?:the )?(?:boss|management)|work(?:s| here)?\b|working|job|shift|call(?:ed)?[- ]out|service call|work order|employee|staff|fix(?:ing)? (?:the )?(?:coffee )?machines?)\b/i,
   delivery: /\b(delivery|courier|package|parcel|shipment|drop off|driver)\b/i,
   personal: /\b(left my|forgot my|my bag|my phone|meet someone|friend inside|personal item)\b/i
@@ -97,7 +105,8 @@ export function classifyResponse(playerInput, pendingRequest) {
   if (pendingRequest.topic === "proof") {
     if (PROOF_DENIAL_PATTERN.test(input)) return "refused";
     // A vague reference such as "I have them" acknowledges the request but
-    // does not give Arthur anything concrete to inspect through the camera.
+    // does not give Arthur anything concrete to weigh.
+    if (SPECIFIC_DETAIL_PATTERN.test(input)) return "satisfied";
     if (NAMED_PROOF_PATTERN.test(input)) return "satisfied";
     return "unclear";
   }

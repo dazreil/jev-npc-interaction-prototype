@@ -25,19 +25,42 @@ const coreScenarios = [
     finalStatus: "active"
   },
   {
-    id: "authority-proof",
-    name: "Head-office claim followed by credible proof",
+    id: "authority-case",
+    name: "Head-office claim built into a checkable case",
     turns: [
       {
         input: "I'm from head office for a night inspection. Please let me through.",
         expected: ["ASK_FOR_PROOF"]
       },
       {
-        input: "Here is my work ID badge and signed authorisation letter.",
+        input: "Quarter-close stock audit. I'm booked in with the duty manager under site reference WSC-04.",
+        expected: ["ASK_FOR_PROOF", "ALLOW_ENTRY"]
+      },
+      {
+        input: "Dave Halloran on the night desk logged my callout at eleven. He can confirm it.",
         expected: ["ALLOW_ENTRY"]
       }
     ],
     finalStatus: "success"
+  },
+  {
+    id: "possession-without-a-case",
+    name: "Naming documents is not a case",
+    turns: [
+      {
+        input: "I'm from head office for a night inspection.",
+        expected: ["ASK_FOR_PROOF"]
+      },
+      {
+        input: "I have my badge and a letter.",
+        expected: ["ASK_FOR_PROOF", "REFUSE_ENTRY"]
+      },
+      {
+        input: "I have them right here.",
+        expected: ["REFUSE_ENTRY", "ASK_FOR_PROOF", "BECOME_SUSPICIOUS"]
+      }
+    ],
+    finalStatus: "active"
   },
   {
     id: "name-question",
@@ -59,7 +82,12 @@ const coreScenarios = [
         expected: ["ASK_FOR_PROOF"]
       },
       {
-        input: "The pressure valve in unit B failed. I am the night engineer on ticket 417.",
+        input: "The pressure valve in unit B failed and the low-pressure alarm tripped at one forty.",
+        expected: ["ASK_FOR_PROOF", "ALLOW_ENTRY"]
+      },
+      {
+        input:
+          "I am the night engineer on ticket 417. Dave Halloran on the night desk took the callout and can confirm it. I only need the plant room off the car park.",
         expected: ["ALLOW_ENTRY"]
       }
     ],
@@ -97,11 +125,12 @@ const coreScenarios = [
         expected: ["REPAIR_CONVERSATION"]
       },
       {
-        input: "Here is my work ID badge and signed authorisation letter.",
-        expected: ["ALLOW_ENTRY"]
+        input:
+          "The truth is I'm the night engineer on ticket 417, called out for the pressure valve in unit B.",
+        expected: ["ASK_FOR_PROOF", "BECOME_SUSPICIOUS", "ALLOW_ENTRY"]
       }
     ],
-    finalStatus: "success"
+    finalStatus: "active"
   },
   {
     id: "bribe",
@@ -187,15 +216,19 @@ const coreScenarios = [
         expected: ["REPAIR_CONVERSATION"]
       },
       {
-        input: "I'm the maintenance engineer for the alarm panel.",
+        input: "I'm the maintenance engineer for the compressor plant, here on ticket 417.",
         expected: ["ASK_FOR_PROOF"]
       },
       {
-        input: "Here is my maintenance ID and ticket reference 417.",
-        expected: ["ALLOW_ENTRY"]
+        input: "Compressor two has been in fault since eleven and Dave Halloran logged the callout.",
+        expected: ["ASK_FOR_PROOF", "ALLOW_ENTRY", "REFUSE_ENTRY"]
+      },
+      {
+        input: "I only need the compressor housing by the car park barrier, not the warehouse itself.",
+        expected: ["ALLOW_ENTRY", "REFUSE_ENTRY"]
       }
     ],
-    finalStatus: "success"
+    finalStatus: ["success", "active"]
   },
   {
     id: "sympathy-cooperation",
@@ -206,15 +239,20 @@ const coreScenarios = [
         expected: ["SHOW_SYMPATHY", "ASK_FOR_REASON"]
       },
       {
-        input: "Thank you for hearing me out. I'm the maintenance engineer for the alarm panel.",
-        expected: ["ASK_FOR_PROOF"]
+        input:
+          "Thank you for hearing me out. I'm the maintenance engineer for the compressor plant on ticket 417.",
+        expected: ["ASK_FOR_PROOF", "ALLOW_ENTRY"]
       },
       {
-        input: "Here is my maintenance ID and ticket reference 417.",
-        expected: ["ALLOW_ENTRY"]
+        input: "Compressor two has been in fault since eleven. Dave Halloran on the night desk logged the callout.",
+        expected: ["ASK_FOR_PROOF", "ALLOW_ENTRY"]
+      },
+      {
+        input: "I only need the compressor housing by the car park barrier, not the warehouse.",
+        expected: ["ALLOW_ENTRY", "REFUSE_ENTRY", "BECOME_SUSPICIOUS"]
       }
     ],
-    finalStatus: "success"
+    finalStatus: ["success", "active"]
   }
 ];
 

@@ -2,8 +2,12 @@ import { deriveConversationSignals, inferPurpose } from "../conversation-signals
 
 const JEV_ENDPOINT = "/api/jev/decision";
 const REQUEST_TIMEOUT_MS = 8000;
-export const ALLOW_ENTRY_MIN_CONFIDENCE = 0.5;
-export const ALLOW_ENTRY_MIN_CREDIBILITY = 0.55;
+// Choice confidence measures how concentrated the distribution is, not
+// permission to act: with ten plausible actions a sound ALLOW_ENTRY still
+// lands near 0.3, so this is only a noise floor. entry_case_credible is the
+// judgment that decides whether the case is good enough.
+export const ALLOW_ENTRY_MIN_CONFIDENCE = 0.25;
+export const ALLOW_ENTRY_MIN_CREDIBILITY = 0.45;
 
 export const ACTION_CRITERIA = Object.freeze({
   ANSWER_QUESTION:

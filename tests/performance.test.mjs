@@ -187,7 +187,7 @@ test("rendering-disabled and lifecycle-driven scenarios keep identical simulatio
   const controller = instantController();
   const inputs = [
     "I'm from head office and need access, please.",
-    "Here is my work ID badge and authorisation letter."
+    "The audit covers unit B, bay 3, on job number 417."
   ];
 
   for (const input of inputs) {

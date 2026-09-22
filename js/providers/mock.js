@@ -12,7 +12,10 @@ const patterns = {
   delivery: /\b(delivery|courier|package|parcel|shipment|drop off|driver)\b/i,
   personal: /\b(left my|forgot my|my bag|my phone|meet someone|friend inside|personal item)\b/i,
   proof: /\b(id|identification|badge|work order|authorisation|authorization|letter|pass|credentials?|employee number|call my manager|manager reference|manifest|invoice|delivery note|papers?|documents?|documentation|permit|licen[cs]e)\b/i,
-  emergency: /\b(boiler|gas|leak|fire|smoke|alarm|pressure|flood|emergency|burst|electrical|sparks)\b/i,
+  // "alarm" and "fire" name equipment as often as they name an incident, so a
+  // contractor who services the fire alarm panel is not reporting an emergency.
+  emergency:
+    /\b(boiler|gas|leak|smoke|pressure|flood|emergency|burst|electrical|sparks|fire(?!\s+(?:alarm|panel|system|door|exit|extinguisher|point))|alarm(?!\s+(?:panel|system|board|cabinet|box|sensor|point|contract|maintenance|engineer)))\b/i,
   detail: /\b(pressure valve|isolation valve|night engineer|ticket|reference|job number|unit [a-z0-9-]+|bay [a-z0-9-]+|control room)\b/i,
   polite: /\b(please|thank you|thanks|sir|understand|sorry|appreciate)\b/i,
   hostile: /\b(idiot|stupid|useless|moron|shut up|old man|pathetic)\b/i,
@@ -292,20 +295,19 @@ function chooseRawDecision(context) {
     );
   }
 
-  if (offersProof && (claimsAuthority || priorAuthorityClaim || claimsDelivery || priorDeliveryClaim)) {
+  // Naming a badge or a letter is a claim about an object the game never gave
+  // the player. Mock, like Jev, opens the gate for a case rather than a prop:
+  // the specific-detail branch below is the only work route through.
+  if (
+    offersProof &&
+    !givesSpecificDetail &&
+    (claimsAuthority || priorAuthorityClaim || claimsDelivery || priorDeliveryClaim)
+  ) {
     return decide(
-      "ALLOW_ENTRY",
-      0.91,
-      "The player's specific support makes the earlier work-related claim persuasive enough for Arthur to open the car-park gate and require a report at Guard Tower 04.",
-      { trust: 25, suspicion: -24, irritation: -7 },
-      {
-        fact:
-          claimsDelivery || priorDeliveryClaim
-            ? "Player supplied a credible delivery manifest"
-            : "Player supplied credible work identification",
-        importance: 90,
-        tags: ["proof", claimsDelivery || priorDeliveryClaim ? "delivery" : "authority"]
-      }
+      "ASK_FOR_PROOF",
+      0.88,
+      "The player names documents but has not given a detail Arthur can actually check.",
+      { trust: 1, suspicion: 2, irritation: 1 }
     );
   }
 
@@ -471,15 +473,17 @@ export async function chooseNpcAction(context, availableActions) {
     );
   }
 
-  const fallback = availableActions.includes("BECOME_SUSPICIOUS")
-    ? "BECOME_SUSPICIOUS"
+  // An action being unavailable says nothing about the visitor, so Arthur asks
+  // for more rather than accusing someone who has done nothing suspicious.
+  const fallback = availableActions.includes("ASK_FOR_PROOF")
+    ? "ASK_FOR_PROOF"
     : "REFUSE_ENTRY";
 
   return decide(
     fallback,
     Math.min(decision.confidence, 0.8),
-    `${decision.reason} Arthur's current state prevents ${decision.action}, so he refuses to relax his guard.`,
-    { suspicion: 5, irritation: 2 }
+    `${decision.reason} Arthur cannot take ${decision.action} yet, so he holds the gate and asks for more.`,
+    fallback === "ASK_FOR_PROOF" ? { trust: 1, suspicion: 1 } : { suspicion: 3, irritation: 2 }
   );
 }
 

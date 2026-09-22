@@ -90,7 +90,9 @@ test("a supported head-office claim can lead to authored entry dialogue", async 
   assert.equal(first.decision.action, "ASK_FOR_PROOF");
   assert.equal(game.getAvailableActions().includes("ALLOW_ENTRY"), true);
 
-  const second = await game.takeTurn("Here is my work ID badge and authorisation letter.");
+  const second = await game.takeTurn(
+    "The audit is for unit B, bay 3, under job number 417. The night engineer booked me in."
+  );
   assert.equal(second.decision.action, "ALLOW_ENTRY");
   assert.equal(second.dialogue, "ALLOW_ENTRY neutral");
   assert.equal(second.status, "success");
@@ -129,7 +131,8 @@ test("specific named support leaves cautious alternatives available", async () =
   assert.equal(context.conversationSignals.proofReference, "named");
   assert.equal(context.availableActions.includes("REFUSE_ENTRY"), true);
   assert.equal(context.availableActions.includes("ASK_FOR_PROOF"), true);
-  assert.equal(proof.decision.action, "ALLOW_ENTRY");
+  // Naming documents is a claim about a prop, not a case Arthur can check.
+  assert.equal(proof.decision.action, "ASK_FOR_PROOF");
 });
 
 test("specific operational details can talk Arthur into limited entry without inventory", async () => {
@@ -263,7 +266,7 @@ test("ordinary repair language gets a contextual human proof request", async () 
     "I understand, sir. I still need a specific name, place, or job detail."
   );
 
-  const proof = await game.takeTurn("I have a work order here.");
+  const proof = await game.takeTurn("The machine in bay 3, job number 417. The night desk called me.");
   assert.equal(proof.decision.action, "ALLOW_ENTRY");
   assert.match(proof.dialogue, /car-park access|car-park gate/i);
   assert.match(proof.dialogue, /Guard Tower 04|car-park access/i);
@@ -495,7 +498,7 @@ test("an honest repair can reopen the path from suspicion to proof", async () =>
   assert.equal(game.getAvailableActions().includes("BECOME_SUSPICIOUS"), true);
 
   const proof = await game.takeTurn(
-    "Here is my work ID badge and signed authorisation letter."
+    "The inspection is unit B, bay 3, on job number 417, booked by the night engineer."
   );
   assert.equal(proof.decision.action, "ALLOW_ENTRY");
   assert.equal(proof.status, "success");
@@ -674,7 +677,9 @@ test("a satisfied request stops being pending and reset clears it", async () => 
   await game.takeTurn("I'm from head office and need access.");
   assert.equal(game.getSnapshot().pendingRequest.topic, "proof");
 
-  await game.takeTurn("Here is my work ID badge and authorisation letter.");
+  await game.takeTurn(
+    "The inspection covers unit B, bay 3, on job number 417."
+  );
   assert.equal(game.getSnapshot().pendingRequest, null);
 
   game.reset();

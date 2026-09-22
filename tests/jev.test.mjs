@@ -165,7 +165,14 @@ test("low-confidence entry is converted into another proof request", () => {
     minimumConfidence: ALLOW_ENTRY_MIN_CONFIDENCE,
     minimumCredibility: ALLOW_ENTRY_MIN_CREDIBILITY
   });
-  assert.match(decision.reason, /requires 0\.50 action confidence and 0\.55 credibility/i);
+  assert.match(
+    decision.reason,
+    new RegExp(
+      `requires ${ALLOW_ENTRY_MIN_CONFIDENCE.toFixed(2)} action confidence and ` +
+        `${ALLOW_ENTRY_MIN_CREDIBILITY.toFixed(2)} credibility`,
+      "i"
+    )
+  );
 });
 
 test("an unpersuasive entry case is held even when the action choice is confident", () => {
