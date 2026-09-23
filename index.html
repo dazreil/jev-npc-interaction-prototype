@@ -42,6 +42,8 @@
             <p class="boot-route">
               <span>Intercom</span>
               <b>Car park south gate → Guard Tower 04</b>
+              <span>Record</span>
+              <b>Transmissions saved for playtest review</b>
             </p>
           </div>
         </section>
@@ -169,7 +171,7 @@
                 id="gate-feed"
                 src="assets/gates/gate-closed.webp"
                 width="480"
-                height="320"
+                height="740"
                 alt="Closed warehouse car-park gate at night"
               />
               <div class="gate-scan" aria-hidden="true"></div>
@@ -286,9 +288,10 @@
         <div class="credits-scroll">
           <p class="credits-lede">A Jev NPC interaction prototype by Daryl Smith.</p>
           <dl class="credits-list">
-            <div><dt>Arthur and player imagery</dt><dd>Original prototype artwork</dd></div>
+            <div><dt>Arthur imagery</dt><dd>Original prototype artwork</dd></div>
             <div><dt>South-gate animation</dt><dd>Original AI-assisted pixel artwork</dd></div>
             <div><dt>NPC dialogue</dt><dd>Hand-authored for this encounter</dd></div>
+            <div><dt>Playtest recording</dt><dd>Each conversation is saved privately for the developer to review</dd></div>
             <div><dt>Decision systems</dt><dd>Deterministic Mock and optional TypeSafe Jev</dd></div>
             <div><dt>Primary speech</dt><dd>Piper neural voice and ONNX Runtime WebAssembly, MIT</dd></div>
             <div><dt>Voice model</dt><dd>en_US-danny-low, Rhasspy Piper; trained on a CC-BY-SA 4.0 dataset</dd></div>
@@ -323,7 +326,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=17.3";
+        appScript.src = "js/app.js?phase=17.4";
         document.body.append(appScript);
       }
     </script>

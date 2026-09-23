@@ -10,3 +10,4 @@ assets/vendor/piper
 .impeccable
 .DS_Store
 tests
+playtest-logs

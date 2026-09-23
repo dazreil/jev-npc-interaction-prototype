@@ -6,6 +6,7 @@
     "postinstall": "node scripts/install-espeak-assets.mjs && node scripts/install-piper-assets.mjs",
     "start": "node server.mjs",
     "build": "node scripts/build-static.mjs",
+    "logs:pull": "node scripts/pull-playtest-logs.mjs",
     "start:mock": "python3 -m http.server 5173",
     "test": "node --test tests/*.test.mjs",
     "lint:dialogue": "node scripts/lint-dialogue.mjs",
@@ -17,7 +18,8 @@
     "evaluate:phase15": "npm run check && npm run check:release"
   },
   "dependencies": {
-    "@echogarden/espeak-ng-emscripten": "0.3.5"
+    "@echogarden/espeak-ng-emscripten": "0.3.5",
+    "@vercel/blob": "^2.8.0"
   },
   "devDependencies": {
     "@diffusionstudio/piper-wasm": "1.0.0",

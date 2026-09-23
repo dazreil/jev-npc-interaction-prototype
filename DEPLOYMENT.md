@@ -61,6 +61,24 @@ The `env add` command asks for the key. Paste it there. Do not put the key in `v
 
 The Jev route is public. Anyone with the address can send it requests, and each request uses TypeSafe credit. Share the address only with people you trust, or remove the key to fall back to Mock.
 
+## Playtest logs
+
+The game saves the whole conversation after every turn. Players do not need to export anything.
+
+- On Vercel, logs go to the private Blob store `jev-playtest-logs` as `logs/<date>/<session>.json`. Only the project owner can read them.
+- On the local server, logs go to `playtest-logs/`. Git ignores this folder.
+- Each Reset link starts a new session file.
+- The boot screen and the credits tell players that conversations are saved.
+
+To download every saved log into `playtest-logs/`:
+
+```bash
+vercel env pull .env.local
+npm run logs:pull
+```
+
+If the store is not connected, the game keeps playing and simply does not save.
+
 ## Release check
 
 Run the offline release gate before publishing:

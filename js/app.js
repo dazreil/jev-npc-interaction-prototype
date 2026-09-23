@@ -113,6 +113,8 @@ let replayRunId = 0;
 let bootRunId = 0;
 let gateRunId = 0;
 let gateAnimationTimer = null;
+let playtestSessionId = createPlaytestSessionId();
+let playtestLogQueue = Promise.resolve();
 const periodAudio = new PeriodAudio();
 const browserSpeech = new BrowserSpeechAdapter();
 const espeakSpeech = new ESpeakWasmAdapter({
@@ -625,11 +627,9 @@ function closeDebug() {
   if (elements.debugDialog.open) elements.debugDialog.close();
 }
 
-function exportConversationLog() {
-  if (!game) return;
-
-  const exportedAt = new Date();
-  const payload = {
+function buildConversationLogPayload(exportedAt = new Date()) {
+  return {
+    sessionId: playtestSessionId,
     ...game.getConversationLog(),
     exportedAt: exportedAt.toISOString(),
     runtime: {
@@ -638,6 +638,39 @@ function exportConversationLog() {
       reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
     }
   };
+}
+
+function createPlaytestSessionId() {
+  const stamp = new Date().toISOString().replace(/\.\d{3}Z$/, "Z").replaceAll(":", "-");
+  const random = crypto.getRandomValues(new Uint32Array(1))[0].toString(16).padStart(8, "0");
+  return `${stamp}-${random}`;
+}
+
+/**
+ * Saves the whole conversation after every turn, so a playtester never has to
+ * export anything. Saves run in order, so the stored copy is always the latest.
+ * A missing or failing log store never interrupts the game.
+ */
+function savePlaytestLog() {
+  if (!game) return;
+  const body = JSON.stringify(buildConversationLogPayload());
+  playtestLogQueue = playtestLogQueue.then(() =>
+    fetch("/api/logs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      // keepalive lets the last save finish if the tab closes, but browsers cap
+      // keepalive bodies at 64 KiB.
+      keepalive: body.length < 60000
+    }).catch(() => {})
+  );
+}
+
+function exportConversationLog() {
+  if (!game) return;
+
+  const exportedAt = new Date();
+  const payload = buildConversationLogPayload(exportedAt);
   const blob = new Blob([`${JSON.stringify(payload, null, 2)}\n`], {
     type: "application/json"
   });
@@ -753,12 +786,14 @@ async function handleSubmit(event) {
     lastPerformance = turn.npcPerformance;
     clearProviderStatus();
     renderDebug(game.getSnapshot());
+    savePlaytestLog();
     const presentation = await performanceController.play(turn.npcPerformance);
     if (!presentation.cancelled) renderOutcome(turn.outcome);
   } catch (error) {
     performanceController.failDecision();
     const snapshot = game.getSnapshot();
     renderDebug(snapshot);
+    savePlaytestLog();
 
     if (snapshot.lastProviderError) {
       const failedProvider = providers[snapshot.lastProviderId]?.label ?? snapshot.lastProviderId;
@@ -890,6 +925,7 @@ elements.resetButton.addEventListener("click", () => {
   speechDirector.cancel();
   performanceController.reset();
   game.reset();
+  playtestSessionId = createPlaytestSessionId();
   clearProviderStatus();
   renderInitialScene();
 });

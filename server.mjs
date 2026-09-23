@@ -1,10 +1,11 @@
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
-import { readFile, stat } from "node:fs/promises";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { jevStatus, MAX_REQUEST_BYTES, parseJevBody, proxyJevDecision } from "./lib/jev-proxy.mjs";
+import { MAX_LOG_BYTES, parsePlaytestLog } from "./lib/playtest-log.mjs";
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 5173;
@@ -58,13 +59,13 @@ function sendJson(response, status, value) {
   response.end(JSON.stringify(value));
 }
 
-async function readBody(request) {
+async function readBody(request, maxBytes = MAX_REQUEST_BYTES) {
   const chunks = [];
   let size = 0;
 
   for await (const chunk of request) {
     size += chunk.length;
-    if (size > MAX_REQUEST_BYTES) {
+    if (size > maxBytes) {
       throw new Error("Request body is too large.");
     }
     chunks.push(chunk);
@@ -84,6 +85,22 @@ async function handleJevDecision(request, response) {
 
   const result = await proxyJevDecision(body, process.env.TYPESAFE_API_KEY);
   sendJson(response, result.status, result.body);
+}
+
+// Locally, playtest logs land in playtest-logs/ (gitignored) instead of Blob.
+async function handlePlaytestLog(request, response) {
+  let log;
+  try {
+    log = parsePlaytestLog(await readBody(request, MAX_LOG_BYTES));
+  } catch (error) {
+    sendJson(response, 400, { error: error.message });
+    return;
+  }
+
+  const directory = resolve(ROOT, "playtest-logs");
+  await mkdir(directory, { recursive: true });
+  await writeFile(resolve(directory, `${log.sessionId}.json`), log.body, "utf8");
+  response.writeHead(204, { "Cache-Control": "no-store" }).end();
 }
 
 async function serveStatic(request, response, url) {
@@ -137,6 +154,11 @@ const server = createServer(async (request, response) => {
 
   if (request.method === "POST" && url.pathname === "/api/jev/decision") {
     await handleJevDecision(request, response);
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/logs") {
+    await handlePlaytestLog(request, response);
     return;
   }
 
