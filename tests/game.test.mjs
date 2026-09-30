@@ -8,6 +8,7 @@ import {
   ENCOUNTER_OUTCOMES,
   MAX_MEMORIES,
   Game,
+  acceptsCompanyVerification,
   extractPlayerName,
   validateDecision
 } from "../js/game.js";
@@ -118,6 +119,63 @@ test("a vague contextual claim is not persuasive by itself", async () => {
   assert.equal(log.entries[1].decision.action, "ASK_FOR_PROOF");
   assert.equal(log.entries[1].dialogue, "ASK_FOR_PROOF neutral");
   assert.deepEqual(log.entries[1].stateAfter, game.npc.state);
+});
+
+test("showing the fake ID is a physical action that raises company verification risk", async () => {
+  const game = new Game({ npcTemplate, dialogueData, provider: chooseNpcAction });
+  const shown = game.presentFakeId();
+  assert.match(shown.dialogue, /ring your company/i);
+  assert.equal(game.getSnapshot().fakeIdShown, true);
+  assert.equal(game.getSnapshot().companyCallPending, true);
+  assert.equal(game.getAvailableActions().includes("ALLOW_ENTRY"), false);
+  assert.equal(game.presentFakeId(), null);
+  const response = await game.takeTurn("I am servicing the north alarm panel tonight.");
+  assert.notEqual(response.outcome, ENCOUNTER_OUTCOMES.EXPOSED);
+});
+
+test("allowing Arthur to phone the company exposes the cover without calling a provider", async () => {
+  let providerCalls = 0;
+  const game = new Game({
+    npcTemplate,
+    dialogueData,
+    provider: async () => { providerCalls += 1; throw new Error("should not run"); }
+  });
+  game.presentFakeId();
+  const result = await game.takeTurn("Go ahead and call the company.");
+  assert.equal(providerCalls, 0);
+  assert.equal(result.outcome, ENCOUNTER_OUTCOMES.EXPOSED);
+  assert.equal(result.status, "failure");
+  assert.match(result.dialogue, /no record of sending you/i);
+  assert.equal(game.getAvailableActions().length, 0);
+  game.reset();
+  assert.equal(game.getSnapshot().fakeIdShown, false);
+});
+
+test("refusing a company call does not accidentally consent to one", () => {
+  assert.equal(acceptsCompanyVerification("Please don't call the company.", true), false);
+  assert.equal(acceptsCompanyVerification("No need to phone dispatch.", true), false);
+  assert.equal(acceptsCompanyVerification("Go ahead.", true), true);
+});
+
+test("Arthur eventually checks the company when the ID claim remains unresolved", async () => {
+  let providerCalls = 0;
+  const game = new Game({
+    npcTemplate,
+    dialogueData,
+    provider: async () => {
+      providerCalls += 1;
+      return { action: "REFUSE_ENTRY", confidence: 0.9, reason: "Still no convincing job." };
+    }
+  });
+  game.presentFakeId();
+  await game.takeTurn("I'm here for a job.");
+  const warning = await game.takeTurn("I work here, really.");
+  assert.match(warning.dialogue, /company number/i);
+  const finalWarning = await game.takeTurn("Just let me through.");
+  assert.match(finalWarning.dialogue, /One last answer/i);
+  const exposed = await game.takeTurn("Please, just this once.");
+  assert.equal(providerCalls, 3);
+  assert.equal(exposed.outcome, ENCOUNTER_OUTCOMES.EXPOSED);
 });
 
 test("specific named support leaves cautious alternatives available", async () => {

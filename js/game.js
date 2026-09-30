@@ -56,8 +56,20 @@ export const ENCOUNTER_OUTCOMES = Object.freeze({
   ENTRY_GRANTED: "entry_granted",
   REFUSED: "refused",
   EXPELLED: "expelled",
-  LOCKED_OUT: "locked_out"
+  LOCKED_OUT: "locked_out",
+  EXPOSED: "exposed"
 });
+
+const COMPANY_CALL_CONSENT =
+  /\b(?:go ahead(?: and)? (?:call|phone|ring)|feel free to (?:call|phone|ring)|(?:call|phone|ring) (?:the |my )?(?:company|office|dispatch|manager))\b/i;
+const COMPANY_CALL_REFUSAL =
+  /\b(?:do not|don't|never|can't|cannot|no need to|please don't|please do not)\b.{0,24}\b(?:call|phone|ring)\b/i;
+
+export function acceptsCompanyVerification(input, pending = false) {
+  const text = String(input ?? "");
+  if (COMPANY_CALL_REFUSAL.test(text)) return false;
+  return COMPANY_CALL_CONSENT.test(text) || (pending && /\b(?:go ahead|feel free|check it|verify it)\b/i.test(text));
+}
 
 const PLAYER_ADDRESS_TOKEN = "[[address]]";
 const PLAYER_NAME_TOKEN = "[[playerName]]";
@@ -241,6 +253,9 @@ export class Game {
     this.actionUses = new Map();
     this.spokenLines = new Set();
     this.pendingRequest = null;
+    this.fakeIdShown = false;
+    this.companyCallPending = false;
+    this.companyCallTurns = 0;
     this.lastDecision = null;
     this.lastContext = null;
     this.lastRawResponse = null;
@@ -264,6 +279,91 @@ export class Game {
     const opening =
       this.dialogueData.profiles?.[this.characterProfile.id]?.opening ?? this.dialogueData.opening;
     return personalizeDialogue(opening, this.playerAddress);
+  }
+
+  /** A physical action, not an AI judgment: the card exists but does not verify the job. */
+  presentFakeId() {
+    if (this.status !== "active") throw new Error("The encounter has ended.");
+    if (this.fakeIdShown) return null;
+    this.fakeIdShown = true;
+    this.companyCallPending = true;
+    this.companyCallTurns = 0;
+    this.turn += 1;
+    const playerInput = "I hold my contractor ID card up to the intercom camera.";
+    const dialogue =
+      "I can see the card. That tells me a name, not why you're here. I could ring your company to check the callout.";
+    this.history.push({ speaker: "player", text: playerInput });
+    this.history.push({ speaker: "arthur", text: dialogue, action: "ASK_FOR_PROOF" });
+    this.history = this.history.slice(-MAX_HISTORY_ENTRIES);
+    this.addMemory({
+      fact: "Player showed a contractor ID card; assignment remains unverified",
+      importance: 76,
+      tags: ["identity", "claim"],
+      topic: "id",
+      value: "presented"
+    });
+    this.debugLog.push({
+      sequence: ++this.debugSequence,
+      turn: this.turn,
+      result: "physical_action",
+      action: "SHOW_ID",
+      playerInput,
+      dialogue,
+      companyCallPending: true
+    });
+    return { playerInput, dialogue };
+  }
+
+  resolveCompanyVerification(input) {
+    const dialogue =
+      "All right. I rang the company. They have no record of sending you. The gate stays shut.";
+    this.lastContext = this.buildDecisionContext(input);
+    this.lastProviderId = "scripted";
+    this.lastRawResponse = { source: "company_verification", action: "END_CONVERSATION" };
+    this.turn += 1;
+    this.companyCallPending = false;
+    this.companyCallTurns = 0;
+    this.status = "failure";
+    this.outcome = ENCOUNTER_OUTCOMES.EXPOSED;
+    this.history.push({ speaker: "player", text: input });
+    this.history.push({ speaker: "arthur", text: dialogue, action: "END_CONVERSATION" });
+    this.history = this.history.slice(-MAX_HISTORY_ENTRIES);
+    this.lastDecision = {
+      action: "END_CONVERSATION",
+      confidence: 1,
+      reason: "The player allowed Arthur to verify the fabricated work identity with the company.",
+      stateChanges: {},
+      memory: null,
+      fallbackUsed: false,
+      invalidAction: null,
+      tone: "hostile"
+    };
+    this.lastPerformance = createNpcPerformance({
+      action: "END_CONVERSATION",
+      tone: "hostile",
+      line: dialogue,
+      portraitCue: "suspicious",
+      speech: this.characterProfile.speech,
+      status: this.status,
+      outcome: this.outcome
+    });
+    this.debugLog.push({
+      sequence: ++this.debugSequence,
+      turn: this.turn,
+      result: "company_verification",
+      playerInput: input,
+      dialogue,
+      status: this.status,
+      outcome: this.outcome
+    });
+    return {
+      playerInput: input,
+      dialogue,
+      decision: this.lastDecision,
+      npcPerformance: structuredClone(this.lastPerformance),
+      status: this.status,
+      outcome: this.outcome
+    };
   }
 
   getAvailableActions(conversationSignals = null) {
@@ -361,9 +461,14 @@ export class Game {
         playerLocation: "outside the locked warehouse car-park gate",
         npcLocation: "inside Guard Tower 04 beyond the car-park gate",
         communicationChannel: "two-way audio and camera intercom",
+        idCardPresented: this.fakeIdShown,
+        companyCallUnderConsideration: this.companyCallPending,
+        identityVerification: this.fakeIdShown
+          ? "Arthur has seen a contractor ID card, but has not verified the visitor's assignment"
+          : "Arthur has not seen an ID card",
         physicalSeparation: "locked car-park perimeter gate separates the player from Arthur",
         entryAssessment:
-          "Arthur judges whether the player's spoken case is coherent and persuasive; the game has no inventory or physical-document check",
+          "Arthur judges the spoken case; a contractor ID card can be shown through the camera, but it does not verify who assigned the job",
         entryScope:
           "ALLOW_ENTRY opens only the car-park gate and requires the visitor to report directly to Guard Tower 04; it does not grant warehouse entry"
       },
@@ -475,6 +580,13 @@ export class Game {
       throw new Error("Enter something for Arthur to respond to.");
     }
 
+    if (
+      acceptsCompanyVerification(input, this.companyCallPending) ||
+      (this.companyCallPending && this.companyCallTurns >= 3)
+    ) {
+      return this.resolveCompanyVerification(input);
+    }
+
     const introducedPlayerName = extractPlayerName(input);
     const isNewPlayerName =
       Boolean(introducedPlayerName) && introducedPlayerName !== this.playerName;
@@ -530,13 +642,21 @@ export class Game {
       this.selectFreshDialogue(decision.action, tone, dialogueOptions),
       this.playerAddress
     );
-    const dialogue = acknowledgePlayerName(
+    let dialogue = acknowledgePlayerName(
       personalizedDialogue,
       isNewPlayerName ? introducedPlayerName : null,
       this.characterProfile.id,
       decision.action,
       this.dialogueData
     );
+    if (this.companyCallPending && decision.action !== "ALLOW_ENTRY") {
+      const nextCallTurn = this.companyCallTurns + 1;
+      if (nextCallTurn === 2) {
+        dialogue += " I've got the company number here. Give me a reason not to check it.";
+      } else if (nextCallTurn === 3) {
+        dialogue += " One last answer, then I'm phoning them.";
+      }
+    }
     const authoredPerformance = resolveDialoguePerformance(
       this.dialogueData,
       decision.action,
@@ -577,6 +697,12 @@ export class Game {
     const refusalsSpent = this.refusals >= MAX_REFUSALS;
 
     if (decision.action === "ALLOW_ENTRY") this.status = "success";
+    if (decision.action === "ALLOW_ENTRY") {
+      this.companyCallPending = false;
+      this.companyCallTurns = 0;
+    } else if (this.companyCallPending) {
+      this.companyCallTurns += 1;
+    }
     if (decision.action === "END_CONVERSATION" || refusalsSpent) this.status = "failure";
     this.outcome = resolveTerminalOutcome({
       action: decision.action,
@@ -639,6 +765,9 @@ export class Game {
       refusals: this.refusals,
       actionUses: Object.fromEntries(this.actionUses),
       pendingRequest: this.pendingRequest ? structuredClone(this.pendingRequest) : null,
+      fakeIdShown: this.fakeIdShown,
+      companyCallPending: this.companyCallPending,
+      companyCallTurns: this.companyCallTurns,
       playerAddress: this.playerAddress,
       playerName: this.playerName,
       characterProfile: structuredClone(this.characterProfile),

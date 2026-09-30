@@ -8,7 +8,8 @@
       content="A retro car-park gate intercom encounter with Arthur, a warehouse security guard."
     />
     <title>Perimeter 04 — Arthur Security Link</title>
-    <link rel="preload" href="assets/arthur-portrait.jpg" as="image" />
+    <link rel="preload" href="assets/encounter/gate-closed.webp" as="image" />
+    <link rel="preload" href="assets/encounter/arthur-intercom.webp" as="image" />
     <link
       rel="preload"
       href="assets/fonts/VT323-Regular.ttf"
@@ -17,10 +18,11 @@
       crossorigin
     />
     <link rel="stylesheet" href="styles.css?phase=18.5" />
+    <link rel="stylesheet" href="encounter.css?phase=21" />
   </head>
   <body>
     <div id="terminal-mount" class="terminal-mount">
-      <main id="terminal-stage" class="terminal-stage" aria-labelledby="terminal-title">
+      <main id="terminal-stage" class="terminal-stage" data-view="gate" aria-labelledby="terminal-title" tabindex="-1">
         <div class="terminal-rivets" aria-hidden="true"></div>
 
         <section id="boot-sequence" class="boot-sequence" aria-live="polite" hidden>
@@ -64,13 +66,15 @@
               <strong id="link-status">Ready</strong>
             </div>
             <time datetime="02:13">02:13</time>
+            <button id="pause-open" class="pause-trigger" type="button" aria-haspopup="dialog" aria-controls="pause-dialog">Pause <span aria-hidden="true">Ⅱ</span></button>
           </div>
         </header>
 
         <section class="terminal-workspace" aria-label="South-gate security intercom">
-          <section class="intercom-module" aria-labelledby="feed-title">
+          <section id="intercom-view" class="intercom-module" aria-labelledby="feed-title" hidden>
             <div class="module-heading">
-              <span id="feed-title">Intercom 04</span>
+              <button id="intercom-back" type="button" aria-label="End intercom call and return to the gate">Disconnect</button>
+              <span id="feed-title">Intercom 04 / Guard Tower</span>
               <span id="phase-label">Idle</span>
             </div>
 
@@ -79,10 +83,10 @@
                 <div id="arthur-frame" class="arthur-viewport">
                   <img
                     id="arthur-portrait"
-                    src="assets/arthur-portrait.jpg"
-                    width="360"
-                    height="480"
-                    alt="Arthur in Guard Tower 04"
+                    src="assets/encounter/arthur-intercom.webp"
+                    width="240"
+                    height="320"
+                    alt="Arthur on the black-and-white intercom video"
                   />
                   <div class="video-scan" aria-hidden="true"></div>
                   <div class="tracking-corners" aria-hidden="true"></div>
@@ -94,29 +98,10 @@
               </div>
             </div>
 
-            <section class="current-message-panel" aria-labelledby="subtitle-speaker">
-              <div class="subtitle-heading">
-                <span id="subtitle-speaker">Arthur</span>
-                <span>Incoming</span>
-              </div>
-              <p id="subtitle-text" aria-live="polite">Establishing security link…</p>
+            <section class="current-message-panel" aria-label="Intercom conversation">
+              <div class="conversation-heading"><span>CHANNEL 04 / CONVERSATION</span><span>LIVE</span></div>
+              <div id="conversation" class="conversation-log" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation with Arthur" tabindex="0"></div>
             </section>
-
-            <section class="player-endpoint" aria-labelledby="player-endpoint-title">
-              <div class="module-heading">
-                <span id="player-endpoint-title">Your transmission</span>
-                <span>TX <b id="turn-count-compact">00</b></span>
-              </div>
-              <p id="player-message" class="player-message">Awaiting transmission.</p>
-            </section>
-
-            <div
-              id="conversation"
-              class="visually-hidden"
-              role="log"
-              aria-live="off"
-              aria-label="Conversation history with Arthur"
-            ></div>
 
             <form id="player-form" class="player-form" novalidate>
               <label class="visually-hidden" for="player-input">Transmit message</label>
@@ -137,27 +122,6 @@
               <p id="input-hint" class="input-hint">Enter to send</p>
             </form>
 
-            <div class="intercom-controls">
-              <div class="audio-deck" aria-label="Speech and audio controls">
-                <div class="audio-buttons">
-                  <button id="audio-toggle" type="button" aria-pressed="true"><i id="voice-lamp" class="lamp" aria-hidden="true"></i><span id="audio-toggle-label">Audio</span><b id="voice-engine">NEURAL</b></button>
-                  <button id="replay-button" type="button" disabled>Replay</button>
-                  <button id="skip-button" type="button" disabled>Skip</button>
-                </div>
-                <label class="volume-control" for="volume-control">
-                  <span>Vol</span>
-                  <input
-                    id="volume-control"
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value="0.72"
-                    aria-valuetext="72 percent"
-                  />
-                </label>
-              </div>
-            </div>
           </section>
 
           <section id="gate-frame" class="gate-module" aria-labelledby="gate-feed-title">
@@ -169,36 +133,71 @@
             <div class="gate-viewport">
               <img
                 id="gate-feed"
-                src="assets/gates/gate-closed.webp"
-                width="480"
-                height="740"
+                src="assets/encounter/gate-closed.webp"
+                width="640"
+                height="360"
                 alt="Closed warehouse car-park gate at night"
               />
+              <img id="gate-open-feed" src="assets/encounter/gate-open.webp" width="640" height="360" alt="" aria-hidden="true" />
               <div class="gate-scan" aria-hidden="true"></div>
               <span class="gate-camera-label">CAM 04-B / EXTERIOR</span>
+              <button id="gate-hotspot" class="scene-hotspot gate-hotspot" type="button" aria-label="Interact with the gate"><span>GATE</span></button>
+              <button id="intercom-hotspot" class="scene-hotspot intercom-hotspot" type="button" aria-label="Interact with the video intercom"><span>VIDEO INTERCOM</span></button>
+              <button id="walk-hotspot" class="scene-hotspot walk-hotspot" type="button" aria-label="Walk through the open gate toward Guard Tower 04" hidden><span>MOVE TO TOWER 04 →</span></button>
             </div>
 
             <div class="gate-status-strip" aria-label="Gate checkpoint status">
               <span>Barrier <strong id="gate-barrier-state">Secured</strong></span>
               <span>Car park only</span>
-              <span>Show papers at Tower 04</span>
+              <span id="objective-status">Find a way past Arthur</span>
             </div>
 
             <div id="outcome" class="outcome" role="status" hidden></div>
+            <div id="tower-arrival" class="tower-arrival" role="status" hidden><strong>GUARD TOWER 04</strong><span>You cross the car park. Arthur is waiting at the next checkpoint.</span><button id="tower-back" type="button">Look back at gate</button></div>
           </section>
+          <div class="item-dock">
+            <button id="id-card-button" type="button" aria-haspopup="dialog" aria-controls="id-card-view"><span class="item-dock-icon" aria-hidden="true">▣</span><span>ID card</span><kbd>I</kbd></button>
+          </div>
+          <section id="id-card-view" class="item-view" role="dialog" aria-modal="true" aria-label="Contractor ID card" hidden>
+            <div class="item-card">
+              <div class="item-card-top"><span>CONTRACTOR ACCESS</span><button id="id-card-close" type="button" aria-label="Put away ID card">×</button></div>
+              <div class="item-card-body"><div class="item-card-photo" aria-hidden="true">▧</div><div><small>WEST SHIPPING CONCERN</small><strong>SITE CONTRACTOR</strong><span>AUTHORISED SERVICE PERSONNEL</span><em>04—C / TEMPORARY</em></div></div>
+              <div class="item-card-bottom"><span>SITE SERVICES / VISITOR CONTROL</span><span class="item-card-mark" aria-hidden="true">WSC</span></div>
+              <div class="item-actions"><button id="id-card-show" type="button">Show Arthur</button><button id="id-card-put-away" type="button">Put away</button></div>
+            </div>
+          </section>
+          <div id="object-menu" class="object-menu" role="menu" aria-label="Object actions" hidden></div>
         </section>
 
         <footer class="terminal-controls">
           <p id="provider-status" class="provider-status" role="status" hidden></p>
-
-          <div class="hardware-controls">
-            <button id="credits-open" type="button" aria-haspopup="dialog">Credits</button>
-            <button id="debug-open" type="button" aria-haspopup="dialog">Developer <kbd>F2</kbd></button>
-            <button id="reset-button" class="reset-button" type="button">Reset link</button>
-          </div>
         </footer>
       </main>
     </div>
+
+    <dialog id="pause-dialog" class="pause-dialog" aria-labelledby="pause-title">
+      <div class="pause-panel">
+        <header><span>PERIMETER 04 / SYSTEM</span><h2 id="pause-title">Paused</h2></header>
+        <div class="pause-actions"><button id="pause-resume" type="button">Resume encounter <kbd>ESC</kbd></button><button id="reset-button" class="reset-button" type="button">Restart encounter</button></div>
+        <section class="pause-section" aria-label="Sound controls">
+          <h3>Sound</h3>
+          <div class="audio-deck">
+            <div class="audio-buttons">
+              <button id="audio-toggle" type="button" aria-pressed="true"><i id="voice-lamp" class="lamp" aria-hidden="true"></i><span id="audio-toggle-label">Audio</span><b id="voice-engine">NEURAL</b></button>
+              <button id="replay-button" type="button" disabled>Replay line</button>
+              <button id="skip-button" type="button" disabled>Skip line</button>
+            </div>
+            <label class="volume-control" for="volume-control"><span>Volume</span><input id="volume-control" type="range" min="0" max="1" step="0.05" value="0.72" aria-valuetext="72 percent" /></label>
+          </div>
+        </section>
+        <section class="pause-section" aria-label="Display and information">
+          <h3>Display & information</h3>
+          <button id="effects-toggle" type="button" aria-pressed="true">FX On</button>
+          <button id="debug-open" type="button" aria-haspopup="dialog">Developer telemetry</button>
+          <button id="credits-open" type="button" aria-haspopup="dialog">Credits</button>
+        </section>
+      </div>
+    </dialog>
 
     <dialog id="debug-dialog" class="debug-dialog" aria-labelledby="debug-title">
       <div class="debug-panel">
@@ -215,7 +214,6 @@
           <section class="debug-section system-settings" aria-labelledby="system-settings-title">
             <div class="section-heading">
               <h3 id="system-settings-title">System</h3>
-              <button id="effects-toggle" type="button" aria-pressed="true">FX On</button>
             </div>
             <div class="provider-control">
               <label for="provider-select">Decision system</label>
@@ -307,17 +305,13 @@
       if (window.location.protocol === "file:") {
         const message =
           "LOCAL SERVER REQUIRED — RUN npm start, THEN OPEN http://localhost:5173";
-        const subtitle = document.querySelector("#subtitle-text");
         const conversation = document.querySelector("#conversation");
-        const playerMessage = document.querySelector("#player-message");
         const providerStatus = document.querySelector("#provider-status");
         const form = document.querySelector("#player-form");
 
-        subtitle.textContent = message;
         conversation.textContent =
           "Safari cannot load the game's modules and JSON data from a file:// address. " +
           "Start the local server and use the HTTP address shown above.";
-        playerMessage.textContent = "Connection unavailable.";
         providerStatus.textContent = "Direct file launch blocked by browser security.";
         providerStatus.hidden = false;
         form.addEventListener("submit", (event) => event.preventDefault());
@@ -326,7 +320,7 @@
       } else {
         const appScript = document.createElement("script");
         appScript.type = "module";
-        appScript.src = "js/app.js?phase=17.4";
+        appScript.src = "js/app.js?phase=21";
         document.body.append(appScript);
       }
     </script>

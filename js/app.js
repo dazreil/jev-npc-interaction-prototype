@@ -1,13 +1,8 @@
 import { Game, MAX_MEMORIES } from "./game.js";
 import { PeriodAudio } from "./audio.js";
-import {
-  LOGICAL_STAGE_HEIGHT,
-  LOGICAL_STAGE_WIDTH,
-  calculateStageScale
-} from "./layout.js";
 import { determineTone } from "./npc.js";
 import { PERFORMANCE_PHASES, PerformanceController } from "./performance.js";
-import { PortraitAnimator } from "./portrait.js";
+import { PortraitAnimator, PORTRAIT_ASSETS } from "./portrait.js";
 import {
   BrowserSpeechAdapter,
   ESpeakWasmAdapter,
@@ -69,19 +64,34 @@ const elements = {
   providerStatus: document.querySelector("#provider-status"),
   resetButton: document.querySelector("#reset-button"),
   stageMount: document.querySelector("#terminal-mount"),
+  stage: document.querySelector("#terminal-stage"),
+  intercomView: document.querySelector("#intercom-view"),
+  intercomBack: document.querySelector("#intercom-back"),
+  intercomHotspot: document.querySelector("#intercom-hotspot"),
+  gateHotspot: document.querySelector("#gate-hotspot"),
+  walkHotspot: document.querySelector("#walk-hotspot"),
+  idCardButton: document.querySelector("#id-card-button"),
+  idCardView: document.querySelector("#id-card-view"),
+  idCardClose: document.querySelector("#id-card-close"),
+  idCardPutAway: document.querySelector("#id-card-put-away"),
+  idCardShow: document.querySelector("#id-card-show"),
+  pauseDialog: document.querySelector("#pause-dialog"),
+  pauseOpen: document.querySelector("#pause-open"),
+  pauseResume: document.querySelector("#pause-resume"),
+  objectMenu: document.querySelector("#object-menu"),
+  objectiveStatus: document.querySelector("#objective-status"),
+  towerArrival: document.querySelector("#tower-arrival"),
+  towerBack: document.querySelector("#tower-back"),
   arthurPortrait: document.querySelector("#arthur-portrait"),
   arthurFrame: document.querySelector("#arthur-frame"),
-  subtitleText: document.querySelector("#subtitle-text"),
-  subtitleSpeaker: document.querySelector("#subtitle-speaker"),
-  playerMessage: document.querySelector("#player-message"),
   phaseLabel: document.querySelector("#phase-label"),
   linkStatus: document.querySelector("#link-status"),
   doorStatus: document.querySelector("#gate-animation-status"),
   gateFeed: document.querySelector("#gate-feed"),
+  gateOpenFeed: document.querySelector("#gate-open-feed"),
   gateFrame: document.querySelector("#gate-frame"),
   gateAnimationStatus: document.querySelector("#gate-animation-status"),
   gateBarrierState: document.querySelector("#gate-barrier-state"),
-  turnCountCompact: document.querySelector("#turn-count-compact"),
   effectsToggle: document.querySelector("#effects-toggle"),
   audioToggle: document.querySelector("#audio-toggle"),
   replayButton: document.querySelector("#replay-button"),
@@ -166,7 +176,9 @@ const performanceController = new PerformanceController({
 const portraitAnimator = new PortraitAnimator({
   onFrame: ({ cue, src, glitch }) => {
     activeArthurPortrait.alt = PORTRAIT_ALT[cue] ?? PORTRAIT_ALT.neutral;
-    activeArthurPortrait.src = src;
+    // Four fixed-camera mouth plates provide the speech motion; the intercom
+    // filter and stepped signal jitter remain presentation-only effects.
+    if (activeArthurPortrait.getAttribute("src") !== src) activeArthurPortrait.src = src;
     activeArthurFrame.dataset.portraitCue = cue;
     activeArthurFrame.classList.toggle("is-glitching", glitch);
   },
@@ -230,13 +242,14 @@ function renderPerformancePhase({ phase, performance }) {
 performanceController.subscribe(renderPerformancePhase);
 
 function appendMessage(speaker, text, action = null) {
+  const stickToLatest = elements.conversation.scrollHeight - elements.conversation.scrollTop - elements.conversation.clientHeight < 48;
   const article = document.createElement("article");
   article.className = `message message--${speaker}`;
   if (action) article.dataset.action = action;
 
   const label = document.createElement("span");
   label.className = "message-speaker";
-  label.textContent = speaker === "arthur" ? "Arthur" : "You";
+  label.textContent = speaker === "arthur" ? "Arthur" : speaker === "player" ? "You" : "System";
 
   const copy = document.createElement("p");
   copy.className = "message-text";
@@ -244,14 +257,7 @@ function appendMessage(speaker, text, action = null) {
 
   article.append(label, copy);
   elements.conversation.append(article);
-  elements.conversation.scrollTop = elements.conversation.scrollHeight;
-
-  if (speaker === "arthur") {
-    elements.subtitleSpeaker.textContent = "Arthur";
-    elements.subtitleText.textContent = text;
-  } else {
-    elements.playerMessage.textContent = text;
-  }
+  if (stickToLatest) elements.conversation.scrollTop = elements.conversation.scrollHeight;
 }
 
 function renderState(snapshot) {
@@ -315,7 +321,6 @@ function renderDebug(snapshot) {
   renderState(snapshot);
   renderMemories(snapshot.memories);
   elements.turnCount.textContent = `Turn ${snapshot.turn}`;
-  elements.turnCountCompact.textContent = String(snapshot.turn).padStart(2, "0");
   elements.currentGoal.textContent = snapshot.primaryGoal.label;
   elements.lastAction.textContent = decision?.action ?? "WAITING";
   elements.confidence.textContent = decision
@@ -422,18 +427,99 @@ const OUTCOME_PRESENTATIONS = Object.freeze({
     code: "Perimeter sealed",
     copy: "Arthur seals the entrance and records you as an active threat.",
     door: "Sealed"
+  },
+  exposed: {
+    title: "Cover exposed",
+    code: "Company check failed",
+    copy: "The company has no record of sending you. Arthur keeps the gate shut.",
+    door: "Denied"
   }
 });
+
+let menuReturnFocus = null;
+let returnToPause = false;
+
+function setSceneView(view) {
+  closeObjectMenu(false);
+  closeIdCard(false);
+  elements.stage.dataset.view = view;
+  elements.intercomView.hidden = view !== "intercom";
+  elements.towerArrival.hidden = view !== "approach";
+  if (view === "intercom" && !elements.input.disabled) elements.input.focus();
+}
+
+function openIdCard() {
+  closeObjectMenu(false);
+  elements.idCardShow.disabled = elements.stage.dataset.view !== "intercom" || !game || game.status !== "active" || game.fakeIdShown;
+  elements.idCardShow.textContent = game?.fakeIdShown ? "Already shown" : "Show Arthur";
+  elements.idCardView.hidden = false;
+  elements.idCardClose.focus();
+}
+
+function closeIdCard(restoreFocus = true) {
+  if (elements.idCardView.hidden) return;
+  elements.idCardView.hidden = true;
+  if (restoreFocus) elements.idCardButton.focus();
+}
+
+function closeObjectMenu(restoreFocus = true) {
+  if (elements.objectMenu.hidden) return;
+  elements.objectMenu.hidden = true;
+  elements.objectMenu.replaceChildren();
+  if (restoreFocus && menuReturnFocus instanceof HTMLElement) menuReturnFocus.focus();
+  menuReturnFocus = null;
+}
+
+function showObjectMenu(title, actions, trigger) {
+  closeObjectMenu(false);
+  menuReturnFocus = trigger;
+  const heading = document.createElement("strong");
+  heading.textContent = title;
+  elements.objectMenu.append(heading);
+  for (const [label, action] of actions) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("role", "menuitem");
+    button.textContent = `> ${label}`;
+    button.addEventListener("click", () => {
+      closeObjectMenu(false);
+      action();
+    });
+    elements.objectMenu.append(button);
+  }
+  const close = document.createElement("button");
+  close.type = "button";
+  close.setAttribute("role", "menuitem");
+  close.textContent = "> Back";
+  close.addEventListener("click", () => closeObjectMenu());
+  elements.objectMenu.append(close);
+  elements.objectMenu.hidden = false;
+  elements.objectMenu.querySelector("button").focus();
+}
+
+function showFakeId() {
+  if (!game || game.status !== "active") return;
+  const event = game.presentFakeId();
+  if (!event) return;
+  appendMessage("player", event.playerInput);
+  appendMessage("arthur", event.dialogue, "ASK_FOR_PROOF");
+  elements.objectiveStatus.textContent = "Arthur may phone the company";
+  elements.idCardButton.setAttribute("aria-label", "ID card already shown to Arthur");
+  renderDebug(game.getSnapshot());
+  savePlaytestLog();
+  if (!elements.input.disabled) elements.input.focus();
+}
 
 function resetGateFeed() {
   gateRunId += 1;
   if (gateAnimationTimer !== null) clearTimeout(gateAnimationTimer);
   gateAnimationTimer = null;
-  elements.gateFeed.src = "assets/gates/gate-closed.webp";
+  elements.gateFeed.src = "assets/encounter/gate-closed.webp";
   elements.gateFeed.alt = "Closed warehouse car-park gate at night";
   elements.gateAnimationStatus.textContent = "Locked";
   elements.gateBarrierState.textContent = "Secured";
   elements.gateFrame.classList.remove("is-opening", "is-open");
+  elements.walkHotspot.hidden = true;
 }
 
 function playGateOpening() {
@@ -447,25 +533,26 @@ function playGateOpening() {
   elements.gateFeed.alt = "Warehouse car-park gate opening at night";
 
   if (reducedMotion) {
-    elements.gateFeed.src = "assets/gates/gate-open.webp";
     elements.gateFrame.classList.add("is-open");
     elements.doorStatus.textContent = "Open";
+    elements.walkHotspot.hidden = false;
+    elements.objectiveStatus.textContent = "Proceed to Guard Tower 04";
     return;
   }
 
   elements.outcome.hidden = true;
   elements.gateFrame.classList.add("is-opening");
-  elements.gateFeed.src = `assets/gates/gate-opening.webp?run=${runId}`;
   elements.doorStatus.textContent = "Opening";
   gateAnimationTimer = setTimeout(() => {
     if (runId !== gateRunId) return;
-    elements.gateFeed.src = "assets/gates/gate-open.webp";
     elements.gateFeed.alt = "Open warehouse car-park gate at night";
     elements.gateAnimationStatus.textContent = "Open";
     elements.gateBarrierState.textContent = "Open";
     elements.gateFrame.classList.remove("is-opening");
     elements.gateFrame.classList.add("is-open");
+    elements.walkHotspot.hidden = false;
     elements.doorStatus.textContent = "Open";
+    elements.objectiveStatus.textContent = "Proceed to Guard Tower 04";
     elements.outcome.hidden = false;
     gateAnimationTimer = null;
   }, 1750);
@@ -490,6 +577,7 @@ function renderOutcome(outcome = "active") {
     elements.outcome.classList.add(`outcome--${outcome.replaceAll("_", "-")}`);
     elements.outcome.replaceChildren(title, code, copy, reset);
     elements.outcome.hidden = false;
+    setSceneView("gate");
     if (outcome === "entry_granted") playGateOpening();
     else {
       resetGateFeed();
@@ -522,6 +610,21 @@ const BOOT_CHECKS = Object.freeze([
   { id: "cameras", label: "Camera 04-A / 04-B", progress: 24 },
   { id: "audio", label: "Guard tower audio channel", progress: 36 }
 ]);
+
+const TALK_ART = Object.freeze([
+  PORTRAIT_ASSETS["talk-b"],
+  PORTRAIT_ASSETS["talk-c"],
+  PORTRAIT_ASSETS["talk-d"]
+]);
+
+async function bufferTalkingFrames() {
+  const frames = TALK_ART.map(async (src) => {
+    const image = new Image();
+    image.src = src;
+    await image.decode();
+  });
+  await Promise.all(frames);
+}
 
 /** Adds a self-test row that stays on screen once it has reported. */
 function addBootCheck({ id, label }) {
@@ -577,6 +680,13 @@ async function playBootSequence() {
   }
 
   if (runId !== bootRunId) return;
+  addBootCheck({ id: "portrait", label: "Intercom video frames" });
+  elements.bootMessage.textContent = "Buffering Arthur's video feed";
+  const portraitReady = await bufferTalkingFrames().then(() => true, () => false);
+  if (runId !== bootRunId) return;
+  setBootCheckStatus("portrait", portraitReady ? "OK" : "FALLBACK", portraitReady ? "ok" : "warn");
+
+  if (runId !== bootRunId) return;
   addBootCheck({ id: "voice", label: "Arthur voice model" });
   elements.bootMessage.textContent = "Loading local neural voice";
   elements.linkStatus.textContent = "Voice init";
@@ -604,19 +714,20 @@ async function playBootSequence() {
   elements.linkStatus.textContent = "Ready";
   elements.input.disabled = false;
   elements.sendButton.disabled = false;
-  elements.input.focus();
+  elements.stage.focus({ preventScroll: true });
 }
 
 function updateStageScale() {
-  const scale = calculateStageScale(window.innerWidth, window.innerHeight);
-
-  document.documentElement.style.setProperty("--stage-scale", String(scale));
-  elements.stageMount.style.width = `${LOGICAL_STAGE_WIDTH * scale}px`;
-  elements.stageMount.style.height = `${LOGICAL_STAGE_HEIGHT * scale}px`;
+  const width = Math.min(1280, Math.max(304, window.innerWidth - 16));
+  const height = Math.min(720, Math.max(300, window.innerHeight - 16));
+  elements.stageMount.style.width = `${width}px`;
+  elements.stageMount.style.height = `${height}px`;
 }
 
 function openDebug() {
   if (elements.debugDialog.open) return;
+  returnToPause = elements.pauseDialog.open;
+  if (elements.pauseDialog.open) elements.pauseDialog.close();
   if (elements.creditsDialog.open) elements.creditsDialog.close();
   focusBeforeDebug = document.activeElement;
   elements.debugDialog.showModal();
@@ -691,6 +802,8 @@ function exportConversationLog() {
 
 function openCredits() {
   if (elements.creditsDialog.open) return;
+  returnToPause = elements.pauseDialog.open;
+  if (elements.pauseDialog.open) elements.pauseDialog.close();
   if (elements.debugDialog.open) elements.debugDialog.close();
   focusBeforeCredits = document.activeElement;
   elements.creditsDialog.showModal();
@@ -707,7 +820,9 @@ function renderInitialScene() {
   performanceController.reset();
   lastPerformance = null;
   elements.conversation.replaceChildren();
-  elements.playerMessage.textContent = "Awaiting transmission.";
+  elements.objectiveStatus.textContent = "Find a way past Arthur";
+  elements.idCardButton.removeAttribute("aria-label");
+  setSceneView("gate");
   appendMessage("arthur", game.getOpeningDialogue());
   renderDebug(game.getSnapshot());
   renderOutcome(game.outcome);
@@ -783,6 +898,11 @@ async function handleSubmit(event) {
     const turn = await game.takeTurn(input);
     appendMessage("player", turn.playerInput);
     appendMessage("arthur", turn.dialogue, turn.decision.action);
+    if (game.companyCallPending && game.companyCallTurns > 0) {
+      elements.objectiveStatus.textContent = game.companyCallTurns >= 2
+        ? "Arthur is reaching for the company line"
+        : "Arthur may phone the company";
+    }
     lastPerformance = turn.npcPerformance;
     clearProviderStatus();
     renderDebug(game.getSnapshot());
@@ -845,18 +965,61 @@ async function initialise() {
   } catch (error) {
     elements.bootSequence.hidden = true;
     elements.linkStatus.textContent = "Offline";
-    elements.subtitleSpeaker.textContent = "System / Link failure";
-    elements.subtitleText.textContent = error.message;
-    elements.playerMessage.textContent = "Connection unavailable.";
+    elements.conversation.replaceChildren();
+    appendMessage("system", error.message);
     elements.input.disabled = true;
     elements.sendButton.disabled = true;
     elements.providerStatus.textContent = "The encounter data could not be loaded. Restart the local server, then reload this page.";
     elements.providerStatus.hidden = false;
-    elements.conversation.textContent = error.message;
   }
 }
 
 elements.form.addEventListener("submit", handleSubmit);
+elements.gateHotspot.addEventListener("click", () => showObjectMenu("GATE", [
+  ["Inspect", () => { elements.objectiveStatus.textContent = "Heavy locked leaves. Arthur controls the release from Tower 04."; }],
+  ["Try gate", () => { elements.objectiveStatus.textContent = "Locked. You need Arthur to release it."; periodAudio.playDenied(); }]
+], elements.gateHotspot));
+elements.intercomHotspot.addEventListener("click", () => showObjectMenu("VIDEO INTERCOM", [
+  ["Inspect", () => { elements.objectiveStatus.textContent = "An old two-way video link to Guard Tower 04."; }],
+  ["Call Arthur", () => setSceneView("intercom")]
+], elements.intercomHotspot));
+elements.intercomBack.addEventListener("click", () => setSceneView("gate"));
+elements.idCardButton.addEventListener("click", openIdCard);
+elements.idCardClose.addEventListener("click", () => closeIdCard());
+elements.idCardPutAway.addEventListener("click", () => closeIdCard());
+elements.idCardShow.addEventListener("click", () => { closeIdCard(false); showFakeId(); });
+elements.walkHotspot.addEventListener("click", () => {
+  if (!elements.gateFrame.classList.contains("is-open")) return;
+  setSceneView("approach");
+  elements.objectiveStatus.textContent = "Proceed to Guard Tower 04";
+});
+elements.towerBack.addEventListener("click", () => setSceneView("gate"));
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Tab" && !elements.idCardView.hidden) {
+    const buttons = [elements.idCardClose, elements.idCardShow, elements.idCardPutAway].filter((button) => !button.disabled);
+    if (event.shiftKey && document.activeElement === buttons[0]) {
+      event.preventDefault();
+      buttons.at(-1).focus();
+    } else if (!event.shiftKey && document.activeElement === buttons.at(-1)) {
+      event.preventDefault();
+      buttons[0].focus();
+    }
+  }
+  if (event.key.toLowerCase() === "i" && elements.bootSequence.hidden && !elements.pauseDialog.open && !elements.debugDialog.open && !elements.creditsDialog.open && document.activeElement !== elements.input) {
+    event.preventDefault();
+    if (elements.idCardView.hidden) openIdCard();
+    else closeIdCard();
+  }
+  if (event.key === "Escape" && !elements.idCardView.hidden) {
+    event.preventDefault();
+    closeIdCard();
+    return;
+  }
+  if (event.key === "Escape" && !elements.objectMenu.hidden) {
+    event.preventDefault();
+    closeObjectMenu();
+  }
+});
 elements.input.addEventListener("input", () => {
   performanceController.setPlayerTyping(Boolean(elements.input.value.trim()));
 });
@@ -902,18 +1065,25 @@ elements.debugOpen.addEventListener("click", openDebug);
 elements.debugClose.addEventListener("click", closeDebug);
 elements.debugExport.addEventListener("click", exportConversationLog);
 elements.debugDialog.addEventListener("close", () => {
-  if (focusBeforeDebug instanceof HTMLElement) focusBeforeDebug.focus();
+  if (returnToPause) {
+    returnToPause = false;
+    elements.pauseDialog.showModal();
+    elements.debugOpen.focus();
+  } else if (focusBeforeDebug instanceof HTMLElement) focusBeforeDebug.focus();
 });
 elements.creditsOpen.addEventListener("click", openCredits);
 elements.creditsClose.addEventListener("click", closeCredits);
 elements.creditsDialog.addEventListener("close", () => {
-  if (focusBeforeCredits instanceof HTMLElement) focusBeforeCredits.focus();
+  if (returnToPause) {
+    returnToPause = false;
+    elements.pauseDialog.showModal();
+    elements.creditsOpen.focus();
+  } else if (focusBeforeCredits instanceof HTMLElement) focusBeforeCredits.focus();
 });
-document.addEventListener("keydown", (event) => {
-  if (event.key !== "F2") return;
-  event.preventDefault();
-  if (elements.debugDialog.open) closeDebug();
-  else openDebug();
+elements.pauseOpen.addEventListener("click", () => { elements.pauseDialog.showModal(); elements.pauseResume.focus(); });
+elements.pauseResume.addEventListener("click", () => elements.pauseDialog.close());
+elements.pauseDialog.addEventListener("close", () => {
+  if (!elements.debugDialog.open && !elements.creditsDialog.open) elements.pauseOpen.focus();
 });
 window.addEventListener("resize", updateStageScale);
 elements.providerSelect.addEventListener("change", () => {
@@ -921,6 +1091,7 @@ elements.providerSelect.addEventListener("change", () => {
   clearProviderStatus();
 });
 elements.resetButton.addEventListener("click", () => {
+  elements.pauseDialog.close();
   replayRunId += 1;
   speechDirector.cancel();
   performanceController.reset();

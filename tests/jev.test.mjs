@@ -88,10 +88,10 @@ test("Jev request contains one Choice over exactly the available actions", () =>
   assert.equal(request.state.scene.playerLocation, "outside the locked warehouse car-park gate");
   assert.match(request.state.scene.entryAssessment, /spoken case/i);
   assert.equal(request.questions.entry_case_credible.type, "noul");
-  assert.match(request.questions.entry_case_credible.instructions, /not possession of inventory/i);
+  assert.match(request.questions.entry_case_credible.instructions, /ID card does not verify/i);
   assert.match(
     request.questions.next_action.instructions,
-    /Never reason as though Arthur and the player are standing face to face/
+    /Do not reason as though the two people are face to face/
   );
 });
 
@@ -128,7 +128,7 @@ test("Jev distinguishes a vague proof reference from conversational support", ()
   });
   assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /I have them/i);
   assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /not persuasive/i);
-  assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /without any inventory item/i);
+  assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /ID card.*not persuasive/i);
   assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /car-park gate/i);
   assert.match(request.questions.next_action.criteria.ALLOW_ENTRY, /Guard Tower 04/i);
 });

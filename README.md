@@ -4,7 +4,7 @@ A small browser-based text game that explores whether a decision model can make 
 
 Arthur's spoken lines all come from `data/dialogue.json`. The Mock and Jev providers select only a structured action and return developer-facing decision metadata. The game validates the action before selecting an authored line.
 
-The player experience runs inside a responsive 640×480 security terminal inspired by mid-1990s CD-ROM interfaces. A short hardline boot sequence opens a two-way intercom at the warehouse car-park gate. The left panel is the compact intercom: Arthur's camera standing beside his incoming line, the player's own transmission below them, and the controls. The right panel is the exterior security feed. When Arthur is persuaded, its four-frame WebP sequence shows the car-park gate opening, then holds on the open gate while directing the visitor to Guard Tower 04. The encounter has no inventory system: entry is earned by building a coherent, credible spoken case, while warehouse access has not yet been granted. Developer telemetry remains available through the **Developer** control or <kbd>F2</kbd>. Arthur's default voice is a Piper neural voice generated locally through WebAssembly, with eSpeak NG as its fallback, and with replay, mute, volume, skip, ambience, and authored interface sounds behind replaceable presentation adapters. Piper audio plays at the model's native speed and pitch so the performance profile does not make it sound like slowed tape. The current incoming message and deterministic timing remain available when browser media APIs are missing.
+The player experience opens on the warehouse car-park gate. Clicking its intercom brings up a narrow, hardware-framed Arthur video link over the scene; the fake ID can be raised as a separate floating item. A scrollable channel log shows both sides of the conversation during the video call. The oversized bottom control strip has been removed. Sound, effects, developer telemetry, credits, and restart are gathered in **Pause**. When Arthur is persuaded, the WebP gate sequence opens the car-park barrier and directs the visitor to Guard Tower 04. Entry is earned by building a coherent, credible spoken case; showing the fake ID risks a company check because the company has no record of the player. Arthur's default voice is a Piper neural voice generated locally through WebAssembly, with eSpeak NG as its fallback. Piper audio plays at the model's native speed and pitch. Captions and deterministic timing remain available when browser media APIs are missing.
 
 ## Run locally
 
@@ -42,7 +42,7 @@ Each line is synthesised one sentence at a time and scheduled gaplessly. Arthur 
 
 The loading screen initializes Piper and downloads the 60 MB voice model before opening the intercom. Its progress bar follows the real model transfer, and the browser caches the completed model for later visits. If Piper cannot initialize, the loading screen reports the fallback and continues with eSpeak NG or browser speech. The download watchdog measures stalled progress rather than total time, and a stalled download is retried rather than disabling Piper for the session.
 
-The **VOICE** indicator reports `NEURAL` once Piper playback begins. If the model cannot load, it reports `WASM` and uses eSpeak NG. If WebAssembly or Web Audio cannot initialize, it reports `BROWSER` and uses the Web Speech API. If no engine is available, it reports `SILENT`; captions and timed mouth animation still complete the turn. Loading, playback, and fallback all remain cancellable through **Skip** or **Reset link**.
+The voice indicator in **Pause → Sound** reports `NEURAL` once Piper playback begins. If the model cannot load, it reports `WASM` and uses eSpeak NG. If WebAssembly or Web Audio cannot initialize, it reports `BROWSER` and uses the Web Speech API. If no engine is available, it reports `SILENT`; captions and timed mouth animation still complete the turn. Loading, playback, and fallback remain cancellable through **Skip line** or **Restart encounter** in Pause.
 
 Run the unit tests and dialogue-content linter together with:
 
@@ -72,7 +72,7 @@ This requires the Jev-enabled local server to be running. Provider parity is wri
 
 Phase 15 adds the final release pass: compressed WebP reaction portraits, a boot/loading state, credits, explicit reduced-motion behavior, and deployment instructions for Mock-only static hosting or a server-backed Jev deployment. The browser preloads only Arthur's portrait and the interface font; speech and reaction frames load when needed.
 
-The gate-screen extension places that intercom beside a landscape exterior view. The entry-granted outcome plays `assets/gates/gate-opening.webp`, a four-frame closed-to-open animation, then replaces it with the final open frame. Browsers that request reduced motion go directly to the open frame.
+The gate-screen extension places that intercom beside a portrait exterior view fitted to the gate viewport. The entry-granted outcome plays `assets/gates/gate-opening.webp`, a four-frame closed-to-open animation, then replaces it with the final open frame. Browsers that request reduced motion go directly to the open frame.
 
 Run the release gate with:
 

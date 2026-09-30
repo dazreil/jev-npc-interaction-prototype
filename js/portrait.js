@@ -1,20 +1,20 @@
 import { PERFORMANCE_PHASES } from "./performance.js";
 
 export const PORTRAIT_ASSETS = Object.freeze({
-  neutral: "assets/arthur-portrait.jpg",
-  blink: "assets/arthur-reactions/blink.webp",
-  listening: "assets/arthur-reactions/listening.webp",
-  suspicious: "assets/arthur-reactions/suspicious.webp",
-  irritated: "assets/arthur-reactions/irritated.webp",
-  hostile: "assets/arthur-reactions/hostile.webp",
-  friendly: "assets/arthur-reactions/friendly.webp",
-  afraid: "assets/arthur-reactions/afraid.webp",
-  dismissive: "assets/arthur-reactions/dismissive.webp",
-  "entry-granted": "assets/arthur-reactions/entry-granted.webp",
-  "talk-a": "assets/arthur-speech/frame-1.jpg",
-  "talk-b": "assets/arthur-speech/frame-2.jpg",
-  "talk-c": "assets/arthur-speech/frame-3.jpg",
-  "talk-d": "assets/arthur-speech/frame-4.jpg"
+  neutral: "assets/encounter/arthur-intercom.webp",
+  blink: "assets/encounter/arthur-intercom.webp",
+  listening: "assets/encounter/arthur-intercom.webp",
+  suspicious: "assets/encounter/arthur-intercom.webp",
+  irritated: "assets/encounter/arthur-intercom.webp",
+  hostile: "assets/encounter/arthur-intercom.webp",
+  friendly: "assets/encounter/arthur-intercom.webp",
+  afraid: "assets/encounter/arthur-intercom.webp",
+  dismissive: "assets/encounter/arthur-intercom.webp",
+  "entry-granted": "assets/encounter/arthur-intercom.webp",
+  "talk-a": "assets/encounter/arthur-intercom.webp",
+  "talk-b": "assets/encounter/arthur-talk-2.webp",
+  "talk-c": "assets/encounter/arthur-talk-3.webp",
+  "talk-d": "assets/encounter/arthur-talk-4.webp"
 });
 
 export const TALK_SEQUENCE = Object.freeze([

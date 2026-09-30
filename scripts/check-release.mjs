@@ -30,7 +30,8 @@ const preloadAssets = [...html.matchAll(/<link\s+rel="preload"\s+href="([^"]+)"/
   (match) => match[1]
 );
 const expectedPreloads = [
-  "assets/arthur-portrait.jpg",
+  "assets/encounter/gate-closed.webp",
+  "assets/encounter/arthur-intercom.webp",
   "assets/fonts/VT323-Regular.ttf"
 ];
 
@@ -45,29 +46,37 @@ check(!preloadAssets.some((asset) => asset.includes("arthur-speech")), "Speech f
 const portraitPaths = [...new Set(Object.values(PORTRAIT_ASSETS))];
 await Promise.all(portraitPaths.map(requireFile));
 
-const reactionPaths = portraitPaths.filter((asset) => asset.includes("arthur-reactions/"));
-const reactionStats = await Promise.all(
-  reactionPaths.map(async (asset) => ({ asset, size: (await stat(resolve(projectRoot, asset))).size }))
+const talkingPaths = ["talk-a", "talk-b", "talk-c", "talk-d"].map(
+  (cue) => PORTRAIT_ASSETS[cue]
 );
-const reactionTotal = reactionStats.reduce((total, asset) => total + asset.size, 0);
-check(reactionStats.every(({ size }) => size <= 32 * 1024), "Each reaction portrait must remain under 32 KiB");
-check(reactionTotal <= 256 * 1024, "The complete reaction portrait set must remain under 256 KiB");
-check(reactionPaths.every((asset) => asset.endsWith(".webp")), "Reaction portraits must use WebP release assets");
+const talkingStats = await Promise.all(
+  talkingPaths.map(async (asset) => ({ asset, size: (await stat(resolve(projectRoot, asset))).size }))
+);
+const talkingTotal = talkingStats.reduce((total, asset) => total + asset.size, 0);
+check(new Set(talkingPaths).size === 4, "Arthur must have four distinct mouth frames");
+check(app.includes("activeArthurPortrait.src = src") && app.includes("portraitAnimator.startTalking()"),
+  "The intercom must apply and animate Arthur's mouth frames");
+check(talkingStats.every(({ size }) => size <= 32 * 1024), "Each mouth frame must remain under 32 KiB");
+check(talkingTotal <= 128 * 1024, "Arthur's complete mouth cycle must remain under 128 KiB");
+check(talkingPaths.every((asset) => asset.endsWith(".webp")), "Mouth frames must use WebP release assets");
 
 check(html.includes('id="credits-dialog"'), "Credits dialog is missing");
 check(html.includes('id="debug-dialog"'), "Developer diagnostics dialog is missing");
 check(html.includes('id="debug-export"'), "Conversation log export control is missing");
 check(html.includes('id="gate-feed"'), "Exterior gate feed is missing");
+check(html.includes('id="intercom-hotspot"'), "Intercom hotspot is missing");
+check(html.includes('id="walk-hotspot"'), "Walk-through hotspot is missing");
+check(html.includes('id="id-card-button"'), "ID-card action is missing");
 check(html.includes('id="gate-animation-status"'), "Gate animation status is missing");
 check(server.includes('".webp": "image/webp"'), "Server must send the WebP MIME type");
 check(server.includes('process.env.HOST || "127.0.0.1"'), "Server must allow a deployment host binding");
 check(
-  html.includes("assets/gates/gate-closed.webp"),
+  html.includes("assets/encounter/gate-closed.webp"),
   "The initial exterior feed must use the closed-gate frame"
 );
 check(
-  app.includes("assets/gates/gate-opening.webp") && app.includes("assets/gates/gate-open.webp"),
-  "Entry approval must play the gate-opening animation and settle on the open frame"
+  html.includes("assets/encounter/gate-open.webp") && app.includes("playGateOpening()"),
+  "Entry approval must reveal the open gate frame"
 );
 
 await Promise.all([
@@ -75,6 +84,13 @@ await Promise.all([
   requireFile("Dockerfile"),
   requireFile("THIRD_PARTY_NOTICES.md"),
   requireFile("assets/fonts/OFL.txt"),
+  requireFile("encounter.css"),
+  requireFile("assets/encounter/gate-closed.webp"),
+  requireFile("assets/encounter/gate-open.webp"),
+  requireFile("assets/encounter/arthur-intercom.webp"),
+  requireFile("assets/encounter/arthur-talk-2.webp"),
+  requireFile("assets/encounter/arthur-talk-3.webp"),
+  requireFile("assets/encounter/arthur-talk-4.webp"),
   requireFile("assets/gates/gate-closed.webp"),
   requireFile("assets/gates/gate-open.webp"),
   requireFile("assets/gates/gate-opening.webp"),
@@ -90,7 +106,7 @@ if (failures.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    `Release audit passed: ${portraitPaths.length} portrait assets present, ` +
-      `${Math.round(reactionTotal / 1024)} KiB of lazy reaction art, ${preloadAssets.length} immediate preloads.`
+    `Release audit passed: ${talkingPaths.length} Arthur mouth frames, ` +
+      `${Math.round(talkingTotal / 1024)} KiB of portrait art, ${preloadAssets.length} immediate preloads.`
   );
 }
