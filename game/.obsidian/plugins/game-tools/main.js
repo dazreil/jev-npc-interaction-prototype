@@ -1,0 +1,203 @@
+// Game Tools: run the asset canvas and the game from inside Obsidian.
+// Plain JavaScript on purpose, so there is no build step. It runs the same
+// scripts as the terminal (scripts/assets.mjs, npm run app), from the repo
+// folder that holds this vault.
+//
+// Right-click a recipe card on a canvas: set its status, generate it now,
+// or preview the request for free. Commands (Cmd+P, "Game Tools"): generate
+// every card set to go, watch the canvas, play the game, open the workbench.
+
+const { Modal, Notice, Plugin } = require("obsidian");
+const { spawn } = require("child_process");
+const path = require("path");
+
+const RECIPE = /^##\s+([\w.-]+)\s*\n(style|image|edit|animate|composite)\s*(?:\n|$)/i;
+const shellQuote = (value) => `'${String(value).replace(/'/g, `'\\''`)}'`;
+
+function readRecipe(text) {
+  const match = String(text ?? "").match(RECIPE);
+  if (!match) return null;
+  const status = String(text).match(/^status\s*:\s*(.*)$/im)?.[1]?.trim().toLowerCase() ?? "";
+  return { name: match[1], kind: match[2].toLowerCase(), status };
+}
+
+function setStatusLine(text, status) {
+  const lines = String(text).split("\n");
+  const index = lines.findIndex((line, i) => i >= 2 && /^status\s*:/i.test(line));
+  if (index >= 0) lines[index] = `status: ${status}`;
+  else lines.splice(2, 0, `status: ${status}`);
+  return lines.join("\n");
+}
+
+class OutputModal extends Modal {
+  constructor(app, title, text) {
+    super(app);
+    this.title = title;
+    this.text = text;
+  }
+  onOpen() {
+    this.titleEl.setText(this.title);
+    const pre = this.contentEl.createEl("pre", { text: this.text });
+    pre.style.whiteSpace = "pre-wrap";
+    pre.style.userSelect = "text";
+    pre.style.maxHeight = "60vh";
+    pre.style.overflow = "auto";
+  }
+}
+
+module.exports = class GameTools extends Plugin {
+  async onload() {
+    // The vault is the repo's game/ folder; the scripts live one level up.
+    this.repo = path.dirname(this.app.vault.adapter.getBasePath());
+    this.watcher = null;
+    this.workbench = null;
+    this.running = 0;
+    this.statusEl = this.addStatusBarItem();
+
+    this.registerEvent(this.app.workspace.on("canvas:node-menu", (menu, node) => this.addCardMenu(menu, node)));
+
+    this.addRibbonIcon("wand-2", "Generate asset cards set to go", () => this.runAssets([], this.canvasPath()));
+    this.addCommand({ id: "generate-go", name: "Generate every card set to go", callback: () => this.runAssets([], this.canvasPath()) });
+    this.addCommand({ id: "preview-go", name: "Preview requests (free, sends nothing)", callback: () => this.runAssets(["--dry-run"], this.canvasPath()) });
+    this.addCommand({ id: "watch", name: "Start or stop watching the asset canvas", callback: () => this.toggleWatch() });
+    this.addCommand({ id: "play", name: "Play the game", callback: () => this.play() });
+    this.addCommand({ id: "workbench", name: "Open the workbench", callback: () => this.openWorkbench() });
+    this.showStatus();
+  }
+
+  onunload() {
+    this.watcher?.kill();
+    this.workbench?.kill();
+  }
+
+  /** The open canvas, or Assets.canvas. Paths are relative to the vault. */
+  canvasPath(node) {
+    const file = node?.canvas?.view?.file ?? this.app.workspace.getActiveFile();
+    return file?.extension === "canvas" ? file.path : "Assets.canvas";
+  }
+
+  addCardMenu(menu, node) {
+    const text = typeof node?.text === "string" ? node.text : node?.getData?.().text;
+    const recipe = readRecipe(text);
+    if (!recipe || recipe.kind === "style") return;
+    const canvas = this.canvasPath(node);
+
+    menu.addSeparator();
+    menu.addItem((item) =>
+      item.setTitle(`Generate "${recipe.name}" now`).setIcon("wand-2").onClick(() => this.runAssets(["--card", recipe.name], canvas))
+    );
+    menu.addItem((item) =>
+      item.setTitle("Preview request (free)").setIcon("eye").onClick(() => this.runAssets(["--dry-run", "--card", recipe.name], canvas))
+    );
+    menu.addItem((item) =>
+      item
+        .setTitle("Redo finish only (free)")
+        .setIcon("refresh-cw")
+        .onClick(() => this.runAssets(["--card", recipe.name, "--refinish"], canvas))
+    );
+    for (const status of ["idea", "go"]) {
+      menu.addItem((item) =>
+        item
+          .setTitle(`Status: ${status}`)
+          .setIcon(status === "go" ? "play" : "lightbulb")
+          .setChecked(recipe.status === status)
+          .onClick(() => this.setCardStatus(node, status))
+      );
+    }
+  }
+
+  setCardStatus(node, status) {
+    try {
+      const text = typeof node.text === "string" ? node.text : node.getData().text;
+      node.setText(setStatusLine(text, status));
+      node.canvas?.requestSave?.();
+    } catch (error) {
+      new Notice(`Could not change the card: ${error.message}`);
+    }
+  }
+
+  /** Runs a command from the repo folder through a login shell, so node is on PATH. */
+  spawnInRepo(command, { detached = false } = {}) {
+    const shell = process.env.SHELL || "/bin/zsh";
+    return spawn(shell, ["-lc", command], {
+      cwd: this.repo,
+      detached,
+      stdio: detached ? "ignore" : ["ignore", "pipe", "pipe"]
+    });
+  }
+
+  runAssets(args, canvas) {
+    const dryRun = args.includes("--dry-run");
+    const label = args.includes("--card") ? args[args.indexOf("--card") + 1] : "cards set to go";
+    const child = this.spawnInRepo(["node", "scripts/assets.mjs", canvas, ...args].map(shellQuote).join(" "));
+    let output = "";
+    let lastLine = "";
+    this.running += 1;
+    this.showStatus();
+    if (!dryRun) new Notice(`Generating ${label}…`);
+
+    const onData = (chunk) => {
+      const text = chunk.toString().replace(/\r/g, "\n");
+      output += text;
+      for (const line of text.split("\n").map((part) => part.trim()).filter(Boolean)) {
+        lastLine = line;
+        if (!dryRun && /\] (done|refinished|error)/.test(line)) new Notice(line, line.includes("error") ? 12000 : 6000);
+      }
+    };
+    child.stdout.on("data", onData);
+    child.stderr.on("data", onData);
+    child.on("error", (error) => new Notice(`Could not start the runner: ${error.message}`, 12000));
+    child.on("close", (code) => {
+      this.running -= 1;
+      this.showStatus();
+      if (dryRun) new OutputModal(this.app, `Preview: ${label}`, output.trim() || "(no output)").open();
+      else if (code !== 0) new Notice(`Asset runner stopped: ${lastLine}`, 12000);
+      else if (/No cards|No recipe card/.test(output)) new Notice(lastLine);
+    });
+  }
+
+  toggleWatch() {
+    if (this.watcher) {
+      this.watcher.kill();
+      this.watcher = null;
+      new Notice("Stopped watching the asset canvas.");
+      this.showStatus();
+      return;
+    }
+    const canvas = this.canvasPath();
+    this.watcher = this.spawnInRepo(["node", "scripts/assets.mjs", canvas, "--watch"].map(shellQuote).join(" "));
+    const onData = (chunk) => {
+      for (const line of chunk.toString().split(/[\r\n]+/).map((part) => part.trim()).filter(Boolean)) {
+        if (/\] (done|error)|FAL_KEY/.test(line)) new Notice(line, line.includes("error") ? 12000 : 6000);
+      }
+    };
+    this.watcher.stdout.on("data", onData);
+    this.watcher.stderr.on("data", onData);
+    this.watcher.on("close", () => {
+      this.watcher = null;
+      this.showStatus();
+    });
+    new Notice(`Watching ${canvas}. Set a card to "go" and it runs.`);
+    this.showStatus();
+  }
+
+  play() {
+    this.spawnInRepo("npm run app", { detached: true }).unref();
+    new Notice("Starting the game…");
+  }
+
+  openWorkbench() {
+    if (!this.workbench) {
+      this.workbench = this.spawnInRepo("npm run workbench");
+      this.workbench.on("close", () => (this.workbench = null));
+    }
+    setTimeout(() => window.open("http://localhost:5174"), 1500);
+  }
+
+  showStatus() {
+    const parts = [];
+    if (this.running) parts.push(`⚙ generating (${this.running})`);
+    if (this.watcher) parts.push("👁 watching assets");
+    this.statusEl.setText(parts.join("  "));
+  }
+};

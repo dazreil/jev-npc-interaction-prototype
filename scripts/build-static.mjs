@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 // server.mjs, so static hosts never publish server code, tests or notes.
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const output = resolve(projectRoot, "dist");
-const PUBLIC_ENTRIES = ["index.html", "styles.css", "assets", "data", "js"];
+const PUBLIC_ENTRIES = ["index.html", "styles.css", "encounter.css", "assets", "data", "js"];
 
 await rm(output, { recursive: true, force: true });
 await Promise.all(

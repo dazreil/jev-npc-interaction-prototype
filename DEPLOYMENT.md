@@ -41,7 +41,7 @@ docker build -t jev-npc .
 docker run --rm -p 5173:5173 -e TYPESAFE_API_KEY jev-npc
 ```
 
-After deployment, open the public HTTP(S) address, confirm the boot sequence completes, send one Mock transmission, switch to Jev, send one live transmission, and verify that mute, replay, skip, reset, credits, and the F2 developer panel work.
+After deployment, open the public HTTP(S) address, confirm the boot sequence completes, call Arthur from the gate intercom, send one Mock transmission, switch to Jev, and send one live transmission. Verify that the floating ID card works and that Pause gives access to mute, replay, skip, restart, credits, and developer telemetry.
 
 ## Vercel hosting
 
@@ -67,7 +67,7 @@ The game saves the whole conversation after every turn. Players do not need to e
 
 - On Vercel, logs go to the private Blob store `jev-playtest-logs` as `logs/<date>/<session>.json`. Only the project owner can read them.
 - On the local server, logs go to `playtest-logs/`. Git ignores this folder.
-- Each Reset link starts a new session file.
+- Each Restart encounter starts a new session file.
 - The boot screen and the credits tell players that conversations are saved.
 
 To download every saved log into `playtest-logs/`:

@@ -1,0 +1,233 @@
+{
+	"nodes": [
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 40,
+			"y": -420,
+			"width": 1280,
+			"height": 330,
+			"text": "# World\nThis canvas **is the game**. Each labelled group is a screen.\n\n- The **picture card** in a group is the scene. Drag other cards onto it to place them.\n- An **object note** card (like the intercom) is clickable where it sits.\n- A **text card with an arrow** to another screen is a button that goes there. Label the arrow `if ...` to add a rule.\n- A text card that starts with `if ...` shows only when that is true.\n- Cards outside the screen groups are just notes.\n\nPlay it: `npm run app`. See [[Start here]]."
+		},
+		{
+			"id": "south-gate",
+			"type": "group",
+			"label": "south-gate",
+			"x": 0,
+			"y": 0,
+			"width": 1360,
+			"height": 820,
+			"color": "6"
+		},
+		{
+			"id": "gate-open-layer",
+			"type": "text",
+			"x": 40,
+			"y": 60,
+			"width": 1280,
+			"height": 720,
+			"text": "if flag.gate-open\n![[gate-open.webp]]"
+		},
+		{
+			"id": "gate-picture",
+			"type": "file",
+			"file": "assets/scenes/gate-closed.webp",
+			"x": 40,
+			"y": 60,
+			"width": 1280,
+			"height": 720
+		},
+		{
+			"id": "intercom",
+			"type": "file",
+			"file": "objects/intercom.md",
+			"x": 1102,
+			"y": 334,
+			"width": 128,
+			"height": 144
+		},
+		{
+			"id": "walk",
+			"type": "text",
+			"x": 578,
+			"y": 412,
+			"width": 230,
+			"height": 216,
+			"text": "MOVE TO TOWER 04 →"
+		},
+		{
+			"id": "guard-tower-04",
+			"type": "group",
+			"label": "guard-tower-04",
+			"x": 40,
+			"y": 1060,
+			"width": 1280,
+			"height": 720,
+			"color": "6"
+		},
+		{
+			"id": "tower-title",
+			"type": "text",
+			"x": 160,
+			"y": 1280,
+			"width": 1040,
+			"height": 180,
+			"text": "## GUARD TOWER 04\nYou cross the car park. Arthur is waiting at the next checkpoint."
+		},
+		{
+			"id": "look-back",
+			"type": "text",
+			"x": 88,
+			"y": 1660,
+			"width": 360,
+			"height": 80,
+			"text": "← LOOK BACK AT GATE"
+		},
+		{
+			"id": "g-notes",
+			"type": "group",
+			"label": "Notes (not screens)",
+			"x": 1440,
+			"y": -80,
+			"width": 700,
+			"height": 1900,
+			"color": "3"
+		},
+		{
+			"id": "intercom-face",
+			"type": "file",
+			"file": "ui/intercom-hud.md",
+			"x": 1480,
+			"y": 0,
+			"width": 620,
+			"height": 520
+		},
+		{
+			"id": "tree",
+			"type": "file",
+			"file": "characters/arthur/arthur-tree.canvas",
+			"x": 1480,
+			"y": 580,
+			"width": 620,
+			"height": 420
+		},
+		{
+			"id": "arthur",
+			"type": "file",
+			"file": "characters/arthur/Arthur.md",
+			"x": 1480,
+			"y": 1060,
+			"width": 300,
+			"height": 300
+		},
+		{
+			"id": "allow",
+			"type": "file",
+			"file": "characters/arthur/actions/ALLOW_ENTRY.md",
+			"x": 1800,
+			"y": 1060,
+			"width": 300,
+			"height": 300
+		},
+		{
+			"id": "o-entry",
+			"type": "file",
+			"file": "outcomes/entry-granted.md",
+			"x": 1480,
+			"y": 1420,
+			"width": 300,
+			"height": 180
+		},
+		{
+			"id": "o-exposed",
+			"type": "file",
+			"file": "outcomes/exposed.md",
+			"x": 1800,
+			"y": 1420,
+			"width": 300,
+			"height": 180
+		},
+		{
+			"id": "ev-gate",
+			"type": "file",
+			"file": "events/gate-opens.md",
+			"x": 1480,
+			"y": 1620,
+			"width": 620,
+			"height": 180
+		}
+	],
+	"edges": [
+		{
+			"id": "w1",
+			"fromNode": "walk",
+			"fromSide": "bottom",
+			"toNode": "guard-tower-04",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "if flag.gate-open"
+		},
+		{
+			"id": "w2",
+			"fromNode": "look-back",
+			"fromSide": "top",
+			"toNode": "south-gate",
+			"toSide": "bottom",
+			"toEnd": "arrow"
+		},
+		{
+			"id": "w3",
+			"fromNode": "intercom",
+			"fromSide": "right",
+			"toNode": "intercom-face",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "opens its UI"
+		},
+		{
+			"id": "w4",
+			"fromNode": "intercom",
+			"fromSide": "right",
+			"toNode": "tree",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "talk"
+		},
+		{
+			"id": "w5",
+			"fromNode": "tree",
+			"fromSide": "bottom",
+			"toNode": "allow",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "can pick"
+		},
+		{
+			"id": "w6",
+			"fromNode": "allow",
+			"fromSide": "bottom",
+			"toNode": "o-entry",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "ends"
+		},
+		{
+			"id": "w7",
+			"fromNode": "tree",
+			"fromSide": "bottom",
+			"toNode": "o-exposed",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "company call"
+		},
+		{
+			"id": "w8",
+			"fromNode": "allow",
+			"fromSide": "left",
+			"toNode": "ev-gate",
+			"toSide": "right",
+			"toEnd": "arrow",
+			"label": "fires"
+		}
+	]
+}

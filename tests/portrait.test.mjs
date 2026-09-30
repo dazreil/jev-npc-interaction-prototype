@@ -30,8 +30,16 @@ test("all twelve actions map to a shipped portrait cue", () => {
 test("unknown portrait cues use the neutral fallback", () => {
   assert.deepEqual(resolvePortraitAsset("missing-emotion"), {
     cue: "neutral",
-    src: "assets/arthur-portrait.jpg"
+    src: "assets/encounter/arthur-intercom.webp"
   });
+});
+
+test("talking cues resolve to four distinct WebP mouth plates", () => {
+  const frames = ["talk-a", "talk-b", "talk-c", "talk-d"].map(
+    (cue) => resolvePortraitAsset(cue).src
+  );
+  assert.equal(new Set(frames).size, 4);
+  assert.ok(frames.every((src) => src.startsWith("assets/encounter/") && src.endsWith(".webp")));
 });
 
 test("portrait animator plays idle, listening, reaction, talk, and reaction-out frames", () => {
@@ -75,6 +83,12 @@ test("portrait animator plays idle, listening, reaction, talk, and reaction-out 
   assert.equal(timers.at(-1).delay, TALK_FRAME_MS);
   timers.at(-1).callback();
   assert.equal(frames.at(-1).cue, "talk-b");
+  timers.at(-1).callback();
+  assert.equal(frames.at(-1).cue, "talk-c");
+  timers.at(-1).callback();
+  assert.equal(frames.at(-1).cue, "talk-b");
+  timers.at(-1).callback();
+  assert.equal(frames.at(-1).cue, "talk-d");
 
   animator.handlePhase({ phase: PERFORMANCE_PHASES.REACTION_OUT, performance });
   assert.equal(frames.at(-1).cue, "suspicious");

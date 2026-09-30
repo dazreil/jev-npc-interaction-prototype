@@ -993,10 +993,9 @@ summary:focus-visible {
   display: block;
   width: 100%;
   height: 100%;
-  /* The plate is landscape and the box is portrait, so cover crops the sides.
-     Bias right to keep Guard Tower 04, the right post and the gate leaf. */
-  object-fit: cover;
-  object-position: 68% center;
+  /* The portrait plate matches this viewport; keep both gate leaves in view. */
+  object-fit: contain;
+  object-position: center;
   image-rendering: pixelated;
   /* The plate is a genuine night exposure: mean luma 27/255, only 2% of pixels
      above 60. At this monitor size it needs the gain a low-light CCTV camera

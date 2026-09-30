@@ -9,3 +9,20 @@ dist/
 .env*
 !.env.example
 playtest-logs/
+
+# Obsidian vault: keep shared settings, ignore per-person state
+game/.obsidian/workspace*.json
+game/.obsidian/plugins/*
+!game/.obsidian/plugins/game-tools/
+game/.obsidian/cache
+build/
+
+# FMV LoRA work: generated pictures stay local
+fmv-lora/pilot/
+fmv-lora/dataset/
+fmv-lora/eval/
+fmv-lora/train/
+fmv-lora/pilot-krea/
+fmv-lora/composites/
+fmv-lora/pilot-krea-composites/
+fmv-lora/sheet-test/

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vault Workbench</title>
+    <link rel="stylesheet" href="/workbench/workbench.css" />
+  </head>
+  <body>
+    <aside class="side">
+      <header>
+        <h1>Workbench</h1>
+        <span id="live" class="live" title="Redraws when you save a note">● live</span>
+      </header>
+
+      <label class="field"><span id="ui-label">UI note</span>
+        <select id="ui-select"></select>
+      </label>
+      <p class="links"><a id="open-note" href="#">Open note in Obsidian</a></p>
+      <section class="play">
+        <h2>Play</h2>
+        <label class="check"><input id="play-mode" type="checkbox" checked /> Play (turn off to preview one UI note)</label>
+        <label class="field">Decision provider
+          <select id="provider-select">
+            <option value="mock">Mock (offline)</option>
+            <option value="jev">Jev (needs TYPESAFE_API_KEY)</option>
+          </select>
+        </label>
+        <p id="play-status" class="hint"></p>
+      </section>
+      <label class="check"><input id="show-slots" type="checkbox" checked /> Show empty slots</label>
+      <label class="check"><input id="sound-on" type="checkbox" checked /> Sound (voice and effects)</label>
+
+      <section>
+        <h2>Arthur state</h2>
+        <div id="state-controls"></div>
+      </section>
+      <section>
+        <h2>Flags and items</h2>
+        <div id="flag-controls"></div>
+      </section>
+      <section>
+        <h2>Profile</h2>
+        <select id="profile-select"></select>
+      </section>
+      <button id="reset" type="button">Restart encounter</button>
+
+      <section>
+        <h2>Event log</h2>
+        <ol id="log" class="log"></ol>
+      </section>
+      <section id="problems-section" hidden>
+        <h2>Problems</h2>
+        <ul id="problems" class="problems"></ul>
+      </section>
+    </aside>
+    <main class="stage-wrap">
+      <div id="stage" class="stage"></div>
+    </main>
+    <script type="module" src="/workbench/workbench.js"></script>
+  </body>
+</html>

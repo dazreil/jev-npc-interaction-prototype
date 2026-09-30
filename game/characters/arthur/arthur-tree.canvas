@@ -1,0 +1,118 @@
+{
+	"nodes": [
+		{
+			"id": "legend",
+			"type": "text",
+			"x": -560,
+			"y": -40,
+			"width": 420,
+			"height": 440,
+			"text": "### How to read this\n\n**Green card** = `open` node. The player types freely. The model picks an action.\n\n**Blue card** = `script` node. Fixed lines. No model call.\n\n`> text` = Arthur says it.\nOther plain lines = effects.\n\n**Arrow labels**\n- `\"text\"` = a button\n- `~ name` = free text matched by a [[detectors|detector]]\n- `if ...` = taken when true\n- `else` = taken when nothing else fits"
+		},
+		{
+			"id": "gate-talk",
+			"type": "text",
+			"color": "4",
+			"x": 0,
+			"y": 0,
+			"width": 440,
+			"height": 300,
+			"text": "## gate-talk\nopen\nsay opening\n\nFree talk on the [[intercom]] (see [[World.canvas]]). Each turn the model picks one of the [[Arthur#Actions|actions]] he is allowed right now.\n\nEndings come from events, such as [[end-locked-out]] and [[gate-opens]]."
+		},
+		{
+			"id": "id-shown",
+			"type": "text",
+			"color": "5",
+			"x": 640,
+			"y": -20,
+			"width": 440,
+			"height": 340,
+			"text": "## id-shown\nscript\n> I can see the card. That tells me a name, not why you're here. I could ring your company to check the callout.\n\n```yaml\ndo:\n  - memory: { fact: \"Player showed a contractor ID\", tags: [identity, claim], importance: 76 }\n  - flag company-call-pending\n```"
+		},
+		{
+			"id": "id-talk",
+			"type": "text",
+			"color": "4",
+			"x": 640,
+			"y": 440,
+			"width": 440,
+			"height": 240,
+			"text": "## id-talk\nopen\n\nFree talk again, but Arthur keeps the company call in mind. [[company-call-countdown]] counts the turns."
+		},
+		{
+			"id": "company-call",
+			"type": "text",
+			"color": "5",
+			"x": 1300,
+			"y": 200,
+			"width": 420,
+			"height": 220,
+			"text": "## company-call\nscript\nsay company-call-result\nend [[exposed]]"
+		},
+		{
+			"id": "exposed-card",
+			"type": "file",
+			"file": "outcomes/exposed.md",
+			"x": 1860,
+			"y": 180,
+			"width": 360,
+			"height": 260
+		}
+	],
+	"edges": [
+		{
+			"id": "e1",
+			"fromNode": "gate-talk",
+			"fromSide": "right",
+			"toNode": "id-shown",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "if item.contractor-id = shown"
+		},
+		{
+			"id": "e2",
+			"fromNode": "id-shown",
+			"fromSide": "right",
+			"toNode": "company-call",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "\"Go ahead, call them.\" ~ company-call-consent"
+		},
+		{
+			"id": "e3",
+			"fromNode": "id-shown",
+			"fromSide": "bottom",
+			"toNode": "id-talk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "else"
+		},
+		{
+			"id": "e4",
+			"fromNode": "id-talk",
+			"fromSide": "right",
+			"toNode": "company-call",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "~ company-call-consent"
+		},
+		{
+			"id": "e5",
+			"fromNode": "id-talk",
+			"fromSide": "right",
+			"toNode": "company-call",
+			"toSide": "bottom",
+			"toEnd": "arrow",
+			"label": "if counter.company-call-turns >= 3"
+		},
+		{
+			"id": "e6",
+			"fromNode": "company-call",
+			"fromSide": "right",
+			"toNode": "exposed-card",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"color": "1"
+		}
+	]
+}

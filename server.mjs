@@ -10,7 +10,7 @@ import { MAX_LOG_BYTES, parsePlaytestLog } from "./lib/playtest-log.mjs";
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 5173;
 const HOST = process.env.HOST || "127.0.0.1";
-const PUBLIC_ROOT_FILES = new Set(["index.html", "styles.css"]);
+const PUBLIC_ROOT_FILES = new Set(["index.html", "styles.css", "encounter.css"]);
 const PUBLIC_DIRECTORIES = ["assets/", "data/", "js/"];
 const MIME_TYPES = Object.freeze({
   ".css": "text/css; charset=utf-8",

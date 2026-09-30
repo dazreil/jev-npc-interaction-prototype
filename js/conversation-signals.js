@@ -4,8 +4,8 @@ const PROOF_DENIAL_PATTERN =
   /\b(?:do not|don't|did not|didn't|have no|haven't|have not|without|lost|forgot|cannot|can't)\b/i;
 const REFERENTIAL_PROOF_PATTERN =
   /\b(?:i (?:have|got) (?:it|them|those|that)|i(?:'ve| have) got (?:it|them|those)|here (?:it is|they are)|they(?:'re| are) right here|it(?:'s| is) right here|i do)\b/i;
-// The support Arthur asks for is a checkable detail, not a possession, so a
-// specific one settles his request as squarely as naming a document used to.
+// A specific operational detail can support Arthur's request. Merely showing
+// a card establishes a claimed identity, not the unverified job assignment.
 const SPECIFIC_DETAIL_PATTERN =
   /\b(pressure valve|isolation valve|control room|plant room|alarm panel|night engineer|night desk|duty manager|monitoring company|ticket \w+|job number \w+|reference \w+|panel \w+|unit [a-z0-9-]+|bay [a-z0-9-]+|callout|called out)\b/i;
 
