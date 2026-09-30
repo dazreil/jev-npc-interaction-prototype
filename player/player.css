@@ -1,0 +1,15 @@
+@font-face {
+  font-family: "VT323";
+  src: url("/assets/fonts/VT323-Regular.ttf") format("truetype");
+  font-display: block;
+}
+
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #030610; overflow: hidden; }
+body { font-family: VT323, monospace; color: #f1f5fa; -webkit-user-select: none; user-select: none; }
+.frame { position: fixed; inset: 0; display: grid; place-items: center; }
+.stage { position: relative; }
+.stage .ui-root { font-family: VT323, monospace; }
+.stage input { -webkit-user-select: text; user-select: text; }
+.toast { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); margin: 0; padding: 6px 12px; background: #101b2bee; border: 1px solid #ff68e8; color: #f1f5fa; font-size: 18px; max-width: 90vw; }

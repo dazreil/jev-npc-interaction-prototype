@@ -15,7 +15,13 @@
     "evaluate:parity": "node scripts/compare-phase14-baseline.mjs",
     "evaluate:phase14": "npm run check && npm run playtest && npm run evaluate:parity",
     "check:release": "node scripts/check-release.mjs",
-    "evaluate:phase15": "npm run check && npm run check:release"
+    "evaluate:phase15": "npm run check && npm run check:release",
+    "vault:export": "node scripts/export-vault.mjs",
+    "vault:compile": "node scripts/compile-vault.mjs",
+    "workbench": "node scripts/workbench.mjs",
+    "app": "electron desktop/main.mjs",
+    "app:smoke": "ENGINE_SMOKE_TEST=1 electron desktop/main.mjs",
+    "assets": "node scripts/assets.mjs"
   },
   "dependencies": {
     "@echogarden/espeak-ng-emscripten": "0.3.5",
@@ -24,6 +30,8 @@
   "devDependencies": {
     "@diffusionstudio/piper-wasm": "1.0.0",
     "@mintplex-labs/piper-tts-web": "^1.0.5",
-    "onnxruntime-web": "^1.18.0"
+    "electron": "^44.5.0",
+    "onnxruntime-web": "^1.18.0",
+    "yaml": "^2.9.1"
   }
 }

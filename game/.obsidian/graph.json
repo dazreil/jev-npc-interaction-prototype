@@ -1,0 +1,20 @@
+{
+  "showTags": false,
+  "showAttachments": false,
+  "showOrphans": true,
+  "hideUnresolved": true,
+  "search": "-path:_templates -path:_reports",
+  "colorGroups": [
+    { "query": "path:characters/arthur/actions", "color": { "a": 1, "rgb": 15105570 } },
+    { "query": "path:characters/arthur/dialogue", "color": { "a": 1, "rgb": 5431378 } },
+    { "query": "path:characters/arthur/profiles", "color": { "a": 1, "rgb": 11657298 } },
+    { "query": "path:screens", "color": { "a": 1, "rgb": 5419488 } },
+    { "query": "path:events", "color": { "a": 1, "rgb": 14701138 } },
+    { "query": "path:outcomes", "color": { "a": 1, "rgb": 14725458 } },
+    { "query": "path:items", "color": { "a": 1, "rgb": 9937374 } }
+  ],
+  "showArrow": true,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 1,
+  "lineSizeMultiplier": 1
+}

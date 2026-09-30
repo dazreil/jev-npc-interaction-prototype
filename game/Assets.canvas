@@ -1,0 +1,1836 @@
+{
+	"nodes": [
+		{
+			"id": "g-night-guard",
+			"type": "group",
+			"x": -40,
+			"y": 1320,
+			"width": 2680,
+			"height": 1360,
+			"color": "6",
+			"label": "Night guard composite"
+		},
+		{
+			"id": "style-room",
+			"type": "text",
+			"text": "## fmv-room\nstyle\n# Pre-rendered 1990s CG rooms. Use with model: z-image.\nprefix: A still frame from a 1995 CD-ROM computer game, a pre-rendered 3D CGI background, early 1990s 3D rendering with flat shading, low-polygon models and simple textures\nsuffix: no people, no text or lettering",
+			"x": 0,
+			"y": 1400,
+			"width": 520,
+			"height": 260,
+			"color": "5"
+		},
+		{
+			"id": "style-actor-green",
+			"type": "text",
+			"text": "## fmv-actor-green\nstyle\n# Live actors on a green screen, to key out. Use with model: krea-2.\n# Keep green out of the wardrobe.\nprefix: A 1995 video capture of a live-action actor filmed for a CD-ROM game on a chroma-key stage\nsuffix: standing in front of a solid bright chroma-key green screen, solid pure green #00FF00 background, evenly lit",
+			"x": 0,
+			"y": 1720,
+			"width": 520,
+			"height": 300,
+			"color": "5"
+		},
+		{
+			"id": "guard-booth",
+			"type": "text",
+			"text": "## guard-booth\nimage\nstatus: done\nmodel: z-image\nsize: 1024x768\nseed: 41\nprompt: interior view from inside an empty cramped night-shift guard room, the back wall fills the frame, a desk against the wall with a bank of CRT security monitors, a wall-mounted intercom panel with a handset, venetian blinds on a dark window, a swivel chair, amber CRT glow and sickly fluorescent tube light",
+			"x": 640,
+			"y": 1400,
+			"width": 560,
+			"height": 300,
+			"color": "4"
+		},
+		{
+			"id": "guard-actor",
+			"type": "text",
+			"text": "## guard-actor\nimage\nstatus: done\nmodel: krea-2\nsize: 1024x768\nseed: 42\nprompt: a waist-up shot of a middle-aged night security guard with grey slicked-back hair, a thick grey mustache and a tired, stern face, black security uniform shirt with shoulder epaulettes and a silver badge, leaning toward the camera as if speaking into an intercom, stiff posture, eyes slightly off-camera",
+			"x": 640,
+			"y": 1740,
+			"width": 560,
+			"height": 320,
+			"color": "4"
+		},
+		{
+			"id": "night-guard",
+			"type": "text",
+			"text": "## night-guard\ncomposite\nstatus: done\n# Free: keys the actor off the green screen and pastes him into the booth.\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 3\ncrunch: 4\njpeg: 50",
+			"x": 1320,
+			"y": 1520,
+			"width": 560,
+			"height": 340,
+			"color": "4"
+		},
+		{
+			"id": "made-guard-booth-1",
+			"type": "file",
+			"file": "assets/generated/guard-booth/guard-booth.webp",
+			"x": 1280,
+			"y": 1400,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-guard-actor-1",
+			"type": "file",
+			"file": "assets/generated/guard-actor/guard-actor.webp",
+			"x": 1280,
+			"y": 1740,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "guard-talk",
+			"type": "text",
+			"text": "## guard-talk\nanimate\nstatus: done\n# Arthur talks on the green screen. The composite pastes every frame.\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: the night guard talks into the handheld intercom handset with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged",
+			"x": 1320,
+			"y": 1880,
+			"width": 560,
+			"height": 420,
+			"color": "4"
+		},
+		{
+			"id": "night-guard-talk",
+			"type": "text",
+			"text": "## night-guard-talk\ncomposite\nstatus: done\n# Free: keys every frame of guard-talk and pastes it into the booth.\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 3\ncrunch: 4\njpeg: 50",
+			"x": 2000,
+			"y": 1880,
+			"width": 560,
+			"height": 340,
+			"color": "4"
+		},
+		{
+			"id": "made-guard-talk-1",
+			"type": "file",
+			"file": "assets/generated/guard-talk/guard-talk.webp",
+			"x": 1960,
+			"y": 1880,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-guard-talk-2",
+			"type": "file",
+			"file": "assets/generated/guard-talk/guard-talk.mp4",
+			"x": 2220,
+			"y": 1880,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "readme",
+			"type": "text",
+			"text": "# Assets\nMake game art with AI, right here. Each **recipe card** makes one asset.\n\n**Right-click a recipe card:**\n- **Generate \"name\" now** runs it.\n- **Preview request (free)** shows what would be sent.\n- **Status: idea / go** sets it to wait or to run.\n\nThe card turns **yellow** while running, **green** when done, **red** on an error. The result appears as a card to the right, and in `assets/generated/`. Animations also get an **MP4** and pictures a **JPG**, for sharing in apps that do not show WebP.\n\n**Style cards** add their LoRA and prompt words to every recipe they point to. **Composite cards** paste an actor (arrow labelled `actor`, on a green or blue screen) into a room (arrow labelled `room`). Free: no AI call. See the night guard below.\n\n**Animate cards** start from the image that points to them, and keep a few held frames like a 90s CD-ROM game.\n\n`Cmd+P` → *Game Tools* also has: generate every card set to go, watch this canvas, play the game, and open the workbench.",
+			"x": 0,
+			"y": -680,
+			"width": 1100,
+			"height": 600
+		},
+		{
+			"id": "models",
+			"type": "text",
+			"text": "## Models (checked 30 Sep 2026)\n| model: | What | LoRAs |\n| --- | --- | --- |\n| `flux-lora` | FLUX.1 [dev] | FLUX.1 LoRAs, e.g. Civitai \"[FLUX]\" ones |\n| `flux-2-lora` | FLUX.2 [dev] | FLUX.2 LoRAs only |\n| `minimax-h3` | MiniMax H3 image→video, first + last frame | — |\n\nFLUX.1 LoRAs **do not** load on FLUX.2. To move the FMV look to FLUX.2, train a FLUX.2 LoRA on fal (about $6 for 1000 steps).\n\n**RefMod** (MiniMax H3 reference adapters) runs only in local ComfyUI with a GPU, and is still \"under construction\". Not usable through fal yet.\n\nAny other fal model: set `endpoint:` and `params:`.",
+			"x": 1180,
+			"y": -520,
+			"width": 760,
+			"height": 440,
+			"color": "3"
+		},
+		{
+			"id": "style-fmv",
+			"type": "text",
+			"text": "## fmv-90s\nstyle\n# 90's PC Game FMV Style [FLUX] by its Civitai author, trained on Phantasmagoria and Harvester.\n# https://civitai.red/models/940053/90s-pc-game-fmv-style-flux — FLUX.1 [dev] only. Strength 0.8–1.0.\nlora: https://civitai.com/api/download/models/1052352?fileId=1010413 @0.9\ntemplate: \"The image is a screenshot from a 3D-rendered scene, possibly from a video game or a virtual environment. The scene depicts {prompt}\"\n# Crunch: shrink 4x, save as a low-quality JPEG, blow back up with no smoothing.\ncrunch: 4\njpeg: 50\n",
+			"x": 0,
+			"y": 0,
+			"width": 520,
+			"height": 400,
+			"color": "5"
+		},
+		{
+			"id": "arthur-frame",
+			"type": "file",
+			"file": "assets/characters/arthur/legacy/arthur-intercom.webp",
+			"x": 0,
+			"y": 860,
+			"width": 158,
+			"height": 210
+		},
+		{
+			"id": "gate-dawn",
+			"type": "text",
+			"text": "## gate-dawn\nimage\nstatus: done\nmodel: flux-lora\nsize: 1280x720\nseed: 7\nprompt: a warehouse car-park gate at dawn, wet asphalt, sodium lights fading, video intercom on a post beside the gate",
+			"x": 660,
+			"y": -15,
+			"width": 520,
+			"height": 300,
+			"color": "4"
+		},
+		{
+			"id": "dbb53ef452d3bfea",
+			"type": "text",
+			"text": "",
+			"x": 300,
+			"y": 388,
+			"width": 250,
+			"height": 60
+		},
+		{
+			"id": "arthur-fmv",
+			"type": "text",
+			"text": "## arthur-fmv\nimage\nstatus: done\nmodel: flux-lora\nsize: 1024x768\nseed: 11\nprompt: a middle-aged night security guard with grey slicked-back hair and a stern, tired face, dark uniform with shoulder epaulettes, head and shoulders, looking straight into a video intercom camera, inside a dim guard tower booth at night, green glow of CCTV monitors, no text",
+			"x": 640,
+			"y": 420,
+			"width": 520,
+			"height": 380,
+			"color": "4"
+		},
+		{
+			"id": "arthur-note",
+			"type": "text",
+			"text": "The old portrait (240×320) is too small for video. It is kept here for reference. [[arthur-fmv]] replaces it as the first frame.",
+			"x": 0,
+			"y": 1100,
+			"width": 420,
+			"height": 120
+		},
+		{
+			"id": "made-gate-dawn-1",
+			"type": "file",
+			"file": "assets/generated/gate-dawn/gate-dawn.webp",
+			"x": 1260,
+			"y": -15,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-fmv-1",
+			"type": "file",
+			"file": "assets/generated/arthur-fmv/arthur-fmv.webp",
+			"x": 1240,
+			"y": 420,
+			"width": 180,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-talk-1",
+			"type": "file",
+			"file": "assets/generated/arthur-talk/arthur-talk.webp",
+			"x": 1900,
+			"y": 420,
+			"width": 180,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-talk-2",
+			"type": "file",
+			"file": "assets/generated/arthur-talk/arthur-talk.mp4",
+			"x": 2160,
+			"y": 420,
+			"width": 180,
+			"height": 135
+		},
+		{
+			"id": "arthur-talk",
+			"type": "text",
+			"text": "## arthur-talk\nanimate\nstatus: done\nmodel: minimax-h3\nprompt: the night guard talks into the intercom camera, small mouth and head movements, static camera, same lighting\nseconds: 5\nfrom: 0.5\nto: 2.5\nframes: 6\nfps: 8\ncolors: 64\nwidth: 320\npingpong: true",
+			"x": 1320,
+			"y": 420,
+			"width": 520,
+			"height": 420,
+			"color": "4"
+		},
+		{
+			"id": "made-night-guard-1",
+			"type": "file",
+			"file": "assets/generated/night-guard/night-guard.webp",
+			"x": 1960,
+			"y": 1520,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-night-guard-talk-1",
+			"type": "file",
+			"file": "assets/generated/night-guard-talk/night-guard-talk.webp",
+			"x": 2640,
+			"y": 1880,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-night-guard-talk-2",
+			"type": "file",
+			"file": "assets/generated/night-guard-talk/night-guard-talk.mp4",
+			"x": 2900,
+			"y": 1880,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "g-moods",
+			"type": "group",
+			"label": "Arthur mood sheet",
+			"x": -40,
+			"y": 2780,
+			"width": 3400,
+			"height": 2900,
+			"color": "6"
+		},
+		{
+			"id": "arthur-keep",
+			"type": "text",
+			"x": 0,
+			"y": 2860,
+			"width": 560,
+			"height": 360,
+			"color": "5",
+			"text": "## arthur-keep\nstyle\n# Holds Arthur steady in edits: only the named part changes.\ntemplate: \"Keep the exact same man: same face, grey slicked-back hair and grey mustache, same black security uniform shirt with epaulettes and silver badge, holding the same handheld intercom handset. Keep the exact same framing, crop, camera position and waist-up pose, and the same flat, evenly lit chroma-key green screen background, lighting and camera quality. Only change {prompt}\"\n"
+		},
+		{
+			"id": "arthur-friendly",
+			"type": "text",
+			"x": 700,
+			"y": 2860,
+			"width": 560,
+			"height": 300,
+			"color": "4",
+			"text": "## arthur-friendly\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\nprompt: \"his expression, which is now a warm, slightly awkward friendly smile with raised eyebrows.\""
+		},
+		{
+			"id": "arthur-irritated",
+			"type": "text",
+			"x": 1320,
+			"y": 2860,
+			"width": 560,
+			"height": 300,
+			"color": "4",
+			"text": "## arthur-irritated\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\nprompt: \"his expression, which is now irritated and impatient: jaw clenched, brows lowered, lips pressed thin.\""
+		},
+		{
+			"id": "arthur-hostile",
+			"type": "text",
+			"x": 1940,
+			"y": 2860,
+			"width": 560,
+			"height": 300,
+			"color": "4",
+			"text": "## arthur-hostile\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\nprompt: \"his expression, which is now hostile: glaring hard at the camera, brows pulled down, mouth open mid-snarl.\""
+		},
+		{
+			"id": "arthur-suspicious",
+			"type": "text",
+			"x": 700,
+			"y": 3380,
+			"width": 560,
+			"height": 300,
+			"color": "4",
+			"text": "## arthur-suspicious\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\nprompt: \"his expression, which is now suspicious: eyes narrowed, one eyebrow raised, head tilted slightly.\""
+		},
+		{
+			"id": "arthur-afraid",
+			"type": "text",
+			"x": 1320,
+			"y": 3380,
+			"width": 560,
+			"height": 300,
+			"color": "4",
+			"text": "## arthur-afraid\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\nprompt: \"his expression, which is now afraid: eyes wide, eyebrows raised high, mouth slightly open.\""
+		},
+		{
+			"id": "arthur-dismissive",
+			"type": "text",
+			"x": 1940,
+			"y": 3380,
+			"width": 560,
+			"height": 300,
+			"color": "4",
+			"text": "## arthur-dismissive\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\nprompt: \"his expression, which is now dismissive and bored: heavy-lidded eyes glancing to the side, mouth flat.\""
+		},
+		{
+			"id": "arthur-granted",
+			"type": "text",
+			"x": 700,
+			"y": 3900,
+			"width": 560,
+			"height": 300,
+			"color": "4",
+			"text": "## arthur-granted\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\nprompt: \"his expression, which is now a small satisfied half-smile, as if nodding approval.\""
+		},
+		{
+			"id": "arthur-blink-half",
+			"type": "text",
+			"x": 1320,
+			"y": 3900,
+			"width": 560,
+			"height": 300,
+			"color": "4",
+			"text": "## arthur-blink-half\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\nprompt: \"his eyes, which are now half closed, halfway through a blink. Nothing else changes.\""
+		},
+		{
+			"id": "arthur-blink-closed",
+			"type": "text",
+			"x": 1940,
+			"y": 3900,
+			"width": 560,
+			"height": 300,
+			"color": "4",
+			"text": "## arthur-blink-closed\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\nprompt: \"his eyes, which are now fully closed in a natural blink. Nothing else changes.\""
+		},
+		{
+			"id": "booth",
+			"type": "text",
+			"x": 2640,
+			"y": 3160,
+			"width": 560,
+			"height": 400,
+			"color": "4",
+			"text": "## booth\ncomposite\nstatus: done\n# Free: every Arthur picture into the guard booth, keyed together so\n# moods and blinks line up exactly. Outputs booth-<picture>.webp.\nalign: true\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 3\ncrunch: 4\njpeg: 50"
+		},
+		{
+			"id": "made-arthur-friendly-1",
+			"type": "file",
+			"file": "assets/generated/arthur-friendly/arthur-friendly.webp",
+			"x": 1340,
+			"y": 2860,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-irritated-1",
+			"type": "file",
+			"file": "assets/generated/arthur-irritated/arthur-irritated.webp",
+			"x": 1960,
+			"y": 2860,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-hostile-1",
+			"type": "file",
+			"file": "assets/generated/arthur-hostile/arthur-hostile.webp",
+			"x": 2580,
+			"y": 2860,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-suspicious-1",
+			"type": "file",
+			"file": "assets/generated/arthur-suspicious/arthur-suspicious.webp",
+			"x": 1340,
+			"y": 3380,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-afraid-1",
+			"type": "file",
+			"file": "assets/generated/arthur-afraid/arthur-afraid.webp",
+			"x": 1960,
+			"y": 3380,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-dismissive-1",
+			"type": "file",
+			"file": "assets/generated/arthur-dismissive/arthur-dismissive.webp",
+			"x": 2580,
+			"y": 3380,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-granted-1",
+			"type": "file",
+			"file": "assets/generated/arthur-granted/arthur-granted.webp",
+			"x": 1340,
+			"y": 3900,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-blink-half-1",
+			"type": "file",
+			"file": "assets/generated/arthur-blink-half/arthur-blink-half.webp",
+			"x": 1960,
+			"y": 3900,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-blink-closed-1",
+			"type": "file",
+			"file": "assets/generated/arthur-blink-closed/arthur-blink-closed.webp",
+			"x": 2580,
+			"y": 3900,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "talk-loop",
+			"type": "text",
+			"x": 0,
+			"y": 4480,
+			"width": 560,
+			"height": 320,
+			"color": "5",
+			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The night guard {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n"
+		},
+		{
+			"id": "arthur-friendly-talk",
+			"type": "text",
+			"x": 700,
+			"y": 4480,
+			"width": 560,
+			"height": 400,
+			"color": "4",
+			"text": "## arthur-friendly-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks warmly and a little awkwardly into the handset, smiling\""
+		},
+		{
+			"id": "arthur-irritated-talk",
+			"type": "text",
+			"x": 1320,
+			"y": 4480,
+			"width": 560,
+			"height": 400,
+			"color": "4",
+			"text": "## arthur-irritated-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks curtly and impatiently into the handset, jaw tight\""
+		},
+		{
+			"id": "arthur-hostile-talk",
+			"type": "text",
+			"x": 1940,
+			"y": 4480,
+			"width": 560,
+			"height": 400,
+			"color": "4",
+			"text": "## arthur-hostile-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"snaps angrily into the handset, glaring at the camera\""
+		},
+		{
+			"id": "arthur-suspicious-talk",
+			"type": "text",
+			"x": 2560,
+			"y": 4480,
+			"width": 560,
+			"height": 400,
+			"color": "4",
+			"text": "## arthur-suspicious-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"questions suspiciously into the handset, eyes narrowed, head slightly tilted\""
+		},
+		{
+			"id": "arthur-afraid-talk",
+			"type": "text",
+			"x": 700,
+			"y": 4940,
+			"width": 560,
+			"height": 400,
+			"color": "4",
+			"text": "## arthur-afraid-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks nervously into the handset, eyes wide, glancing about\""
+		},
+		{
+			"id": "arthur-dismissive-talk",
+			"type": "text",
+			"x": 1320,
+			"y": 4940,
+			"width": 560,
+			"height": 400,
+			"color": "4",
+			"text": "## arthur-dismissive-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks in a bored, dismissive way into the handset, barely looking at the camera\""
+		},
+		{
+			"id": "arthur-granted-talk",
+			"type": "text",
+			"x": 1940,
+			"y": 4940,
+			"width": 560,
+			"height": 400,
+			"color": "4",
+			"text": "## arthur-granted-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks in a relieved, approving way into the handset with a small satisfied smile\""
+		},
+		{
+			"id": "made-arthur-friendly-talk-1",
+			"type": "file",
+			"file": "assets/generated/arthur-friendly-talk/arthur-friendly-talk.webp",
+			"x": 1340,
+			"y": 4480,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-friendly-talk-2",
+			"type": "file",
+			"file": "assets/generated/arthur-friendly-talk/arthur-friendly-talk.mp4",
+			"x": 1600,
+			"y": 4480,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-irritated-talk-1",
+			"type": "file",
+			"file": "assets/generated/arthur-irritated-talk/arthur-irritated-talk.webp",
+			"x": 1960,
+			"y": 4480,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-irritated-talk-2",
+			"type": "file",
+			"file": "assets/generated/arthur-irritated-talk/arthur-irritated-talk.mp4",
+			"x": 2220,
+			"y": 4480,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-hostile-talk-1",
+			"type": "file",
+			"file": "assets/generated/arthur-hostile-talk/arthur-hostile-talk.webp",
+			"x": 2580,
+			"y": 4480,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-hostile-talk-2",
+			"type": "file",
+			"file": "assets/generated/arthur-hostile-talk/arthur-hostile-talk.mp4",
+			"x": 2840,
+			"y": 4480,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-suspicious-talk-1",
+			"type": "file",
+			"file": "assets/generated/arthur-suspicious-talk/arthur-suspicious-talk.webp",
+			"x": 3200,
+			"y": 4480,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-suspicious-talk-2",
+			"type": "file",
+			"file": "assets/generated/arthur-suspicious-talk/arthur-suspicious-talk.mp4",
+			"x": 3460,
+			"y": 4480,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-afraid-talk-1",
+			"type": "file",
+			"file": "assets/generated/arthur-afraid-talk/arthur-afraid-talk.webp",
+			"x": 1340,
+			"y": 4940,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-afraid-talk-2",
+			"type": "file",
+			"file": "assets/generated/arthur-afraid-talk/arthur-afraid-talk.mp4",
+			"x": 1600,
+			"y": 4940,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-dismissive-talk-1",
+			"type": "file",
+			"file": "assets/generated/arthur-dismissive-talk/arthur-dismissive-talk.webp",
+			"x": 1960,
+			"y": 4940,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-dismissive-talk-2",
+			"type": "file",
+			"file": "assets/generated/arthur-dismissive-talk/arthur-dismissive-talk.mp4",
+			"x": 2220,
+			"y": 4940,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-granted-talk-1",
+			"type": "file",
+			"file": "assets/generated/arthur-granted-talk/arthur-granted-talk.webp",
+			"x": 2580,
+			"y": 4940,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-granted-talk-2",
+			"type": "file",
+			"file": "assets/generated/arthur-granted-talk/arthur-granted-talk.mp4",
+			"x": 2840,
+			"y": 4940,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-1",
+			"type": "file",
+			"file": "assets/generated/booth/booth-guard-actor.webp",
+			"x": 3280,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-2",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-friendly.webp",
+			"x": 3540,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-3",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-irritated.webp",
+			"x": 3800,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-4",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-hostile.webp",
+			"x": 4060,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-5",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-suspicious.webp",
+			"x": 4320,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-6",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-afraid.webp",
+			"x": 4580,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-7",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-dismissive.webp",
+			"x": 4840,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-8",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-granted.webp",
+			"x": 5100,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-9",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-blink-half.webp",
+			"x": 5360,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-10",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-blink-closed.webp",
+			"x": 5620,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-11",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-friendly-talk.webp",
+			"x": 5880,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-12",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-irritated-talk.webp",
+			"x": 6140,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-13",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-hostile-talk.webp",
+			"x": 6400,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-14",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-suspicious-talk.webp",
+			"x": 6660,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-15",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-afraid-talk.webp",
+			"x": 6920,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-16",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-dismissive-talk.webp",
+			"x": 7180,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-17",
+			"type": "file",
+			"file": "assets/generated/booth/booth-arthur-granted-talk.webp",
+			"x": 7440,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-booth-18",
+			"type": "file",
+			"file": "assets/generated/booth/booth-guard-talk.webp",
+			"x": 7700,
+			"y": 3160,
+			"width": 240,
+			"height": 135
+		}
+	],
+	"edges": [
+		{
+			"id": "e1",
+			"fromNode": "style-fmv",
+			"fromSide": "right",
+			"toNode": "gate-dawn",
+			"toSide": "left",
+			"label": "style"
+		},
+		{
+			"id": "made-gate-dawn-1-edge",
+			"fromNode": "gate-dawn",
+			"fromSide": "right",
+			"toNode": "made-gate-dawn-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "e3",
+			"fromNode": "style-fmv",
+			"fromSide": "bottom",
+			"toNode": "arthur-fmv",
+			"toSide": "left",
+			"label": "style"
+		},
+		{
+			"id": "e4",
+			"fromNode": "arthur-fmv",
+			"fromSide": "right",
+			"toNode": "arthur-talk",
+			"toSide": "left",
+			"label": "first frame"
+		},
+		{
+			"id": "made-arthur-fmv-1-edge",
+			"fromNode": "arthur-fmv",
+			"fromSide": "right",
+			"toNode": "made-arthur-fmv-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-talk-1-edge",
+			"fromNode": "arthur-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-talk-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-talk-2-edge",
+			"fromNode": "arthur-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-talk-2",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "ng1",
+			"fromNode": "style-room",
+			"fromSide": "right",
+			"toNode": "guard-booth",
+			"toSide": "left",
+			"label": "style"
+		},
+		{
+			"id": "ng2",
+			"fromNode": "style-actor-green",
+			"fromSide": "right",
+			"toNode": "guard-actor",
+			"toSide": "left",
+			"label": "style"
+		},
+		{
+			"id": "ng3",
+			"fromNode": "guard-booth",
+			"fromSide": "right",
+			"toNode": "night-guard",
+			"toSide": "left",
+			"label": "room"
+		},
+		{
+			"id": "ng4",
+			"fromNode": "guard-actor",
+			"fromSide": "right",
+			"toNode": "night-guard",
+			"toSide": "left",
+			"label": "actor"
+		},
+		{
+			"id": "made-guard-booth-1-edge",
+			"fromNode": "guard-booth",
+			"fromSide": "right",
+			"toNode": "made-guard-booth-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-guard-actor-1-edge",
+			"fromNode": "guard-actor",
+			"fromSide": "right",
+			"toNode": "made-guard-actor-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-night-guard-1-edge",
+			"fromNode": "night-guard",
+			"fromSide": "right",
+			"toNode": "made-night-guard-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "ng5",
+			"fromNode": "guard-actor",
+			"fromSide": "bottom",
+			"toNode": "guard-talk",
+			"toSide": "left",
+			"label": "first frame"
+		},
+		{
+			"id": "ng6",
+			"fromNode": "guard-talk",
+			"fromSide": "right",
+			"toNode": "night-guard-talk",
+			"toSide": "left",
+			"label": "actor"
+		},
+		{
+			"id": "ng7",
+			"fromNode": "guard-booth",
+			"fromSide": "right",
+			"toNode": "night-guard-talk",
+			"toSide": "top",
+			"label": "room"
+		},
+		{
+			"id": "made-guard-talk-1-edge",
+			"fromNode": "guard-talk",
+			"fromSide": "right",
+			"toNode": "made-guard-talk-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-guard-talk-2-edge",
+			"fromNode": "guard-talk",
+			"fromSide": "right",
+			"toNode": "made-guard-talk-2",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-night-guard-talk-1-edge",
+			"fromNode": "night-guard-talk",
+			"fromSide": "right",
+			"toNode": "made-night-guard-talk-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-night-guard-talk-2-edge",
+			"fromNode": "night-guard-talk",
+			"fromSide": "right",
+			"toNode": "made-night-guard-talk-2",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "m-ref-arthur-friendly",
+			"fromNode": "guard-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-friendly",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "m-style-arthur-friendly",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-friendly",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "m-ref-arthur-irritated",
+			"fromNode": "guard-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-irritated",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "m-style-arthur-irritated",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-irritated",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "m-ref-arthur-hostile",
+			"fromNode": "guard-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-hostile",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "m-style-arthur-hostile",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-hostile",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "m-ref-arthur-suspicious",
+			"fromNode": "guard-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-suspicious",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "m-style-arthur-suspicious",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-suspicious",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "m-ref-arthur-afraid",
+			"fromNode": "guard-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-afraid",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "m-style-arthur-afraid",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-afraid",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "m-ref-arthur-dismissive",
+			"fromNode": "guard-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-dismissive",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "m-style-arthur-dismissive",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-dismissive",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "m-ref-arthur-granted",
+			"fromNode": "guard-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-granted",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "m-style-arthur-granted",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-granted",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "m-ref-arthur-blink-half",
+			"fromNode": "guard-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-blink-half",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "m-style-arthur-blink-half",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-blink-half",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "m-ref-arthur-blink-closed",
+			"fromNode": "guard-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-blink-closed",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "m-style-arthur-blink-closed",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-blink-closed",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "m-room",
+			"fromNode": "guard-booth",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "room"
+		},
+		{
+			"id": "m-hero",
+			"fromNode": "guard-actor",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "m-act-arthur-friendly",
+			"fromNode": "arthur-friendly",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "m-act-arthur-irritated",
+			"fromNode": "arthur-irritated",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "m-act-arthur-hostile",
+			"fromNode": "arthur-hostile",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "m-act-arthur-suspicious",
+			"fromNode": "arthur-suspicious",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "m-act-arthur-afraid",
+			"fromNode": "arthur-afraid",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "m-act-arthur-dismissive",
+			"fromNode": "arthur-dismissive",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "m-act-arthur-granted",
+			"fromNode": "arthur-granted",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "m-act-arthur-blink-half",
+			"fromNode": "arthur-blink-half",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "m-act-arthur-blink-closed",
+			"fromNode": "arthur-blink-closed",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "made-arthur-friendly-1-edge",
+			"fromNode": "arthur-friendly",
+			"fromSide": "right",
+			"toNode": "made-arthur-friendly-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-irritated-1-edge",
+			"fromNode": "arthur-irritated",
+			"fromSide": "right",
+			"toNode": "made-arthur-irritated-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-hostile-1-edge",
+			"fromNode": "arthur-hostile",
+			"fromSide": "right",
+			"toNode": "made-arthur-hostile-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-suspicious-1-edge",
+			"fromNode": "arthur-suspicious",
+			"fromSide": "right",
+			"toNode": "made-arthur-suspicious-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-afraid-1-edge",
+			"fromNode": "arthur-afraid",
+			"fromSide": "right",
+			"toNode": "made-arthur-afraid-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-dismissive-1-edge",
+			"fromNode": "arthur-dismissive",
+			"fromSide": "right",
+			"toNode": "made-arthur-dismissive-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-granted-1-edge",
+			"fromNode": "arthur-granted",
+			"fromSide": "right",
+			"toNode": "made-arthur-granted-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-blink-half-1-edge",
+			"fromNode": "arthur-blink-half",
+			"fromSide": "right",
+			"toNode": "made-arthur-blink-half-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-blink-closed-1-edge",
+			"fromNode": "arthur-blink-closed",
+			"fromSide": "right",
+			"toNode": "made-arthur-blink-closed-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "t-first-friendly",
+			"fromNode": "arthur-friendly",
+			"fromSide": "bottom",
+			"toNode": "arthur-friendly-talk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "first frame"
+		},
+		{
+			"id": "t-style-friendly",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-friendly-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "t-booth-friendly",
+			"fromNode": "arthur-friendly-talk",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "bottom",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "t-first-irritated",
+			"fromNode": "arthur-irritated",
+			"fromSide": "bottom",
+			"toNode": "arthur-irritated-talk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "first frame"
+		},
+		{
+			"id": "t-style-irritated",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-irritated-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "t-booth-irritated",
+			"fromNode": "arthur-irritated-talk",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "bottom",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "t-first-hostile",
+			"fromNode": "arthur-hostile",
+			"fromSide": "bottom",
+			"toNode": "arthur-hostile-talk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "first frame"
+		},
+		{
+			"id": "t-style-hostile",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-hostile-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "t-booth-hostile",
+			"fromNode": "arthur-hostile-talk",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "bottom",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "t-first-suspicious",
+			"fromNode": "arthur-suspicious",
+			"fromSide": "bottom",
+			"toNode": "arthur-suspicious-talk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "first frame"
+		},
+		{
+			"id": "t-style-suspicious",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-suspicious-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "t-booth-suspicious",
+			"fromNode": "arthur-suspicious-talk",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "bottom",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "t-first-afraid",
+			"fromNode": "arthur-afraid",
+			"fromSide": "bottom",
+			"toNode": "arthur-afraid-talk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "first frame"
+		},
+		{
+			"id": "t-style-afraid",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-afraid-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "t-booth-afraid",
+			"fromNode": "arthur-afraid-talk",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "bottom",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "t-first-dismissive",
+			"fromNode": "arthur-dismissive",
+			"fromSide": "bottom",
+			"toNode": "arthur-dismissive-talk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "first frame"
+		},
+		{
+			"id": "t-style-dismissive",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-dismissive-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "t-booth-dismissive",
+			"fromNode": "arthur-dismissive-talk",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "bottom",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "t-first-granted",
+			"fromNode": "arthur-granted",
+			"fromSide": "bottom",
+			"toNode": "arthur-granted-talk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "first frame"
+		},
+		{
+			"id": "t-style-granted",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-granted-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "t-booth-granted",
+			"fromNode": "arthur-granted-talk",
+			"fromSide": "right",
+			"toNode": "booth",
+			"toSide": "bottom",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "t-booth-neutral",
+			"fromNode": "guard-talk",
+			"fromSide": "bottom",
+			"toNode": "booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "made-arthur-friendly-talk-1-edge",
+			"fromNode": "arthur-friendly-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-friendly-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-friendly-talk-2-edge",
+			"fromNode": "arthur-friendly-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-friendly-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-irritated-talk-1-edge",
+			"fromNode": "arthur-irritated-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-irritated-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-irritated-talk-2-edge",
+			"fromNode": "arthur-irritated-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-irritated-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-hostile-talk-1-edge",
+			"fromNode": "arthur-hostile-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-hostile-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-hostile-talk-2-edge",
+			"fromNode": "arthur-hostile-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-hostile-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-suspicious-talk-1-edge",
+			"fromNode": "arthur-suspicious-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-suspicious-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-suspicious-talk-2-edge",
+			"fromNode": "arthur-suspicious-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-suspicious-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-afraid-talk-1-edge",
+			"fromNode": "arthur-afraid-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-afraid-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-afraid-talk-2-edge",
+			"fromNode": "arthur-afraid-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-afraid-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-dismissive-talk-1-edge",
+			"fromNode": "arthur-dismissive-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-dismissive-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-dismissive-talk-2-edge",
+			"fromNode": "arthur-dismissive-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-dismissive-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-granted-talk-1-edge",
+			"fromNode": "arthur-granted-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-granted-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-granted-talk-2-edge",
+			"fromNode": "arthur-granted-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-granted-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-1-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-2-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-3-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-3",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-4-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-4",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-5-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-5",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-6-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-6",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-7-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-7",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-8-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-8",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-9-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-9",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-10-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-10",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-11-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-11",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-12-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-12",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-13-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-13",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-14-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-14",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-15-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-15",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-16-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-16",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-17-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-17",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-booth-18-edge",
+			"fromNode": "booth",
+			"fromSide": "right",
+			"toNode": "made-booth-18",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		}
+	]
+}
