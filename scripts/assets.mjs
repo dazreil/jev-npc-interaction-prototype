@@ -8,8 +8,10 @@
 //                                  redo only the finish (crunch, frames, colours)
 //                                  from the saved original; free, no AI call
 //
-// Needs FAL_KEY in .env. Results go to game/assets/generated/ and appear on
-// the canvas as cards next to their recipe.
+// Needs FAL_KEY in .env. Results appear on the canvas as cards next to their
+// recipe. They are saved beside the canvas: a character's, scene's, or item's
+// own canvas (characters/arthur/Arthur.canvas) saves into its art/ folder;
+// the shared Assets.canvas saves into assets/generated/.
 import { watch } from "node:fs";
 import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -20,16 +22,16 @@ import { readEnv } from "../lib/env.mjs";
 import { animationSettings, applyResult, buildRequest, compositeOverrides, crunchSettings, latestOutput, readRecipes } from "../lib/asset-canvas.mjs";
 import { chooseParameters, composite, key, keyFrames, seeded } from "../lib/composite.mjs";
 import { download, runFal } from "../lib/fal.mjs";
-import { crunch, ensureMinSize, extractFrames, finishFrames, makeLimitedAnimation, mediaSize, toJpeg, toPng, toWebp } from "../lib/limited-animation.mjs";
+import { crunch, crunchRgba, ensureMinSize, extractFrames, finishFrames, makeLimitedAnimation, mediaSize, mirrorImage, toJpeg, toPng, toWebp } from "../lib/limited-animation.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const VAULT = join(ROOT, "game");
 const CANVAS = join(VAULT, process.argv.find((arg) => arg.endsWith(".canvas")) ?? "Assets.canvas");
-// Every recipe gets its own folder: assets/generated/<name>/ holds the
-// finished files, and <name>/_source/ the clean originals (the leading
-// underscore keeps them out of the game build; the ".source" ending keeps
-// file names unique in the vault, as Obsidian links need).
-const GENERATED = join(VAULT, "assets", "generated");
+// Every recipe gets its own folder: <art>/<name>/ holds the finished files,
+// and <name>/_source/ the clean originals (the leading underscore keeps them
+// out of the game build; the ".source" ending keeps file names unique in the
+// vault, as Obsidian links need).
+const GENERATED = dirname(CANVAS) === VAULT ? join(VAULT, "assets", "generated") : join(dirname(CANVAS), "art");
 const outDir = (name) => join(GENERATED, name);
 const sourceDir = (name) => join(GENERATED, name, "_source");
 const sourcePath = (name, extension) => join(sourceDir(name), `${name}.source.${extension}`);
@@ -299,8 +301,78 @@ async function runComposite(recipe, canvas) {
   }
 }
 
+/**
+ * A cutout card: key the picture off its green or blue screen, trim it, and
+ * keep it transparent (crunched the same way as everything else), so it can
+ * be layered over a scene. `mirror: true` also writes <name>-mirrored.webp.
+ * Free.
+ */
+async function runCutout(recipe, canvas) {
+  if (recipe.references.length !== 1) throw new Error("draw one arrow from the picture to cut out into this card");
+  const animation = readRecipes(canvas).find((item) => item.name === recipe.references[0].recipe && item.kind === "animate");
+  if (animation) return runAnimatedCutout(recipe, animation);
+  const picture = cleanSource(canvas, recipe.references[0]);
+  const settings = crunchSettings(recipe);
+  if (DRY_RUN) {
+    console.log(`\n[${recipe.name}] would cut out ${relative(ROOT, picture)} (free)${recipe.fields.mirror ? ", plus a mirror image" : ""}; crunch:`, settings ?? "none");
+    return;
+  }
+  await update(recipe.nodeId, { status: "running" });
+  await mkdir(sourceDir(recipe.name), { recursive: true });
+  const source = sourcePath(recipe.name, "png");
+  const { screen, box } = await key(picture, source);
+  const work = await mkdtemp(join(tmpdir(), "cutout-"));
+  try {
+    const finished = settings ? await crunchRgba(source, join(work, "crunched.png"), settings) : source;
+    const out = join(outDir(recipe.name), `${recipe.name}.webp`);
+    await mkdir(outDir(recipe.name), { recursive: true });
+    await toWebp(finished, out);
+    const files = [vaultPath(out)];
+    if (recipe.fields.mirror === true) files.push(vaultPath(await mirrorImage(out, join(outDir(recipe.name), `${recipe.name}-mirrored.webp`))));
+    await update(recipe.nodeId, { status: "done", files });
+    console.log(`  keyed off ${screen.screen} ${screen.hex}; ${box.width}x${box.height}`);
+    console.log(`[${recipe.name}] cut out → ${files.join(", ")}`);
+  } finally {
+    await rm(work, { recursive: true, force: true });
+  }
+}
+
+/**
+ * A cutout card fed by an animate card: key every frame of the clean clip
+ * (one screen colour, one trim box, so the frames line up), crunch them, and
+ * finish them as a transparent limited animation. Frames, speed and time
+ * window come from the animate card. Use it for a sprite the engine moves,
+ * such as a walk cycle in place. Free.
+ */
+async function runAnimatedCutout(recipe, animation) {
+  const clip = await sourceClip(animation);
+  const { frames, fps, from, to, width, pingpong } = animationSettings(animation.fields);
+  const settings = crunchSettings(recipe);
+  if (DRY_RUN) {
+    console.log(`\n[${recipe.name}] would cut out ${frames} frames of ${relative(ROOT, clip)} (free); crunch:`, settings ?? "none");
+    return;
+  }
+  if (!existsSync(clip)) throw new Error(`"${animation.name}" has no clip yet; generate it first`);
+  await update(recipe.nodeId, { status: "running" });
+  const work = await mkdtemp(join(tmpdir(), "cutout-anim-"));
+  try {
+    const raw = await extractFrames(clip, join(work, "raw"), { frames, from, to, width });
+    const { keyed, screen, box } = await keyFrames(raw, join(work, "key"));
+    const finished = settings
+      ? await Promise.all(keyed.map((file, index) => crunchRgba(file, join(work, `crunch-${String(index + 1).padStart(2, "0")}.png`), settings)))
+      : keyed;
+    const result = await finishFrames(finished, outDir(recipe.name), recipe.name, { fps, pingpong });
+    await update(recipe.nodeId, { status: "done", files: [vaultPath(result.animation)] });
+    console.log(`  keyed off ${screen.screen} ${screen.hex}; ${box.width}x${box.height}`);
+    console.log(`[${recipe.name}] cut out → ${vaultPath(result.animation)} + ${result.frames.length} frames`);
+  } finally {
+    await rm(work, { recursive: true, force: true });
+  }
+}
+
 async function runRecipe(recipe, canvas) {
   if (recipe.kind === "composite") return runComposite(recipe, canvas);
+  if (recipe.kind === "cutout") return runCutout(recipe, canvas);
   if (REFINISH) {
     if (DRY_RUN) console.log(`[${recipe.name}] would refinish from the saved original (free)`, crunchSettings(recipe) ?? "(no crunch)");
     else await refinish(recipe);
@@ -356,7 +428,7 @@ async function runRecipe(recipe, canvas) {
 }
 
 // Composites of an animation run after it, so composites go last.
-const ORDER = { image: 0, edit: 1, animate: 2, composite: 3 };
+const ORDER = { image: 0, edit: 1, cutout: 2, animate: 3, composite: 4 };
 
 async function runPending() {
   const canvas = await readCanvas();

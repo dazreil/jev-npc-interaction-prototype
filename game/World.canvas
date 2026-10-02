@@ -20,39 +20,57 @@
 			"color": "6"
 		},
 		{
-			"id": "gate-open-layer",
-			"type": "text",
-			"x": 40,
-			"y": 60,
-			"width": 1280,
-			"height": 720,
-			"text": "if flag.gate-open\n![[gate-open.webp]]"
-		},
-		{
 			"id": "gate-picture",
 			"type": "file",
-			"file": "assets/scenes/gate-closed.webp",
+			"file": "screens/south-gate/art/car-park-yard/car-park-yard.webp",
 			"x": 40,
 			"y": 60,
 			"width": 1280,
 			"height": 720
 		},
 		{
+			"id": "gate-yard",
+			"type": "file",
+			"file": "screens/south-gate/ui/gate-yard.md",
+			"x": 40,
+			"y": 310,
+			"width": 1280,
+			"height": 470
+		},
+		{
+			"id": "gate-front",
+			"type": "file",
+			"file": "screens/south-gate/ui/gate-front.md",
+			"x": 40,
+			"y": 251,
+			"width": 1280,
+			"height": 529
+		},
+		{
+			"id": "gate-intercom",
+			"type": "file",
+			"file": "screens/south-gate/ui/gate-intercom.md",
+			"x": 1010,
+			"y": 430,
+			"width": 86,
+			"height": 138
+		},
+		{
 			"id": "intercom",
 			"type": "file",
-			"file": "objects/intercom.md",
-			"x": 1102,
-			"y": 334,
-			"width": 128,
-			"height": 144
+			"file": "screens/south-gate/intercom.md",
+			"x": 1010,
+			"y": 430,
+			"width": 86,
+			"height": 138
 		},
 		{
 			"id": "walk",
 			"type": "text",
-			"x": 578,
-			"y": 412,
-			"width": 230,
-			"height": 216,
+			"x": 560,
+			"y": 440,
+			"width": 240,
+			"height": 160,
 			"text": "MOVE TO TOWER 04 →"
 		},
 		{
@@ -96,7 +114,7 @@
 		{
 			"id": "intercom-face",
 			"type": "file",
-			"file": "ui/intercom-hud.md",
+			"file": "screens/south-gate/ui/intercom-hud.md",
 			"x": 1480,
 			"y": 0,
 			"width": 620,

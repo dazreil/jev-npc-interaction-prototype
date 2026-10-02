@@ -1,0 +1,653 @@
+{
+	"nodes": [
+		{
+			"id": "g-screen",
+			"type": "group",
+			"label": "The screen (its note, its layers, the intercom)",
+			"x": -40,
+			"y": -80,
+			"width": 2100,
+			"height": 760,
+			"color": "6"
+		},
+		{
+			"id": "g-art",
+			"type": "group",
+			"label": "Art: yard, wall, posts, gate leaves, intercom panel (left to right: make, edit, cut out)",
+			"x": -40,
+			"y": 920,
+			"width": 4440,
+			"height": 2360,
+			"color": "6"
+		},
+		{
+			"id": "g-dog",
+			"type": "group",
+			"label": "The guard dog (walks across the yard)",
+			"x": -40,
+			"y": 3460,
+			"width": 4440,
+			"height": 520,
+			"color": "6"
+		},
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 0,
+			"y": -300,
+			"width": 1600,
+			"height": 220,
+			"text": "# South gate\nThe first screen. Where things sit is on [[World.canvas]]; this canvas holds the screen's notes and the art for its parts. Recipes save into `screens/south-gate/art/`."
+		},
+		{
+			"id": "n-screen",
+			"type": "file",
+			"file": "screens/south-gate/south-gate.md",
+			"x": 0,
+			"y": 0,
+			"width": 560,
+			"height": 420
+		},
+		{
+			"id": "n-hud",
+			"type": "file",
+			"file": "screens/south-gate/ui/gate-hud.md",
+			"x": 640,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-front",
+			"type": "file",
+			"file": "screens/south-gate/ui/gate-front.md",
+			"x": 1100,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-yard",
+			"type": "file",
+			"file": "screens/south-gate/ui/gate-yard.md",
+			"x": 1560,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-gate-intercom",
+			"type": "file",
+			"file": "screens/south-gate/ui/gate-intercom.md",
+			"x": 640,
+			"y": 340,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-intercom",
+			"type": "file",
+			"file": "screens/south-gate/intercom.md",
+			"x": 1100,
+			"y": 340,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-intercom-hud",
+			"type": "file",
+			"file": "screens/south-gate/ui/intercom-hud.md",
+			"x": 1560,
+			"y": 340,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "style-room",
+			"type": "text",
+			"text": "## fmv-room\nstyle\n# Pre-rendered 1990s CG rooms. Use with model: z-image.\nprefix: A still frame from a 1995 CD-ROM computer game, a pre-rendered 3D CGI background, early 1990s 3D rendering with flat shading, low-polygon models and simple textures\nsuffix: no people, no text or lettering",
+			"x": 0,
+			"y": 1000,
+			"width": 520,
+			"height": 260,
+			"color": "5"
+		},
+		{
+			"id": "car-park-yard",
+			"type": "text",
+			"text": "## car-park-yard\nimage\nstatus: done\nmodel: z-image\nsize: 1280x720\nseed: 43\nprompt: \"a bleak industrial warehouse yard and staff car park late at night under a heavy overcast sky, seen straight on from the street, nothing in the foreground, the yard starts at the bottom of the frame: wet black asphalt with faded painted bays and puddles, a few parked 1990s cars, a large corrugated metal warehouse with one dim loading bay, a tall concrete guard tower with a single small lit window and a searchlight on the right, chain link fence in the far distance, sparse weak sodium lamps, thin mist, deep shadows, very dark and gloomy, low contrast, cold blue-grey tones\"\n",
+			"x": 700,
+			"y": 1000,
+			"width": 560,
+			"height": 300,
+			"color": "4"
+		},
+		{
+			"id": "made-car-park-yard-1",
+			"type": "file",
+			"file": "screens/south-gate/art/car-park-yard/car-park-yard.webp",
+			"x": 1340,
+			"y": 1000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "krea-prop-green",
+			"type": "text",
+			"text": "## krea-prop-green\nstyle\n# Krea 2 props to cut out: a filmed 1990s look, flat on, on pure green.\ntemplate: \"A prop for a 1995 CD-ROM full-motion-video game, photographed straight on in a flat front view for chroma-key compositing: {prompt}. Isolated on a solid flat pure green #00FF00 background, evenly lit, no shadow on the background, no ground, no people, no text\"\n",
+			"x": 0,
+			"y": 1460,
+			"width": 560,
+			"height": 360,
+			"color": "5"
+		},
+		{
+			"id": "prop-keep",
+			"type": "text",
+			"text": "## prop-keep\nstyle\n# Holds a prop steady in edits: only the named part changes.\ntemplate: \"Keep the exact same object, same shape, size, position, framing, materials, colours, lighting and camera quality, and the same solid flat green screen background. {prompt}\"\n",
+			"x": 0,
+			"y": 1920,
+			"width": 560,
+			"height": 300,
+			"color": "5"
+		},
+		{
+			"id": "wall-krea",
+			"type": "text",
+			"text": "## wall-krea\nimage\nstatus: done\nmodel: krea-2\nsize: 768x1024\nseed: 33\nprompt: \"a tall straight section of old grey industrial wall, seen straight on, the wall fills the whole width of the frame and the lower two thirds of its height, green above the wall\"\n",
+			"x": 700,
+			"y": 1460,
+			"width": 560,
+			"height": 300,
+			"color": "4"
+		},
+		{
+			"id": "made-wall-krea-1",
+			"type": "file",
+			"file": "screens/south-gate/art/wall-krea/wall-krea.webp",
+			"x": 1340,
+			"y": 1460,
+			"width": 101,
+			"height": 135
+		},
+		{
+			"id": "wall-wire",
+			"type": "text",
+			"text": "## wall-wire\nedit\nstatus: done\nmodel: qwen-edit\nsize: 768x1024\nseed: 42\nprompt: \"Add coils of rusty razor wire and barbed wire running along the whole top of the wall, on short angled steel brackets above the stone coping, the wire against the green background.\"\n",
+			"x": 1900,
+			"y": 1460,
+			"width": 560,
+			"height": 300,
+			"color": "4"
+		},
+		{
+			"id": "made-wall-wire-1",
+			"type": "file",
+			"file": "screens/south-gate/art/wall-wire/wall-wire.webp",
+			"x": 2540,
+			"y": 1460,
+			"width": 101,
+			"height": 135
+		},
+		{
+			"id": "wall-wire-cut",
+			"type": "text",
+			"text": "## wall-wire-cut\ncutout\nstatus: done\nmirror: true\ncrunch: 4\njpeg: 50",
+			"x": 3100,
+			"y": 1460,
+			"width": 520,
+			"height": 280,
+			"color": "4"
+		},
+		{
+			"id": "made-wall-wire-cut-1",
+			"type": "file",
+			"file": "screens/south-gate/art/wall-wire-cut/wall-wire-cut.webp",
+			"x": 3700,
+			"y": 1460,
+			"width": 133,
+			"height": 135
+		},
+		{
+			"id": "made-wall-wire-cut-2",
+			"type": "file",
+			"file": "screens/south-gate/art/wall-wire-cut/wall-wire-cut-mirrored.webp",
+			"x": 3853,
+			"y": 1460,
+			"width": 133,
+			"height": 135
+		},
+		{
+			"id": "gate-post-krea",
+			"type": "text",
+			"text": "## gate-post-krea\nimage\nstatus: done\nmodel: krea-2\nsize: 576x1024\nseed: 32\nprompt: \"a single tall square industrial grey gate pillar with a stone cap, standing alone, the pillar fills the frame from top to bottom\"\n",
+			"x": 700,
+			"y": 1920,
+			"width": 560,
+			"height": 300,
+			"color": "4"
+		},
+		{
+			"id": "made-gate-post-krea-1",
+			"type": "file",
+			"file": "screens/south-gate/art/gate-post-krea/gate-post-krea.webp",
+			"x": 1340,
+			"y": 1920,
+			"width": 76,
+			"height": 135
+		},
+		{
+			"id": "post-no-lamp-cut",
+			"type": "text",
+			"text": "## post-no-lamp-cut\ncutout\nstatus: done\nmirror: true\ncrunch: 4\njpeg: 50",
+			"x": 3100,
+			"y": 1920,
+			"width": 520,
+			"height": 280,
+			"color": "4"
+		},
+		{
+			"id": "made-post-no-lamp-cut-1",
+			"type": "file",
+			"file": "screens/south-gate/art/post-no-lamp-cut/post-no-lamp-cut.webp",
+			"x": 3700,
+			"y": 1920,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-post-no-lamp-cut-2",
+			"type": "file",
+			"file": "screens/south-gate/art/post-no-lamp-cut/post-no-lamp-cut-mirrored.webp",
+			"x": 3960,
+			"y": 1920,
+			"width": 32,
+			"height": 135
+		},
+		{
+			"id": "gate-leaf-krea",
+			"type": "text",
+			"text": "## gate-leaf-krea\nimage\nstatus: done\nmodel: krea-2\nsize: 768x1024\nseed: 31\nprompt: \"a single tall black wrought iron gate leaf, vertical bars with spear-tip finials, a decorative scroll band near the top, a solid bottom rail, heavy hinges along its left edge, the leaf fills the frame from top to bottom, the green background visible between the bars\"\n",
+			"x": 700,
+			"y": 2380,
+			"width": 560,
+			"height": 300,
+			"color": "4"
+		},
+		{
+			"id": "made-gate-leaf-krea-1",
+			"type": "file",
+			"file": "screens/south-gate/art/gate-leaf-krea/gate-leaf-krea.webp",
+			"x": 1340,
+			"y": 2380,
+			"width": 101,
+			"height": 135
+		},
+		{
+			"id": "gate-leaf-krea-cut",
+			"type": "text",
+			"text": "## gate-leaf-krea-cut\ncutout\nstatus: done\n# Free: keyed off the green screen, transparent, plus a mirror image.\nmirror: true\ncrunch: 4\njpeg: 50",
+			"x": 3100,
+			"y": 2380,
+			"width": 520,
+			"height": 280,
+			"color": "4"
+		},
+		{
+			"id": "made-gate-leaf-krea-cut-1",
+			"type": "file",
+			"file": "screens/south-gate/art/gate-leaf-krea-cut/gate-leaf-krea-cut.webp",
+			"x": 3700,
+			"y": 2380,
+			"width": 83,
+			"height": 135
+		},
+		{
+			"id": "made-gate-leaf-krea-cut-2",
+			"type": "file",
+			"file": "screens/south-gate/art/gate-leaf-krea-cut/gate-leaf-krea-cut-mirrored.webp",
+			"x": 3803,
+			"y": 2380,
+			"width": 83,
+			"height": 135
+		},
+		{
+			"id": "fmv-prop-green",
+			"type": "text",
+			"text": "## fmv-prop-green\nstyle\n# Props to cut out and layer over a scene: flat, front-on, on pure green.\ntemplate: \"A 1995 pre-rendered 3D CGI game asset, early 1990s 3D rendering with flat shading, low-polygon model and simple textures, seen straight on in a front orthographic view: {prompt}. Isolated on a solid flat pure green #00FF00 background, evenly lit, no shadow on the background, no ground, no text\"\n",
+			"x": 0,
+			"y": 2840,
+			"width": 560,
+			"height": 360,
+			"color": "5"
+		},
+		{
+			"id": "intercom-unit",
+			"type": "text",
+			"text": "## intercom-unit\nimage\nstatus: done\nmodel: z-image\nsize: 768x1024\nseed: 24\nprompt: \"a 1990s security video intercom call panel, a brushed steel box with rounded corners, a small square video screen near the top, a round speaker grille, one large call button and a rectangular label strip; the video screen and the label strip are solid flat pure green #00FF00\"\n",
+			"x": 700,
+			"y": 2840,
+			"width": 560,
+			"height": 380,
+			"color": "4"
+		},
+		{
+			"id": "made-intercom-unit-1",
+			"type": "file",
+			"file": "screens/south-gate/art/intercom-unit/intercom-unit.webp",
+			"x": 1340,
+			"y": 2840,
+			"width": 101,
+			"height": 135
+		},
+		{
+			"id": "intercom-unit-cut",
+			"type": "text",
+			"text": "## intercom-unit-cut\ncutout\nstatus: done\n# Free: keyed off the green screen, transparent, ready to layer.\ncrunch: 4\njpeg: 50",
+			"x": 3100,
+			"y": 2840,
+			"width": 520,
+			"height": 290,
+			"color": "4"
+		},
+		{
+			"id": "made-intercom-unit-cut-1",
+			"type": "file",
+			"file": "screens/south-gate/art/intercom-unit-cut/intercom-unit-cut.webp",
+			"x": 3700,
+			"y": 2840,
+			"width": 84,
+			"height": 135
+		},
+		{
+			"id": "dog-cross-start",
+			"type": "text",
+			"text": "## dog-cross-start\nimage\nstatus: done\nmodel: krea-2\nsize: 1232x928\nseed: 74\nprompt: \"A realistic photograph of a German Shepherd guard dog in a full side view facing right, small in the frame: the whole dog from nose to tail tip is visible, standing near the left side of the frame with a little green space behind its tail, the dog is about one fifth of the frame width, its paws near the bottom of the frame, the rest of the frame to the right is empty. Flat, evenly lit pure green screen background, no floor, no shadow.\"\n",
+			"x": 700,
+			"y": 3540,
+			"width": 560,
+			"height": 380,
+			"color": "4"
+		},
+		{
+			"id": "dog-cross",
+			"type": "text",
+			"text": "## dog-cross\nanimate\nstatus: done\n# The dog walks across the whole frame in the clip, so the engine does not move it.\nmodel: h3-max-turbo\nloop: false\nseconds: 5\nframes: 40\nfps: 8\nprompt: \"the German Shepherd walks at a relaxed natural pace from the left side of the frame all the way across to the right side, sniffing the ground now and then, a realistic dog walk, side view, locked-off static camera that does not move or follow it, the green screen background stays flat and unchanged\"\n",
+			"x": 1900,
+			"y": 3540,
+			"width": 560,
+			"height": 380,
+			"color": "4"
+		},
+		{
+			"id": "made-dog-cross-1",
+			"type": "file",
+			"file": "screens/south-gate/art/dog-cross/dog-cross.webp",
+			"x": 2540,
+			"y": 3540,
+			"width": 180,
+			"height": 135
+		},
+		{
+			"id": "made-dog-cross-2",
+			"type": "file",
+			"file": "screens/south-gate/art/dog-cross/dog-cross.mp4",
+			"x": 2740,
+			"y": 3540,
+			"width": 180,
+			"height": 135
+		},
+		{
+			"id": "dog-cross-cut",
+			"type": "text",
+			"text": "## dog-cross-cut\ncutout\nstatus: done\n# Free: every frame keyed off the green screen, one trim box, so the walk keeps its path.\ncrunch: 4\njpeg: 50",
+			"x": 3100,
+			"y": 3540,
+			"width": 520,
+			"height": 260,
+			"color": "4"
+		},
+		{
+			"id": "made-dog-cross-cut-1",
+			"type": "file",
+			"file": "screens/south-gate/art/dog-cross-cut/dog-cross-cut.webp",
+			"x": 3700,
+			"y": 3540,
+			"width": 240,
+			"height": 98
+		}
+	],
+	"edges": [
+		{
+			"id": "gs-style-intercom-unit",
+			"fromNode": "fmv-prop-green",
+			"fromSide": "right",
+			"toNode": "intercom-unit",
+			"toSide": "left",
+			"label": "style"
+		},
+		{
+			"id": "made-intercom-unit-1-edge",
+			"fromNode": "intercom-unit",
+			"fromSide": "right",
+			"toNode": "made-intercom-unit-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "gs-cut-intercom-unit-cut",
+			"fromNode": "intercom-unit",
+			"fromSide": "right",
+			"toNode": "intercom-unit-cut",
+			"toSide": "left",
+			"label": "cut out"
+		},
+		{
+			"id": "made-intercom-unit-cut-1-edge",
+			"fromNode": "intercom-unit-cut",
+			"fromSide": "right",
+			"toNode": "made-intercom-unit-cut-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "gk-cut-gate-leaf-krea-cut",
+			"fromNode": "gate-leaf-krea",
+			"fromSide": "right",
+			"toNode": "gate-leaf-krea-cut",
+			"toSide": "left",
+			"label": "cut out"
+		},
+		{
+			"id": "gk-style-gate-leaf-krea",
+			"fromNode": "krea-prop-green",
+			"fromSide": "right",
+			"toNode": "gate-leaf-krea",
+			"toSide": "left",
+			"label": "style"
+		},
+		{
+			"id": "gk-style-gate-post-krea",
+			"fromNode": "krea-prop-green",
+			"fromSide": "right",
+			"toNode": "gate-post-krea",
+			"toSide": "left",
+			"label": "style"
+		},
+		{
+			"id": "gk-style-wall-krea",
+			"fromNode": "krea-prop-green",
+			"fromSide": "right",
+			"toNode": "wall-krea",
+			"toSide": "left",
+			"label": "style"
+		},
+		{
+			"id": "made-gate-leaf-krea-1-edge",
+			"fromNode": "gate-leaf-krea",
+			"fromSide": "right",
+			"toNode": "made-gate-leaf-krea-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-gate-leaf-krea-cut-1-edge",
+			"fromNode": "gate-leaf-krea-cut",
+			"fromSide": "right",
+			"toNode": "made-gate-leaf-krea-cut-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-gate-leaf-krea-cut-2-edge",
+			"fromNode": "gate-leaf-krea-cut",
+			"fromSide": "right",
+			"toNode": "made-gate-leaf-krea-cut-2",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "gf-cut-wall-wire-cut",
+			"fromNode": "wall-wire",
+			"fromSide": "right",
+			"toNode": "wall-wire-cut",
+			"toSide": "left",
+			"label": "cut out"
+		},
+		{
+			"id": "gf-style-wall-wire",
+			"fromNode": "prop-keep",
+			"fromSide": "right",
+			"toNode": "wall-wire",
+			"toSide": "left",
+			"label": "style"
+		},
+		{
+			"id": "gf-edit-wall",
+			"fromNode": "wall-krea",
+			"fromSide": "bottom",
+			"toNode": "wall-wire",
+			"toSide": "top",
+			"label": "edit"
+		},
+		{
+			"id": "gf-style-yard",
+			"fromNode": "style-room",
+			"fromSide": "right",
+			"toNode": "car-park-yard",
+			"toSide": "left",
+			"label": "style"
+		},
+		{
+			"id": "made-car-park-yard-1-edge",
+			"fromNode": "car-park-yard",
+			"fromSide": "right",
+			"toNode": "made-car-park-yard-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "pc-anim-dog",
+			"fromNode": "dog-cross-start",
+			"fromSide": "right",
+			"toNode": "dog-cross",
+			"toSide": "left",
+			"label": "start"
+		},
+		{
+			"id": "made-dog-cross-1-edge",
+			"fromNode": "dog-cross",
+			"fromSide": "right",
+			"toNode": "made-dog-cross-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-dog-cross-2-edge",
+			"fromNode": "dog-cross",
+			"fromSide": "right",
+			"toNode": "made-dog-cross-2",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "pc-cut-dog-cross",
+			"fromNode": "dog-cross",
+			"fromSide": "right",
+			"toNode": "dog-cross-cut",
+			"toSide": "left",
+			"label": "cut out"
+		},
+		{
+			"id": "made-dog-cross-cut-1-edge",
+			"fromNode": "dog-cross-cut",
+			"fromSide": "right",
+			"toNode": "made-dog-cross-cut-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-wall-krea-1-edge",
+			"fromNode": "wall-krea",
+			"fromSide": "right",
+			"toNode": "made-wall-krea-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-gate-post-krea-1-edge",
+			"fromNode": "gate-post-krea",
+			"fromSide": "right",
+			"toNode": "made-gate-post-krea-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "4339ab72199ce1a9",
+			"fromNode": "gate-post-krea",
+			"fromSide": "right",
+			"toNode": "post-no-lamp-cut",
+			"toSide": "left"
+		},
+		{
+			"id": "made-wall-wire-1-edge",
+			"fromNode": "wall-wire",
+			"fromSide": "right",
+			"toNode": "made-wall-wire-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-wall-wire-cut-1-edge",
+			"fromNode": "wall-wire-cut",
+			"fromSide": "right",
+			"toNode": "made-wall-wire-cut-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-wall-wire-cut-2-edge",
+			"fromNode": "wall-wire-cut",
+			"fromSide": "right",
+			"toNode": "made-wall-wire-cut-2",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-post-no-lamp-cut-1-edge",
+			"fromNode": "post-no-lamp-cut",
+			"fromSide": "right",
+			"toNode": "made-post-no-lamp-cut-1",
+			"toSide": "left",
+			"label": "made"
+		},
+		{
+			"id": "made-post-no-lamp-cut-2-edge",
+			"fromNode": "post-no-lamp-cut",
+			"fromSide": "right",
+			"toNode": "made-post-no-lamp-cut-2",
+			"toSide": "left",
+			"label": "made"
+		}
+	]
+}

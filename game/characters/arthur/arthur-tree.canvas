@@ -7,7 +7,7 @@
 			"y": -40,
 			"width": 420,
 			"height": 440,
-			"text": "### How to read this\n\n**Green card** = `open` node. The player types freely. The model picks an action.\n\n**Blue card** = `script` node. Fixed lines. No model call.\n\n`> text` = Arthur says it.\nOther plain lines = effects.\n\n**Arrow labels**\n- `\"text\"` = a button\n- `~ name` = free text matched by a [[detectors|detector]]\n- `if ...` = taken when true\n- `else` = taken when nothing else fits"
+			"text": "### How to read this\n\n**Green card** = `open` node. The player types freely. The model picks an action.\n\n**Blue card** = `script` node. Fixed lines. No model call.\n\n`> text` or `say <line>` = Arthur says it (a line from [[arthur-lines]]).\n`action X` = the line counts as action X in the talk history.\n`tone` / `cue` = how he says it.\nOther plain lines and a `do:` block = effects.\n\n**Arrow labels**\n- `\"text\"` = a button\n- `~ name` = free text matched by a [[detectors|detector]]\n- `if ...` = taken when true\n- `else` = taken when nothing else fits"
 		},
 		{
 			"id": "gate-talk",
@@ -27,7 +27,7 @@
 			"y": -20,
 			"width": 440,
 			"height": 340,
-			"text": "## id-shown\nscript\n> I can see the card. That tells me a name, not why you're here. I could ring your company to check the callout.\n\n```yaml\ndo:\n  - memory: { fact: \"Player showed a contractor ID\", tags: [identity, claim], importance: 76 }\n  - flag company-call-pending\n```"
+			"text": "## id-shown\nscript\naction [[ASK_FOR_PROOF]]\nsay id-shown\n\n```yaml\ndo:\n  - memory: { fact: \"Player showed a contractor ID card; assignment remains unverified\", importance: 76, tags: [identity, claim], topic: id, value: presented }\n  - flag company-call-pending\n  - counter company-call-turns = 0\n```"
 		},
 		{
 			"id": "id-talk",
@@ -47,7 +47,7 @@
 			"y": 200,
 			"width": 420,
 			"height": 220,
-			"text": "## company-call\nscript\nsay company-call-result\nend [[exposed]]"
+			"text": "## company-call\nscript\naction [[END_CONVERSATION]]\ntone hostile\ncue suspicious\nsay company-call-result\nflag company-call-pending off\nend [[exposed]]"
 		},
 		{
 			"id": "exposed-card",
@@ -113,6 +113,33 @@
 			"toSide": "left",
 			"toEnd": "arrow",
 			"color": "1"
+		},
+		{
+			"id": "t-consent-early",
+			"fromNode": "gate-talk",
+			"fromSide": "bottom",
+			"toNode": "company-call",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "~ company-call-consent"
+		},
+		{
+			"id": "t-go-ahead-1",
+			"fromNode": "id-shown",
+			"fromSide": "bottom",
+			"toNode": "company-call",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "~ company-call-go-ahead"
+		},
+		{
+			"id": "t-go-ahead-2",
+			"fromNode": "id-talk",
+			"fromSide": "right",
+			"toNode": "company-call",
+			"toSide": "bottom",
+			"toEnd": "arrow",
+			"label": "~ company-call-go-ahead"
 		}
 	]
 }

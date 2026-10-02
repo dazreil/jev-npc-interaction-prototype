@@ -7,7 +7,7 @@ character: "[[Arthur]]"
 
 The intercom shows Arthur from the `portrait` slot. He speaks in the mood of each line (its talking loop, longer for longer lines), then settles back to his neutral idle frame and blinks now and then.
 
-The frames come from the `night-guard-talk` composite on [[Assets.canvas]]: Arthur animated on a green screen, then pasted into his guard booth. Remake them there, and the game uses the new ones.
+The frames come from the `booth` composite on [[Assets.canvas]]: Arthur's stills and talking loops on a green screen, keyed together and pasted into his guard booth. Remake them there, and the game uses the new ones.
 
 ## Idle
 ```yaml

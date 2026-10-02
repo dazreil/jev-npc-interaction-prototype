@@ -10,6 +10,7 @@ effects:
   - flag reason-asked
 opensRequest: purpose
 portraitCue: listening
+acknowledgesName: true
 dialogue: "[[ask-for-reason]]"
 ---
 

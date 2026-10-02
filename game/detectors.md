@@ -166,10 +166,24 @@ The player agrees that Arthur can call the company.
 
 ```yaml
 pattern: "\\b(?:go ahead(?: and)? (?:call|phone|ring)|feel free to (?:call|phone|ring)|(?:call|phone|ring) (?:the |my )?(?:company|office|dispatch|manager))\\b"
+unless: company-call-refusal
 match:
   - Go ahead and call the company
 miss:
   - Please don't call anyone
+```
+
+## company-call-go-ahead
+Shorter ways to say yes, once Arthur has offered to call. `unless` means it does not count when that detector also matches.
+
+```yaml
+pattern: \b(?:go ahead|feel free|check it|verify it)\b
+unless: company-call-refusal
+match:
+  - Go ahead
+  - Feel free, check it
+miss:
+  - Don't go ahead and call them
 ```
 
 ## company-call-refusal

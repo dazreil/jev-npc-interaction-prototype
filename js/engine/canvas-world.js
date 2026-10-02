@@ -74,9 +74,19 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
       Math.round(node.width * scale),
       Math.round(node.height * scale)
     ];
-    const screen = { id, width, height: Math.round(frame.height * scale), elements: [], objects: [], exits: [], place };
+    // `frame` lets the editor turn screen pixels back into canvas positions.
+    const screen = {
+      id,
+      width,
+      height: Math.round(frame.height * scale),
+      frame: { x: frame.x, y: frame.y, unit: frame.width / width, picture: picture?.id ?? null },
+      elements: [],
+      objects: [],
+      exits: [],
+      place
+    };
     screens[id] = screen;
-    if (picture) screen.elements.push({ type: "image", id: `${id}-picture`, at: place(picture), src: asset(baseName(picture.file)), fit: "cover" });
+    if (picture) screen.elements.push({ type: "image", id: `${id}-picture`, node: picture.id, at: place(picture), src: asset(baseName(picture.file)), fit: "cover" });
 
     for (const node of inside) {
       if (node === picture || !contains(frame, node)) continue;
@@ -85,23 +95,23 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
       if (node.type === "file") {
         const name = baseName(node.file);
         if (IMAGE_PATTERN.test(name)) {
-          screen.elements.push({ type: "image", id: node.id, at, src: asset(name), fit: "cover" });
+          screen.elements.push({ type: "image", id: node.id, node: node.id, at, src: asset(name), fit: "cover" });
           continue;
         }
         const note = notes[noteId(name)];
         if (note?.type === "object") screen.objects.push({ id: noteId(name), rect: at, node: node.id });
-        else if (note?.type === "ui") screen.elements.push({ type: "ui", id: noteId(name), ui: noteId(name), at });
+        else if (note?.type === "ui") screen.elements.push({ type: "ui", id: noteId(name), node: node.id, ui: noteId(name), at });
         else errors.push(`World canvas: card "${name}" on screen "${id}" is not an image, object, or ui note`);
       } else if (node.type === "text") {
         const { condition, body } = readText(node.text);
         const embed = body.match(EMBED_PATTERN);
         const visible = condition ? [condition] : undefined;
         if (embed && asset(embed[1].trim())) {
-          screen.elements.push({ type: "image", id: node.id, at, src: asset(embed[1].trim()), fit: "cover", visible });
+          screen.elements.push({ type: "image", id: node.id, node: node.id, at, src: asset(embed[1].trim()), fit: "cover", visible });
         } else if (embed && notes[embed[1].trim()]?.type === "ui") {
-          screen.elements.push({ type: "ui", id: node.id, ui: embed[1].trim(), at, visible });
+          screen.elements.push({ type: "ui", id: node.id, node: node.id, ui: embed[1].trim(), at, visible });
         } else {
-          screen.elements.push({ type: "text", id: node.id, at, style: "label", text: plain(body), visible, card: node.id });
+          screen.elements.push({ type: "text", id: node.id, node: node.id, at, style: "label", text: plain(body), visible, card: node.id });
         }
       }
     }
@@ -137,6 +147,7 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
     screen.exits.push({
       type: "button",
       id: edge.fromNode,
+      node: edge.fromNode,
       at: text.at,
       style: "hotspot",
       label: text.text,

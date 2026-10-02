@@ -1,5 +1,6 @@
 ---
 type: outcome
+sound: denied
 result: failure
 title: Access refused
 code: Visitor departed

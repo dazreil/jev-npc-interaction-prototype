@@ -10,7 +10,7 @@
 
 import { evaluate, interpolate, readPath } from "./conditions.js";
 
-const COMMON = ["type", "id", "at", "style", "visible", "opacity", "rotate", "children", "note", "layer"];
+const COMMON = ["type", "id", "at", "style", "visible", "opacity", "rotate", "children", "note", "layer", "mirror", "swing", "shade", "walk", "clip", "node"];
 const PAINT = ["fill", "stroke", "strokeWidth", "radius", "glow", "pattern", "blur"];
 const TEXT = ["text", "size", "color", "font", "align", "valign", "bold", "letterSpacing", "uppercase", "padding"];
 export const ELEMENT_PROPS = Object.freeze({
@@ -22,7 +22,7 @@ export const ELEMENT_PROPS = Object.freeze({
   image: ["src", "fit", "pixelated"],
   "nine-slice": ["src", "slice", "border", "pixelated"],
   bar: ["value", "max", "fill", "back", "stroke", "strokeWidth", "radius", "vertical"],
-  button: [...PAINT, ...TEXT, "label", "do", "key", "image", "hoverImage", "pressedImage", "hoverFill", "disabled"],
+  button: [...PAINT, ...TEXT, "label", "do", "key", "image", "hoverImage", "pressedImage", "hoverFill", "disabled", "hoverLabel"],
   group: [...PAINT, "clip"],
   ui: ["ui"],
   slot: ["name", ...PAINT]
@@ -104,12 +104,73 @@ function resolveElement(raw, context, parentBox, path) {
     .filter(Boolean);
   if (element.type === "ui") context.depth -= 1;
 
+  // `swing` turns an element toward a hinge edge while its condition holds:
+  // a gate leaf opening, done as a 2D squash in a few held steps.
+  let swing = null;
+  if (element.swing) {
+    const settings = element.swing;
+    swing = {
+      open: evaluate(settings.when ?? false, world),
+      hinge: settings.hinge === "right" ? "right" : "left",
+      to: Number(settings.to ?? 0.15),
+      seconds: Number(settings.seconds ?? 1.5),
+      steps: Number(settings.steps ?? 6)
+    };
+    if (!element.id) warnings.push(`${label}: a swing needs an id, so it can keep playing across redraws`);
+  }
+  // `walk` moves an element in a straight line to `to` (and back), in held
+  // steps, while its condition holds: a walk-cycle sprite crossing a scene.
+  // The picture faces right; it turns to face the way it goes.
+  let walk = null;
+  if (element.walk) {
+    const settings = element.walk;
+    const to = list(settings.to).map(Number);
+    if (to.length !== 2) warnings.push(`${label}: walk needs to: [x, y]`);
+    walk = {
+      on: settings.when === undefined ? true : evaluate(settings.when, world),
+      dx: (to[0] ?? nodeBox.x) - nodeBox.x,
+      dy: (to[1] ?? nodeBox.y) - nodeBox.y,
+      seconds: Number(settings.seconds ?? 10),
+      back: settings.back !== false,
+      loop: settings.loop === true,
+      fps: Number(settings.fps ?? 8)
+    };
+    if (!element.id) warnings.push(`${label}: a walk needs an id, so it can keep going across redraws`);
+    if (element.swing || element.mirror) warnings.push(`${label}: walk does not mix with swing or mirror`);
+  }
+  // `clip` plays a numbered frame sequence (src is frame -01) on a clock
+  // while its condition holds: once across, then, with `back`, mirrored
+  // back again after `gap` seconds. Hidden between legs. For a walk filmed
+  // across the whole frame, so the engine does not move it.
+  let clip = null;
+  if (element.clip) {
+    const settings = element.clip;
+    clip = {
+      on: settings.when === undefined ? true : evaluate(settings.when, world),
+      frames: Number(settings.frames ?? 1),
+      fps: Number(settings.fps ?? 8),
+      back: settings.back !== false,
+      gap: Number(settings.gap ?? 0),
+      wait: Number(settings.wait ?? 0),
+      loop: settings.loop === true
+    };
+    if (element.type !== "image") warnings.push(`${label}: clip only works on an image`);
+    if (!element.id) warnings.push(`${label}: a clip needs an id, so it can keep playing across redraws`);
+    if (!/-0*1\.\w+$/.test(String(element.src ?? "").replace(/\]\]$/, ""))) warnings.push(`${label}: a clip's src must be its first frame (name-01.webp)`);
+  }
+  if (element.mirror && element.swing) warnings.push(`${label}: mirror and swing do not mix; use a mirrored picture for a swinging leaf`);
+
   return {
     id: element.id ?? null,
     type: element.type,
     box: nodeBox,
     opacity: element.opacity,
     rotate: element.rotate,
+    mirror: element.mirror === true,
+    shade: element.shade === undefined ? undefined : Math.min(1, Math.max(0, Number(element.shade))),
+    swing,
+    walk,
+    clip,
     props,
     children
   };
@@ -191,6 +252,138 @@ function vector(node, parentBox) {
   return svg;
 }
 
+// When each swing started opening, by element id. The screen is rebuilt on
+// every change, so a swing resumes from the right point instead of
+// restarting: its CSS animation starts with a negative delay.
+const swingStarts = new Map();
+
+function applySwing(element, node) {
+  const { open, hinge, to, seconds, steps } = node.swing;
+  const style = element.style;
+  style.transformOrigin = `${hinge} center`;
+  if (!open) {
+    swingStarts.delete(node.id);
+    return;
+  }
+  if (!swingStarts.has(node.id)) swingStarts.set(node.id, performance.now());
+  const elapsed = (performance.now() - swingStarts.get(node.id)) / 1000;
+  const name = `ui-swing-${String(to).replace(/\W/g, "_")}`;
+  let sheet = document.getElementById("ui-swing-css");
+  if (!sheet) {
+    sheet = document.createElement("style");
+    sheet.id = "ui-swing-css";
+    document.head.append(sheet);
+  }
+  if (!sheet.textContent.includes(`@keyframes ${name} `)) {
+    sheet.textContent += `@keyframes ${name} { from { transform: scaleX(1); } to { transform: scaleX(${to}); } }\n`;
+  }
+  style.transform = `scaleX(${to})`;
+  style.animation = `${name} ${seconds}s steps(${steps}, end) ${-elapsed}s 1 both`;
+}
+
+// The screen editor holds animations still: a clip shows its first frame and
+// a walker stands at its start, so you can see and grab them. One that is
+// switched off right now shows see-through.
+let editorPreview = false;
+export function setEditorPreview(value) {
+  editorPreview = Boolean(value);
+}
+
+const clipStarts = new Map();
+const clipElements = new Map();
+let clipTicker = null;
+
+/** Which frame shows at `now`, and facing which way; null when hidden. */
+export function clipFrame(clip, seconds) {
+  const { frames, fps, back, gap, wait, loop } = clip;
+  const leg = frames / fps;
+  const cycle = wait + (back ? 2 * leg + gap : leg) + (loop ? gap : 0);
+  let t = seconds;
+  if (loop) t %= cycle;
+  t -= wait;
+  if (t >= 0 && t < leg) return { frame: Math.floor(t * fps), flip: false };
+  t -= leg + gap;
+  if (back && t >= 0 && t < leg) return { frame: Math.floor(t * fps), flip: true };
+  return null;
+}
+
+function frameSrc(src, index) {
+  return src.replace(/-0*1(\.\w+)((?:[?#].*)?)$/, (_, ext, rest) => `-${String(index + 1).padStart(2, "0")}${ext}${rest}`);
+}
+
+function showClip(element, node, now) {
+  const shown = clipFrame(node.clip, (now - clipStarts.get(node.id)) / 1000);
+  element.style.visibility = shown ? "visible" : "hidden";
+  if (!shown) return;
+  element.style.transform = shown.flip ? "scaleX(-1)" : "";
+  const src = frameSrc(node.props.src, shown.frame);
+  if (element.getAttribute("src") !== src) element.src = src;
+}
+
+function applyClip(element, node) {
+  if (editorPreview) {
+    Object.assign(element.style, { visibility: "visible", transform: "", opacity: node.clip.on ? "" : "0.45" });
+    element.src = frameSrc(node.props.src, 0);
+    return;
+  }
+  if (!node.clip.on) {
+    clipStarts.delete(node.id);
+    element.style.display = "none";
+    return;
+  }
+  if (!clipStarts.has(node.id)) {
+    clipStarts.set(node.id, performance.now());
+    // Load every frame now, so the first pass does not stutter.
+    for (let index = 0; index < node.clip.frames; index += 1) new Image().src = frameSrc(node.props.src, index);
+  }
+  clipElements.set(node.id, { element, node });
+  showClip(element, node, performance.now());
+  clipTicker ??= setInterval(() => {
+    const now = performance.now();
+    for (const [id, entry] of clipElements) {
+      if (entry.element.isConnected) showClip(entry.element, entry.node, now);
+      else if (clipElements.get(id) === entry) clipElements.delete(id);
+    }
+    if (!clipElements.size) {
+      clearInterval(clipTicker);
+      clipTicker = null;
+    }
+  }, 1000 / 24);
+}
+
+const walkStarts = new Map();
+function applyWalk(element, node) {
+  const { on, dx, dy, seconds, back, loop, fps } = node.walk;
+  const style = element.style;
+  if (editorPreview) {
+    Object.assign(style, { animation: "none", transform: "", opacity: on ? "" : "0.45" });
+    return;
+  }
+  if (!on) {
+    walkStarts.delete(node.id);
+    style.display = "none";
+    return;
+  }
+  if (!walkStarts.has(node.id)) walkStarts.set(node.id, performance.now());
+  const elapsed = (performance.now() - walkStarts.get(node.id)) / 1000;
+  const face = dx >= 0 ? 1 : -1;
+  const at = (x, y, facing) => `transform: translate(${x}px, ${y}px) scaleX(${facing});`;
+  const frames = back
+    ? `0% { ${at(0, 0, face)} } 49.99% { ${at(dx, dy, face)} } 50% { ${at(dx, dy, -face)} } 100% { ${at(0, 0, -face)} }`
+    : `0% { ${at(0, 0, face)} } 100% { ${at(dx, dy, face)} }`;
+  const name = `ui-walk-${String(node.id).replace(/\W/g, "_")}-${Math.round(dx)}-${Math.round(dy)}-${back ? "b" : "o"}`;
+  let sheet = document.getElementById("ui-swing-css");
+  if (!sheet) {
+    sheet = document.createElement("style");
+    sheet.id = "ui-swing-css";
+    document.head.append(sheet);
+  }
+  if (!sheet.textContent.includes(`@keyframes ${name} `)) sheet.textContent += `@keyframes ${name} { ${frames} }\n`;
+  // Steps apply per leg, so the sprite moves in held steps like its frames.
+  const steps = Math.max(1, Math.round((back ? seconds / 2 : seconds) * fps));
+  style.animation = `${name} ${seconds}s steps(${steps}, end) ${-elapsed}s ${loop ? "infinite" : 1} both`;
+}
+
 function mountNode(node, parentBox, options) {
   if (node.type === "line" || node.type === "polygon") return vector(node, parentBox);
 
@@ -209,7 +402,15 @@ function mountNode(node, parentBox, options) {
     margin: "0"
   });
   if (node.opacity !== undefined) style.opacity = String(node.opacity);
-  if (node.rotate) style.transform = `rotate(${node.rotate}deg)`;
+  // shade: 0 = black, 1 = as drawn. Darkens a bright prop to sit in a dark scene.
+  if (node.shade !== undefined) style.filter = `brightness(${node.shade})`;
+  const transforms = [];
+  if (node.rotate) transforms.push(`rotate(${node.rotate}deg)`);
+  if (node.mirror && !node.swing) transforms.push("scaleX(-1)");
+  if (transforms.length) style.transform = transforms.join(" ");
+  if (node.swing) applySwing(element, node);
+  if (node.walk) applyWalk(element, node);
+  if (node.clip) applyClip(element, node);
 
   switch (node.type) {
     case "rect":
@@ -299,6 +500,9 @@ function mountNode(node, parentBox, options) {
       if (props.key) element.dataset.key = props.key;
       const label = document.createElement("span");
       label.textContent = props.label ?? "";
+      // hoverLabel: the label shows only on hover or keyboard focus, so a
+      // hotspot does not cover the art it sits on.
+      if (props.hoverLabel) label.className = "ui-hover-label";
       element.append(label);
       if (props.label) element.setAttribute("aria-label", props.label);
       element.addEventListener("click", () => options.onAction?.(props.do ?? [], node));
@@ -338,6 +542,8 @@ const BASE_CSS = `
 .ui-root .ui-button-image:not(:disabled):hover { background-image: var(--ui-hover-image); }
 .ui-root .ui-button-image:not(:disabled):active { background-image: var(--ui-pressed-image); }
 .ui-root .ui-button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.ui-root .ui-button .ui-hover-label { opacity: 0; transition: opacity .12s; }
+.ui-root .ui-button:hover .ui-hover-label, .ui-root .ui-button:focus-visible .ui-hover-label { opacity: 1; }
 .ui-root .ui-button:disabled { opacity: 0.45; }
 .ui-root .ui-slot-preview { outline: 1px dashed rgba(255,255,255,.45); color: rgba(255,255,255,.6); font: 12px monospace; display: flex; align-items: center; justify-content: center; }
 `;

@@ -1,8 +1,8 @@
 # Scene Engine Spec
 
-Status: draft, 29 September 2026. Revision 2: the game is written in an Obsidian vault.
+Status: draft, 1 October 2026. Revision 3: the game is written in an Obsidian vault and runs in the desktop app. The old browser game (`index.html`, `js/app.js`) is frozen; new work goes into the desktop app only.
 
-A working sample of this format is in `game/`. Build it again from the live game with `npm run vault:export`.
+The game is in `game/`. It is the source: the desktop app runs Arthur entirely from its notes (section 13). `npm run vault:check` checks it.
 
 ## 1. Why
 
@@ -25,7 +25,7 @@ But most of the game lives in code, not in data:
 | Fake ID and company phone call | hand-written methods in `js/game.js` |
 | Gate screen, hotspots, tower screen | `index.html` + `js/app.js` |
 
-So a second NPC or a second place needs new JavaScript. This spec changes that.
+So a second NPC or a second place needed new JavaScript. This spec changes that. **Now (1 October 2026):** every row above is a note in the vault, and the desktop app runs from the notes. Only the Mock provider is still code (section 14, question 2).
 
 **Goal:** a small engine that runs scenes from an Obsidian vault. Obsidian is the editor. A new NPC, a new screen, or a new event needs notes only. No new code.
 
@@ -34,7 +34,7 @@ So a second NPC or a second place needs new JavaScript. This spec changes that.
 - No big general engine (no physics, no inventory grid).
 - No model-written dialogue. This rule does not change.
 - No custom text editor. Obsidian does that job.
-- No Obsidian plugin in version 1. It can come later (section 14).
+- No big Obsidian plugin. A small one (Game Tools) runs asset cards and opens the game from inside Obsidian; the game itself never needs it.
 - No browser for players. The game ships as a standalone desktop app (section 10.4).
 
 ## 2. Rules the engine keeps
@@ -46,17 +46,17 @@ These come from `ROADMAP.md` and stay true:
 3. The engine checks every model answer. A bad answer becomes a safe fallback action.
 4. State changes, memories, and endings are done by engine rules, not by the model.
 5. Runs are repeatable. Same seed plus same input gives the same result.
-6. The vault is the source of truth. Tools only read it, except the hotspot tool, which writes one block (section 12.3).
+6. The vault is the source of truth. Tools only read it, except the screen editor (section 12.7) and the templates (section 7.4), which write only what you asked them to.
 
 ## 3. Big picture
 
 ```text
- Obsidian vault  game/                    workbench page (/workbench)
+ Obsidian vault  game/                    workbench page (localhost:5174)
    notes (.md)  canvas (.canvas)            hotspots · play · replay
           │   ▲                                   │
           │   └──── writes hotspot blocks only ───┘
           ▼
-   compiler + checker ──► dist/game.bundle.json
+   compiler + checker ──► vault bundle (in memory)
           │
           └──► _reports/*.md  (errors and stats, readable in Obsidian)
                                    │
@@ -70,8 +70,8 @@ These come from `ROADMAP.md` and stay true:
 - **Vault:** the `game/` folder in this repo. You open it in Obsidian as a vault. Git tracks it like any other folder.
 - **Compiler + checker:** reads notes and canvas files, checks them, and writes one JSON bundle. It also writes report notes back into the vault, so you see errors in Obsidian.
 - **Workbench:** a small local web page for the three jobs Obsidian cannot do: draw hotspots, play, and replay logs.
-- **Engine core:** pure JavaScript. No DOM. Runs in Node for tests and in the browser for play.
-- **Renderer:** today's `js/app.js`, `js/portrait.js`, `js/speech.js`, `js/audio.js`.
+- **Engine core:** pure JavaScript. No DOM. Runs in Node for tests and in the desktop app for play.
+- **Renderer:** `js/engine/ui.js` (UI notes), `js/engine/session.js` (a play session), and `js/engine/sound.js` (voice and effects), inside the desktop app (section 10.4).
 - **Provider:** same as today. It gets a context and a list of actions. It gives back one action.
 
 ## 4. How the vault is written
@@ -94,7 +94,7 @@ Everything else in a note is ignored by the compiler. So normal text is a free c
 
 The compiler reads the `type` property to know what the note is. A note with no `type` is ignored. That means you can keep any other notes in the vault.
 
-Types: `game`, `character`, `profile`, `action`, `dialogue`, `lines`, `portraits`, `detectors`, `screen`, `ui`, `theme`, `item`, `event`, `outcome`, `token`.
+Types: `game`, `character`, `profile`, `action`, `dialogue`, `lines`, `portraits`, `detectors`, `screen`, `ui`, `theme`, `object`, `timer`, `item`, `event`, `outcome`, `token`.
 
 A `token` note documents a placeholder such as `[[address]]`. It also stops Obsidian showing the placeholder as a broken link.
 
@@ -106,7 +106,7 @@ A dialogue tree is a `.canvas` file, not a note (section 5.5).
 - **File names must be unique in the whole vault.** The checker enforces this, because Obsidian links find notes by name.
 - **Links are references.** `[[south-gate]]` in a property or rule block means "the thing with id `south-gate`". The compiler turns links into ids.
 - **Renaming is safe.** With "Automatically update internal links" turned on, Obsidian fixes every link when you rename a note.
-- **Assets are links too.** `[[gate-closed.webp]]` points to an image in `assets/`. Obsidian shows it in the note.
+- **Assets are links too.** `[[car-park-yard.webp]]` points to an image in `assets/`. Obsidian shows it in the note.
 
 ### 4.4 Folder layout
 
@@ -121,12 +121,21 @@ game/                          ← open this folder as a vault
       actions/   ALLOW_ENTRY.md  REFUSE_ENTRY.md  ...
       dialogue/  refuse-entry.md  ...   arthur-lines.md
       arthur-tree.canvas       ← dialogue tree
+  World.canvas                 ← the screens, laid out (section 7.3)
+  Assets.canvas                ← the art guide, model list, and style library (section 7.4)
   detectors.md
-  screens/   south-gate.md  guard-tower-04.md
-  items/     contractor-id.md
+  characters/arthur/           ← one folder per character
+    Arthur.md  Arthur.canvas  arthur-tree.canvas  arthur-portraits.md  arthur-patrol.md
+    profiles/  actions/  dialogue/  art/
+  screens/south-gate/          ← one folder per screen
+    south-gate.md  south-gate.canvas  intercom.md  ui/  art/
+  screens/guard-tower-04/
+  items/contractor-id/         ← one folder per item
+    contractor-id.md  contractor-id.canvas  art/
+  ui/        neon-theme.md                ← shared UI
   events/    gate-opens.md  locked-out.md  expelled.md  ...
   outcomes/  entry-granted.md  refused.md  ...
-  assets/    images, animations, sounds
+  assets/    generated/  references/  ui/  ← shared art
   _templates/                  ← starter notes for each type
   _reports/                    ← written by the checker; do not edit
 ```
@@ -141,7 +150,7 @@ Turn on these settings. The repo commits them in `game/.obsidian/app.json`, so t
 - Core plugin **Templates**: on, folder `_templates`.
 - Core plugin **Canvas**: on.
 
-No community plugins are needed. Git ignores `game/.obsidian/workspace*.json` and other per-person files.
+No community plugins are needed. The repo's own **Game Tools** plugin (`game/.obsidian/plugins/game-tools/`) adds the asset-card menu and the play and workbench commands. Git ignores `game/.obsidian/workspace*.json` and other per-person files.
 
 ### 4.6 Conditions
 
@@ -241,43 +250,57 @@ name: Arthur
 role: South-gate night security guard
 iq: 95
 patience: 35
-greed: 25
-courage: 70
-sympathy: 55
-ruleFollowing: 80
-trust: 20
-suspicion: 40
-irritation: 10
-fear: 5
+# ... greed, courage, sympathy, ruleFollowing, trust, suspicion, irritation, fear
 memoryMax: 8
 historyMax: 12
 fallbackAction: "[[REFUSE_ENTRY]]"
-profilePick: random
 tree: "[[arthur-tree.canvas]]"
+lines: "[[arthur-lines]]"
 portraits: "[[arthur-portraits]]"
 ---
 
-# Arthur
-
-![[arthur-portrait.jpg|160]]
-
 ## Style
-Practical and ordinary. Uses simple reasoning and everyday language, and
-assumes late-night visitors already understand the basic gate procedure.
+Practical and ordinary. Uses simple reasoning and everyday language, ...
 
 ## Goals
 ```yaml
-- { id: protect-warehouse, label: Protect warehouse grounds, priority: 100 }
-- { id: keep-job, label: Keep his job, priority: 90 }
-- { id: avoid-trouble, label: Avoid trouble, priority: 60 }
+- { id: protect_warehouse, label: Protect warehouse grounds, priority: 100 }
 ```
 
-Design note: Arthur should feel tired, not stupid.
+## Tones
+```yaml
+- { tone: hostile, when: state.irritation > 70 }
+- { tone: neutral }
+```
+
+## Scene
+```yaml
+location: warehouse car-park south-gate intercom
+idCardPresented: { when: item.contractor-id = shown }
+identityVerification: { when: item.contractor-id = shown, then: "Arthur has seen a contractor ID card ...", else: "Arthur has not seen an ID card" }
+```
+
+## Prompt
+```yaml
+role: South-gate night guard in Guard Tower 04, ...
+instructions: Which single action should Arthur take ...
+pendingGuidance: conversationSignals.pendingRequest, when present, ...
+```
+
+## Profiles
+- [[pal]]
+
+## Actions
+- [[ANSWER_QUESTION]]
 ````
 
 - Personality and state are flat Properties, so you edit them in the Obsidian form.
-- The `## Style` section is plain text. The compiler sends it to the model as the cognition note.
-- The last line is a free comment. The compiler ignores it.
+- `## Style` is plain text. It goes to the model as the cognition note.
+- `## Tones`: the first row that is true sets his tone, and the tone picks the line set.
+- `## Scene`: what he knows about where he is, sent to the model each turn. A value with `when` is worked out from the game (`then` / `else`, or true / false).
+- `## Prompt`: how the model is asked to choose. Each action's `## Criteria` is added. `pendingGuidance` goes first on turns where the player still owes him an answer.
+- `## Profiles` and `## Actions` list his profiles and actions, in order. The first random number picks the profile.
+- Other text is a free comment.
 
 ### 5.2 Profile notes
 
@@ -307,7 +330,7 @@ around. He speaks fast and holds a firm boundary.
 
 ### 5.3 Action notes
 
-One note per action. This joins four things that are now in three code files: the action list, the gate rules, the text for the model, and the state change.
+One note per action. It joins what used to be in three code files: the action list, the gate rules, the text for the model, and the state change.
 
 ````markdown
 ---
@@ -315,43 +338,55 @@ type: action
 character: "[[Arthur]]"
 label: Open the car-park gate
 available:
-  - flag.entry-basis
-  - no memory.tag in [threat, weapon, trespass] since repair
+  - no memory.tag in [threat, weapon, bribe, contradiction, dishonesty, lie, suspicion] since repair
   - state.suspicion < 78
   - state.irritation < 71
-minConfidence: 0.25
-judgment: entry-case-credible
-judgmentMin: 0.45
 effects:
   - state trust +20
   - state suspicion -20
   - state irritation -5
+minConfidence: 0.25
+judgment: entry_case_credible
+judgmentMin: 0.45
+gateFallback: ["[[ASK_FOR_PROOF]]", "[[REFUSE_ENTRY]]"]
 ends: "[[entry-granted]]"
+portraitCue: entry-granted
+acknowledgesName: true
 dialogue: "[[allow-entry]]"
 ---
 
 ## Criteria
-Open only the warehouse car-park gate when the player's conversation has
-become coherent, persuasive, and consistent enough for a cautious exception.
-A contractor ID card or a vague claim such as "I have them" is not enough.
-Tell the visitor to report directly to Guard Tower 04.
+Open only the warehouse car-park gate when ...
 
 ## Judgment
-Is the player's spoken case for entry credible?
-
-## Mock
 ```yaml
-when: [detector = work-detail, state.trust >= 30]
-priority: 40
+id: entry_case_credible
+instructions: Based on the complete conversation ...
+"true": The player's spoken case is persuasive enough ...
+"false": The player's spoken case is still too vague ...
+```
+
+## Also needs
+```yaml
+any:
+  - state.trust >= profile.trustThreshold
+  - some memory.tag in [authority, emergency, delivery, proof]
+```
+
+## Memory
+```yaml
+- fact: Arthur was persuaded to open the car-park gate ...
+  importance: 90
+  tags: [persuasion, cooperation]
 ```
 ````
 
-- `## Criteria` is sent to the model. It replaces `ACTION_CRITERIA`.
-- `## Judgment` is the question for a second model call, like today's credibility check.
-- `## Mock` tells the offline mock provider when to pick this action.
-- `available` and `effects` are short form, so they are editable in the Properties form.
-
-Other actions look the same. For example, `ASK_FOR_REASON.md` has `available: [not flag.reason-asked]` and `effects: [flag reason-asked, state trust +2]`, plus `opensRequest: purpose`.
+- `available` (Properties) and `## Also needs` must both be true for the action to be offered.
+- `effects` run when he takes it: state changes, counters (`counter refusals +1`), flags. A provider that brings its own state changes (the Mock) replaces the `state` ones.
+- `## Criteria` is sent to the model. `## Judgment` is a second question in the same call. Below `judgmentMin`, or below `minConfidence` for the choice, he takes the first available `gateFallback` action instead.
+- `## Memory`: what he remembers afterwards. The first entry whose `when` holds is kept. `when` can test `detector.<name>` and `signal.purpose` for this turn.
+- `ends` sets the outcome. `portraitCue` is his face (left out: the face for his tone). `acknowledgesName: true` adds the name acknowledgement when the player gives a name.
+- The Mock provider is still code (section 14, question 2).
 
 ### 5.4 Dialogue notes
 
@@ -433,25 +468,31 @@ open
 ````markdown
 ## id-shown
 script
-> I can see the card. That tells me a name, not why you're here.
-> I could ring your company to check the callout.
+action [[ASK_FOR_PROOF]]
+say id-shown
 
 ```yaml
 do:
-  - memory: { fact: "Player showed a contractor ID", tags: [identity, claim], importance: 76 }
+  - memory: { fact: "Player showed a contractor ID card; assignment remains unverified", importance: 76, tags: [identity, claim], topic: id, value: presented }
   - flag company-call-pending
+  - counter company-call-turns = 0
 ```
 ````
 
 ````markdown
 ## company-call
 script
+action [[END_CONVERSATION]]
+tone hostile
+cue suspicious
 say company-call-result
-end exposed
+flag company-call-pending off
+end [[exposed]]
 ````
 
 - **`open` node:** the player types freely, and the model picks an action. This is today's Arthur. An optional `actions:` line limits the list.
-- **`script` node:** fixed lines and fixed choices. No model call. Lines starting with `>` are said by the character. Other plain lines are short-form effects.
+- **`script` node:** fixed lines and fixed choices. No model call. `say <line>` (from the lines note) or `> text` is what the character says. `action X` makes the line count as action X in the talk history. `tone` and `cue` set how he says it. `end` sets the outcome. Other short-form lines and a `do:` block are effects. Any other text is a note for people.
+- **The start node** is the first node no arrow points to. The engine moves along an `if` arrow as soon as it is true (showing the ID moves to `id-shown`). With player text, a `~ detector` arrow can fire, and an `else` arrow moves on from a script node.
 - A card can also be a **file card** that points to a note. Use this for big nodes. The note uses the same layout.
 
 **Arrows.** Each arrow is a way out of a node. The arrow's label says when it is taken:
@@ -459,8 +500,8 @@ end exposed
 | Arrow label | Meaning |
 | --- | --- |
 | `"Go ahead, call them."` (in quotes) | A player choice. It shows as a button. |
-| `"Go ahead, call them." ~ accepts-company-call` | A choice that free text can also pick, through a detector. |
-| `~ accepts-company-call` | An exit taken when free text matches a detector. No button. |
+| `"Go ahead, call them." ~ company-call-consent` | A choice that free text can also pick, through a detector. (The button is not drawn yet.) |
+| `~ company-call-consent` | An exit taken when free text matches a detector. No button. |
 | `if item.contractor-id = shown` | An exit taken when the condition is true. |
 | `else` | Taken when nothing else matches. |
 | (no label) | Same as `else`. |
@@ -476,7 +517,7 @@ The Arthur fake ID flow as a canvas:
 
 **Groups and colours.** Canvas groups and colours are for you. The compiler ignores them. Use them to mark scenes or unfinished parts.
 
-The checker rejects a card with no name, two cards with the same name, a script node with no way out, and a node nothing can reach.
+Not checked yet: a card with no name, two cards with the same name, a script node with no way out, and a node nothing can reach.
 
 ## 6. Detectors
 
@@ -510,6 +551,8 @@ miss: ["I service the fire alarm panel"]
 
 A screen is one place the player can look at. Today there are two: the south gate and Guard Tower 04.
 
+A screen note holds the screen's settings and its overlay UI. Its pictures, objects, and exits are cards on [[World.canvas]] (section 7.3).
+
 ````markdown
 ---
 type: screen
@@ -517,23 +560,11 @@ title: Car park / South gate
 width: 640
 height: 360
 camera: CAM 04-B / EXTERIOR
-conversation: "[[Arthur]]"
-conversationStyle: video-intercom
+objective: Find a way past Arthur
+ui: "[[gate-hud]]"
 ---
 
-![[gate-closed.webp]]
-
-## Layers
-```yaml
-- id: gate
-  states:
-    closed: "[[gate-closed.webp]]"
-    opening: { animation: "[[gate-opening.webp]]", reducedMotion: open }
-    open: "[[gate-open.webp]]"
-  start: closed
-- id: scan
-  effect: scanlines
-```
+![[car-park-yard.webp|320]]
 
 ## Status
 ```yaml
@@ -543,21 +574,17 @@ conversationStyle: video-intercom
 ## Hotspots
 ```yaml
 # written by the workbench hotspot tool; you can also edit it by hand
-- id: intercom
-  label: VIDEO INTERCOM
-  rect: [412, 150, 90, 110]
-  do: [start-dialogue [[Arthur]]]
 - id: gate
   label: GATE
-  rect: [120, 120, 260, 180]
-  do: [say gate-locked]
-- id: walk
-  label: MOVE TO TOWER 04 →
-  rect: [240, 200, 160, 80]
-  visible: [flag.gate-open]
-  do: [screen [[guard-tower-04]]]
+  rect: [170, 106, 300, 244]
+  visible: [not flag.gate-open]
+  verbs:
+    Inspect: [narrate "Heavy locked leaves. Arthur controls the release from Tower 04."]
+    Try gate: [narrate "Locked. You need Arthur to release it.", sound denied]
 ```
 ````
+
+The south gate is built in layers on the canvas: the yard picture, life in the yard ([[gate-yard]]: Arthur's patrol and the dog), the gate front ([[gate-front]]: wall, swinging leaves, posts), and the call panel with the [[intercom]] object.
 
 - The embedded image lets you see the screen in Obsidian.
 - `rect` is `[x, y, width, height]` in screen pixels.
@@ -576,9 +603,9 @@ A UI note has `width`, `height`, `theme`, and optional `background` in Propertie
 ```yaml
 - type: image
   at: [0, 0, 640, 360]          # x, y, width, height
-  src: "[[gate-closed.webp]]"
+  src: "[[car-park-yard.webp]]"
   fit: cover
-  visible: [not flag.gate-open]
+  visible: [not flag.power-cut]
 - type: text
   at: [22, 16, 260, 22]
   style: label                   # from the theme
@@ -614,6 +641,10 @@ Rules:
 - **`fill` can be a list** of colours. That makes a gradient.
 - **`$name`** is a theme colour or font. **`style: name`** copies a theme style. The element's own values win.
 - **`visible`** and a button's **`disabled`** take a condition. **`{...}`** in text shows a value, or picks text: `{flag.gate-open ? Open : Secured}`.
+- **`mirror: true`** flips an element. **`swing: { when, hinge, to, seconds, steps }`** turns it toward its hinge edge while `when` holds: a 2D squash in a few held steps, like a pre-rendered 90s animation (the gate leaves). A swing needs an `id`; it is driven by a clock, so redraws continue it instead of restarting it. Use a mirrored picture rather than `mirror` on a swinging element.
+- **`shade: 0..1`** darkens an element (1 is as drawn, 0 is black), so a bright prop sits in a dark scene. **`walk: { when, to: [x, y], seconds, back, loop, fps }`** moves an element in a straight line to `to` and (by default) back, in held steps, turning to face the way it goes (the picture faces right). Without `when` it always walks; `loop: true` repeats. Like `swing`, it needs an `id` and is driven by a clock.
+- **`clip: { when, frames, fps, wait, gap, back, loop }`** plays a numbered frame sequence on an image (its `src` is frame `-01`): after `wait` seconds, once across, then `gap` seconds hidden, then mirrored back. `loop: true` repeats. Use it for a walk filmed across the whole frame: the box is the path, so the engine does not move the sprite and the walk looks natural. Arthur's patrol and the guard dog work this way ([[gate-yard]]). Like `swing`, it needs an `id` and runs on a clock.
+- **`hoverLabel: true`** on a button shows its label only on hover or keyboard focus, so a hotspot does not cover the art it sits on.
 - **Buttons are real `<button>` elements**, with focus and a label for screen readers. `key` is a keyboard shortcut. Bars have the `meter` role.
 - **Typos are caught:** an unknown element type is an error, and a property that does nothing (for example `colour`) is a warning.
 
@@ -632,9 +663,12 @@ name: Video intercom
 screen: "[[south-gate]]"     # the scene it stands in
 label: VIDEO INTERCOM
 key: C                        # keyboard shortcut
-rect: [531, 137, 64, 72]      # where it is in the scene picture
+rect: [485, 185, 43, 69]      # where it is (the World.canvas card sets this)
 ui: "[[intercom-hud]]"        # its face, a normal ui note
-panel: [262, 10, 370, 300]    # where that face opens on the screen
+panel: [160, 4, 424, 300]     # where that face opens on the screen
+conversation: "[[Arthur]]"    # calling it starts the talk
+noAnswer: [flag.arthur-out]   # nobody picks up while this holds
+ringSeconds: 6
 ```
 
 - The engine adds a hotspot at `rect`. Using it runs `open intercom`, unless the note sets its own `use` effects.
@@ -655,7 +689,7 @@ The game's screens are built on one Obsidian Canvas, named in `Game.md` as `worl
 | An **image card** on the picture | An image layer. |
 | An **object note** card on the picture | That object, clickable where the card sits. |
 | A **ui note** card on the picture | That UI, drawn in the card's box. |
-| A **text card** | Text on the screen. If it embeds a picture (`![[gate-open.webp]]`), it is an image layer. |
+| A **text card** | Text on the screen. If it embeds a picture (`![[some-picture.webp]]`), it is an image layer. |
 | A first line `if <condition>` in a text card | The card shows only when the condition is true. |
 | An **arrow** from a text card to another screen group | That card becomes a button that goes there. An arrow label `if <condition>` also gates it. |
 | An **arrow** from an object card to a ui note card inside the frame | Where that object's UI opens. If the ui card is outside the frame, the object's `panel` property is used. |
@@ -664,23 +698,26 @@ The game's screens are built on one Obsidian Canvas, named in `Game.md` as `worl
 Rules:
 
 - **Order is layering.** Cards later in the canvas draw on top. The screen's `ui` note (for example the camera overlay) draws above the canvas cards. Objects and buttons draw above that.
-- **A variant picture** (such as the open gate) is a text card with `if flag.gate-open` and the picture. Put it *before* the main picture in the canvas order, so Obsidian shows the normal picture on top while you edit. The game draws it above when its condition holds.
+- **A variant picture** (for example the yard with the power cut) is a text card with `if flag.gate-open` and the picture. Put it *before* the main picture in the canvas order, so Obsidian shows the normal picture on top while you edit. The game draws it above when its condition holds.
 - **A screen with no picture** uses the group box as its frame and the theme's `screen` colour.
 - **The checker** reports a card that points to a missing file, and a card on a screen that is not an image, object, or ui note.
 - **Screen notes still hold settings,** such as `title`, `objective`, and the overlay `ui`. A screen that is not on the world canvas falls back to its `ui` note and object `rect` values.
 
 ### 7.4 Make assets with AI on a canvas (working now)
 
-**Asset folders.** `game/assets/` has four parts:
+**Where art lives.** Every character, screen, and item has its own folder with its own canvas (such as `characters/arthur/Arthur.canvas`). A recipe saves beside the canvas it is on, in that folder's `art/<recipe>/`: the finished files, and the clean originals in `_source/`. The runner owns these folders. Shared art goes in `game/assets/`:
 
 | Folder | Holds |
 | --- | --- |
-| `scenes/` | Hand-placed game art for places, such as the gate pictures and the gate-opening animation. |
 | `ui/` | Frame and button art for UI notes. |
-| `characters/<name>/legacy/` | Older character art, kept for reference. |
-| `generated/<recipe>/` | Everything one recipe card made: the finished files, and its clean originals in `_source/`. The runner owns this folder. |
+| `references/` | Shared pictures you give to recipe cards. |
+| `generated/<recipe>/` | What recipes on `Assets.canvas` make. |
 
-File names stay unique across the whole vault, so links such as `[[night-guard-talk-01.webp]]` work wherever a file lives.
+`Assets.canvas` keeps the guide, the model list, and the **style library**. A canvas uses a style by holding its own copy of the card (copy it from the library) with an arrow to the recipe.
+
+**Templates.** `npm run new -- character "Mira" "a tired night nurse in her 50s, short grey hair, blue scrubs"` (or Game Tools → *New character…* in Obsidian) makes a character's folder: the character note, one profile, four starter actions with lines and `## Mock` rules (ask what they want, answer a question, say no, end the talk), a lines note, a dialogue tree, an outcome, a portraits note to fill in, and its canvas with every art recipe ready (room, actor, moods and blinks, talking loops, the booth composite), all `status: idea`. It can be talked to at once, offline, through the vault Mock. `scene` and `item` work the same: a screen note, its art canvas (background, a prop and its cut-out) and a group on `World.canvas`; or an item note and its art canvas. Nothing is generated or spent until you run a card.
+
+File names stay unique across the whole vault, so links such as `[[booth-guard-talk-01.webp]]` work wherever a file lives.
 
 `game/Assets.canvas` is a workbench for game art. Each **recipe card** makes one asset through fal.ai. Results come back as cards on the same canvas and as files in `game/assets/generated/`.
 
@@ -698,6 +735,7 @@ prompt: warehouse car-park gate at dawn …
 | `style` | Holds `lora:` (`<url> @0.9`, one or a list), `prefix:`, `suffix:`, and `template:` (wraps the recipe prompt where it says `{prompt}`, for LoRAs trained on a fixed caption). An arrow from it adds these to a recipe. It is never run by itself. |
 | `image` | Text to image. `model:` `z-image` (Z-Image Turbo, about $0.004 a picture, best for empty pre-rendered rooms), `krea-2` (Krea 2 Turbo, about $0.006, best for 1990s-looking actors on a chroma-key screen), `flux-lora` (FLUX.1 [dev], takes FLUX.1 LoRAs, about $0.035) or `flux-2-lora` (FLUX.2 [dev], FLUX.2 LoRAs only). Also `size`, `seed`, `steps`, `guidance`, `width` (output scale). |
 | `edit` | Changes the pictures that point to it (the references), as its prompt says: the same person with a new mood, pose or angle. `model:` `qwen-edit` (Qwen Image Edit 2511, about $0.024, the default: kept Arthur's face best) or `flux2-edit` (FLUX.2 [dev] edit, about $0.021). A style card's `template` is a good place for "keep the same man, framing and green screen; only change {prompt}". Blinks are edits too: eyes half closed, eyes closed. |
+| `cutout` | No AI call, free. Keys the picture that points to it off its green or blue screen, trims it, and keeps it transparent (crunched with transparency kept), so a prop can be layered over a scene. `mirror: true` also writes `<name>-mirrored.webp`. The gate leaf, posts and call panel are cut-outs. Fed by an `animate` card instead, it keys every frame of the clip (one screen colour, one trim box) into a transparent limited animation: a walk cycle in place that the engine moves with `walk`, or a walk across the whole frame that `clip` plays (`arthur-cross-cut`, `dog-cross-cut`). |
 | `composite` | No AI call, free. With several `actor` arrows it makes one picture per actor, `<card>-<actor>.webp`, all with the same placement; `align: true` keys them together (one screen colour, one trim box) so moods and blinks line up exactly. An arrow labelled `room` (a picture of an empty room) and one labelled `actor` (an actor on a green or blue screen) come in. The runner keys the actor off the screen with a colour-difference key, trims them, and pastes them over the room with slightly wrong lighting and hard edges, like a 1990s FMV game. `shot` (`full` or `waist-up`), `height` and `x` (shares of the frame), and `seed` place the actor; `brightness`, `contrast`, `temperature`, `feather` and `shadow` override the seeded look. Crunch applies as for images. | If the `actor` arrow comes from an `animate` card, every frame of that card's clean clip is keyed (one screen colour read from the first frame, one trim box for all frames, so nothing flickers or jumps) and pasted over the still room; the result is a limited animation (`name.webp`, frames, `name.mp4`) with the animate card's frame count and speed and the composite card's crunch and colours. Animate the actor on the green screen, not the finished composite: the room then stays perfectly still, as in the original games.
 | `animate` | Image to video with `model: h3-max-turbo` (about $0.13 for 5 s at 480p) or `minimax-h3` (about $0.25), then **limited animation**. An arrow from an image (a file card or an image recipe) is the first frame. An arrow labelled `end` is the last frame. With no `end`, the clip ends on its first frame, so it loops. |
 
@@ -790,6 +828,8 @@ Locked out beats expelled, so this has the higher priority.
 
 - `if` (Properties) and `## Also needs` (rule block) must both be true.
 - Higher `priority` runs first. The first `end` wins.
+- An event can have a `## Memory` block, like an action ([[remember-purpose]]).
+- **Working now:** `action`, `action <ID>`, `turn`, and `reply`. The others are planned.
 
 ````markdown
 ---
@@ -800,13 +840,10 @@ effects:
   - sound unlock
 ---
 
-## Effects
-```yaml
-- animate: { layer: gate, play: opening, then: open }
-```
+`flag gate-open` swings the gate leaves open ([[gate-front]]).
 ````
 
-When a note has both `effects` in Properties and an `## Effects` block, the Properties list runs first.
+A note can also put longer effects in an `## Effects` rule block. When a note has both, the Properties list runs first.
 
 Triggers (`on`):
 
@@ -817,6 +854,7 @@ Triggers (`on`):
 | `input` | the player sends text, before the model call |
 | `action` / `action <ID>` | an NPC action is applied |
 | `turn` | every turn ends |
+| `reply` | his line is picked, before the turn's effects. `append <line>` adds a line from the lines note (the company-call warnings). |
 | `flag <name>` / `var <name>` | a value changes |
 | `item <id>` | an item is used |
 | `timer <seconds>` | seconds pass on a screen |
@@ -841,18 +879,18 @@ The note body is the ending card text. `result` keeps the old `success` / `failu
 
 | Module | Job |
 | --- | --- |
-| `engine/load.js` | Read `game.bundle.json`. Build lookup tables. |
-| `engine/world.js` | The one state object: screen, flags, vars, counters, items, NPC states, memories, history, seed. |
+| `scripts/compile-vault.mjs` | Read every note, canvas and tree. Notes keep their Properties, rule blocks, and every section's text. |
+| `scripts/check-vault.mjs` | Check the vault and write `_reports/check.md`. |
+| `engine/character-data.js` | Build a character from its notes: template, profiles, actions, lines (in the old data shapes). |
+| `engine/encounter.js` | One encounter: available actions, the provider call, the judgment bar, effects, memory, events, the dialogue tree. |
 | `engine/conditions.js` | Parse short form. `evaluate(condition, world)`. |
-| `engine/effects.js` | Parse short form. `run(effects, world) → events[]`. |
-| `engine/events.js` | Find and run events for a trigger, in priority order. |
-| `engine/dialogue-tree.js` | Walk `open` and `script` nodes. |
-| `engine/decide.js` | Build the context, call the provider, check the answer, pick the fallback. Moved from `game.js` and `jev.js`. |
-| `engine/lines.js` | Pick an authored line (today's `dialogue.js`). |
-| `engine/detectors.js` | Run detectors and built-in signals. |
-| `engine/save.js` | Save and load the world as JSON. |
+| `engine/effects.js` | Parse short form. `applyEffects(effects, world) → events[]`. |
+| `engine/session.js` | A play session: screens, objects, UI, timers, sound, and the encounter. |
+| `engine/ui.js`, `engine/canvas-world.js`, `engine/sound.js` | Drawing, the world canvas, and sound. |
+| `dialogue.js`, `performance.js`, `conversation-signals.js`, `npc.js` | Line picking, the performance, built-in signals, state helpers. Shared with the frozen browser game. |
+| `providers/jev-vault.js`, `providers/mock.js` | The decision providers. |
 
-The core has no DOM, no `fetch`, no timers. The renderer gives it input and plays what it returns.
+The core has no DOM. The session gives it input and plays what it returns.
 
 ### 10.2 One turn
 
@@ -869,11 +907,13 @@ The core has no DOM, no `fetch`, no timers. The renderer gives it input and play
 11. Follow any tree arrow whose condition is now true.
 12. Return a **turn result**: line, performance cues, screen changes, outcome, and the full debug record.
 
-If the provider fails, nothing changes and the player's text stays. This is today's rule.
+If the provider fails, nothing changes and the player's text stays.
+
+**Working now** in `js/engine/encounter.js`. Before step 4, the tree may take the input instead (a `~ detector` or `if` arrow to a script node). After step 9, `on: reply` events run (they can `append` a line). Steps 10 and 11 are `on: action` and `on: turn` events.
 
 ### 10.3 Play session
 
-`js/engine/session.js` runs a play session: the world, the current screen, open objects, and the Arthur encounter (`js/game.js`) feeding the `conversation-log` and `text-input` slots. The desktop app and the workbench both use it, so what you test is what ships.
+`js/engine/session.js` runs a play session: the world, the current screen, open objects, and the encounter (`js/engine/encounter.js`, run from the vault) feeding the `conversation-log` and `text-input` slots. The desktop app and the workbench both use it, so what you test is what ships.
 
 ### 10.4 Desktop app (working now)
 
@@ -890,21 +930,23 @@ npm run app
 - Menu: **Game → Restart** (`Cmd+R`), full screen, and **Develop → Toggle DevTools**.
 - **Sound (working now):** `js/engine/sound.js` gives the session Arthur's voice and the sound effects, reusing the browser game's parts: the Piper neural voice through the intercom filter (eSpeak and browser speech as fallbacks), the intercom key-up click, the gate ambience, button clicks, and the cue for each line (relay, warning, unlock, denied, lockdown). Each line is spoken in its profile's voice settings, and his talking frames run exactly while the audio plays. The greeting waits until the player calls him. `M` mutes in the app; the workbench has a Sound checkbox and logs which voice spoke.
 - **Connecting.** Calling someone on an in-world object with a `conversation` (the intercom) first shows CONNECTING on its screen: "Ringing Tower 04…", or "Tuning voice N%" while the voice model (about 60 MB) downloads on the first launch. The line goes live once the neural voice is ready and a short ring has passed (1.8 s on the first call, 1 s after). Only then does the greeting appear and play, so Arthur's first line is always spoken in his real voice. The text box waits too. UI notes read `call.connecting` and `call.status`. The model is cached after the first launch.
+- **No answer.** An object's `noAnswer` condition (the intercom: `[flag.arthur-out]`) makes a call ring for `ringSeconds` and then show NO ANSWER (`call.unanswered`). It does not count as the first call, so the greeting waits for a real one.
+- **Timers.** A `type: timer` note switches a flag on a clock: each cycle of `every` seconds, `flag` is true for the last `for` seconds, and the clock stops while `pause` holds. [[arthur-patrol]] sends Arthur out for 26 s of every 70 s, never during a call.
 - **Not yet:** a packaged `.app` / `.exe` file for other people (electron-builder), and shipping the voice model inside the app so the first launch needs no download.
 
 ### 10.5 Provider contract
 
-The provider interface stays. The engine builds the action criteria from the `## Criteria` sections, so the Jev server gets the same request shape as now.
-
 ```js
-provider(context) → { action, confidence, reason, judgments?: { [id]: number } }
+provider(context, availableActions) → { action, confidence, reason, judgments?: { [id]: number }, stateChanges?, memory? }
 ```
 
-The mock provider picks the highest-priority action whose `## Mock` condition is true.
+- `context.prompt` carries the character's role, instructions, the `## Criteria` of each available action, and each `## Judgment`. `providers/jev-vault.js` turns it into the Jev request, so the Jev provider has no character in it. The request body is the same as the old one (tested).
+- A provider that returns `stateChanges` or `memory` replaces the action note's state effects or `## Memory`. The Mock does; Jev does not.
+- The Mock provider: Arthur keeps his own, written in code (`providers/mock.js`). Any other character uses `providers/mock-vault.js`, which reads each action's `## Mock` block (`when`, `priority`, or `default: true`).
 
 ## 11. Compiler and checker
 
-Command: `npm run build:game`. It also runs inside `npm run check`. `npm run build:game -- --watch` rebuilds each time you save a note in Obsidian.
+Command: `npm run vault:check` (also part of `npm run check`). It compiles the vault, builds every character, runs the detector tests, and writes the report (11.3). The app and the workbench compile the vault themselves when they start, and again each time you save a note. A `--watch` mode that rewrites the report on every save is not built yet.
 
 ### 11.1 Reading notes
 
@@ -930,7 +972,7 @@ It fails with a clear message (note, line, what is wrong) when:
 
 ### 11.3 Reports in the vault
 
-The checker writes plain notes to `game/_reports/`. You read them in Obsidian. Every item links to the note that has the problem.
+The checker writes plain notes to `game/_reports/` (today only `check.md`). You read them in Obsidian. Every item links to the note that has the problem.
 
 | Report | Shows |
 | --- | --- |
@@ -984,30 +1026,46 @@ Obsidian does files, text, links, search, graph, and trees. It cannot do three t
 - Step through it turn by turn and see which rules fired.
 - **What if:** change one number (for example the `ALLOW_ENTRY` suspicion limit) in the page, and replay with the mock provider to see what changes. To keep the change, you edit the note in Obsidian.
 
+### 12.7 Screen editor (working now)
+
+Press **Cmd+E** in the desktop app (**Game → Edit screen**) to edit the screen you are on, on top of the real game picture. The scene freezes (the clocks pause) and every part of the screen gets a box.
+
+- **Select** a box, or a row in the layer list. **Drag** to move; drag a **corner** to resize, with **Shift** to keep the shape; **arrow keys** nudge 1 pixel (Shift: 10). The x, y, w, h fields take exact numbers.
+- **Layers:** the screen's cards (UI layers, images, text), its objects, and its exits, front at the top. **▲ ▼** change the drawing order; **●** hides a layer while you edit (not saved). The scene picture is locked: it sets the screen's frame.
+- **Edit inside:** **▸**, or click a layer twice, opens a UI layer (such as [[gate-front]]) to edit its parts; **Esc** goes back.
+- **Preview:** switches for flags, open objects and items, to see the screen in another state.
+- **Undo / Redo** (Cmd+Z, Shift+Cmd+Z). **Save** (Cmd+S) writes into the vault: card boxes and order on `World.canvas`, and element boxes (`at`) and order in UI notes. Only the changed text is replaced, so comments and formatting stay (`lib/editor-save.mjs`). If a file changed on disk since you started (in Obsidian, say), it asks before overwriting.
+- Parts of the screen stay on the scene picture, because a card dragged off it would drop out of the screen.
+- The game page on the workbench server (`/player/index.html`) has the same editor, saving through the workbench.
+
+**Not yet:** adding new parts from an asset panel, a settings panel for each part (picture, shade, swing, walk, clip, visible), making a new screen, editing parts nested deeper than one layer, and an animation timeline.
+
 ## 13. Moving Arthur over
 
-Each step keeps the game working. Each step must pass `npm run check` and the Phase 14 parity check (same actions for the same scripted inputs, mock provider).
+Each step keeps the game working. Steps 3 to 6 are proven by `tests/vault-engine.test.mjs`: the same scripted talks (all 5 endings, all 12 actions, every profile) give the same lines, actions, state, memories and endings as the old code, with the Mock and with a stand-in Jev, and the same Jev request body.
 
-| Step | Work | Done when |
+| Step | Work | Status |
 | --- | --- | --- |
-| 1 | Make the `game/` vault with Obsidian settings and `_templates/`. Write a one-time script that turns `data/*.json` into notes. Add the compiler. The old code reads the bundle. | Bundle matches today's JSON. All tests pass. The vault opens in Obsidian with no broken links. |
-| 2 | Add `conditions.js` and `effects.js`, with the short-form parser and full tests. | Every key and short form has a test. |
-| 3 | Move actions: list, criteria, effects, `available`. Delete `AVAILABLE_ACTIONS`, `ACTION_CRITERIA`, `ACTION_STATE_CHANGES`, and the body of `getAvailableActions()`. | Parity check passes. Jev request body is the same. |
-| 4 | Move detectors and profiles. | `character.js` and the regex constants are gone. |
-| 5 | Move endings and limits to event and outcome notes. Delete `resolveTerminalOutcome()`. | All five outcomes are reached by the existing tests. |
-| 6 | Add Canvas trees. Move the fake ID and company call into `script` nodes. | `presentFakeId()` and `resolveCompanyVerification()` are gone. |
-| 7 | Move screens and hotspots. `index.html` keeps only the shell. | Gate and tower screens come from notes. |
-| 8 | Reports in `_reports/` and `--watch`. | A broken link shows in `_reports/check.md` within 2 seconds of saving. |
-| 9 | Workbench: hotspot tool. | Moving a hotspot changes only the `## Hotspots` block. Git diff shows only that. |
-| 10 | Workbench: play and replay, with Open in Obsidian links. | Can replay a real playtest log and jump to each rule's note. |
-| 11 | **Proof:** add a second NPC at Guard Tower 04 with notes and a canvas only. | No new `.js` file and no change to engine code. |
+| 1 | The `game/` vault, the compiler. Arthur's data rebuilt from notes. | **Done.** The notes rebuild `data/*.json` and the profile table exactly (tested). The one-time export script is retired: the vault is the source. |
+| 2 | `conditions.js` and `effects.js`, with tests. | **Done.** |
+| 3 | Actions from notes: list, criteria, effects, `available`. | **Done** for the desktop app. |
+| 4 | Detectors and profiles from notes. | **Done** for the desktop app. |
+| 5 | Endings and limits as event and outcome notes. | **Done.** Ending sounds are in the outcome notes. |
+| 6 | The fake ID and company call as Canvas tree `script` nodes. | **Done.** |
+| 7 | Screens and hotspots from notes. | **Done** (World.canvas). |
+| 8 | Reports in `_reports/` and `--watch`. | Half: `npm run vault:check`, no watch. |
+| 9 | Workbench: hotspot tool. | Replaced by the screen editor (12.7): objects and exits are boxes you drag. |
+| 10 | Workbench: play and replay, with Open in Obsidian links. | Play done; replay not built. |
+| 11 | **Proof:** add a second NPC at Guard Tower 04 with notes and a canvas only. | Next. The character template and the vault Mock make this possible; it needs an object on the tower screen to talk to them. |
+
+The old code (`js/game.js`, `js/character.js`, `js/providers/jev.js`) stays only for the frozen browser game and as the reference for the parity test.
 
 Step 11 is the real test of this spec.
 
 ## 14. Open questions
 
 1. **Short form limits.** The short form covers most rules. Should `any` also get a short form (for example `a | b`)? This spec says no, to keep the grammar small. Use a rule block for `any`.
-2. **Mock provider.** Move all its rules into `## Mock` sections, or keep the mock as code? Data is better for new NPCs. Code is fine if the mock is only a test tool.
+2. **Mock provider.** Answered: new characters use `## Mock` sections (`providers/mock-vault.js`). Arthur keeps his code Mock, because the parity test compares against it.
 3. **Shared actions.** This spec puts actions under each character. A shared action (for example `WARN_PLAYER` for all guards) may come later with an `extends` property.
-4. **Obsidian plugin, later.** A plugin could show checker errors inside Obsidian and add the hotspot tool as a view. Build it only if the workbench feels slow to use. It is not needed for version 1.
+4. **Obsidian plugin.** Built, small: Game Tools runs asset cards, sets their status, and opens the game and the workbench. It could later show checker errors and the hotspot tool as views.
 5. **Dataview.** The community plugin Dataview could show live tables in the vault. The `_reports/` notes cover the same need without a plugin, so it stays optional.

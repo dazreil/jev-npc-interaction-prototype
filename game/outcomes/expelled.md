@@ -1,5 +1,6 @@
 ---
 type: outcome
+sound: warning
 result: failure
 title: Link terminated
 code: Leave property

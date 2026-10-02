@@ -6,7 +6,7 @@ available:
   - state.irritation <= 70
 effects:
   - state trust +2
-portraitCue: neutral
+acknowledgesName: true
 dialogue: "[[answer-question]]"
 ---
 

@@ -52,6 +52,7 @@ hotspot:
   color: $cyan
   stroke: "#62f7ff66"
   hoverFill: "#62f7ff22"
+  hoverLabel: true
 button:
   font: $body
   size: 18

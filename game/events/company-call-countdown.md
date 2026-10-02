@@ -3,6 +3,7 @@ type: event
 on: turn
 if:
   - flag.company-call-pending
+  - lastAction != ALLOW_ENTRY
 effects:
   - counter company-call-turns +1
 ---

@@ -1,5 +1,6 @@
 ---
 type: outcome
+sound: unlock
 result: success
 title: Car park access granted
 code: South gate open

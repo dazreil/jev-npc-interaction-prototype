@@ -4,17 +4,18 @@
 // game page.
 //
 //   npm run app
-import { BrowserWindow, Menu, app, protocol, shell } from "electron";
+import { BrowserWindow, Menu, app, ipcMain, protocol, shell } from "electron";
 import { watch } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readApiKey } from "../lib/env.mjs";
 import { MAX_REQUEST_BYTES, jevStatus, parseJevBody, proxyJevDecision } from "../lib/jev-proxy.mjs";
+import { applyEdits } from "../lib/editor-save.mjs";
 import { VAULT_DIR, compileVault } from "../scripts/compile-vault.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SERVED = ["player/", "js/", "data/", "game/assets/", "assets/fonts/", "assets/encounter/", "assets/vendor/"];
+const SERVED = ["player/", "js/", "data/", "game/", "assets/fonts/", "assets/encounter/", "assets/vendor/"];
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -61,7 +62,7 @@ async function handle(request) {
     return json(result.body, result.status);
   }
   if (process.env.ENGINE_DEBUG) console.log(`[app] ${request.url} -> ${path}`);
-  if (!SERVED.some((prefix) => path.startsWith(prefix))) return new Response("Not found", { status: 404 });
+  if (!SERVED.some((prefix) => path.startsWith(prefix)) || path.includes("/.")) return new Response("Not found", { status: 404 });
   try {
     const body = await readFile(join(ROOT, path));
     return new Response(body, { headers: { "Content-Type": MIME[extname(path).toLowerCase()] ?? "application/octet-stream" } });
@@ -80,6 +81,7 @@ function buildMenu() {
         label: "Game",
         submenu: [
           { label: `Restart ${game}`, accelerator: "CmdOrCtrl+R", click: () => mainWindow?.reload() },
+          { label: "Edit screen", accelerator: "CmdOrCtrl+E", click: () => mainWindow?.webContents.send("toggle-editor") },
           { role: "togglefullscreen" },
           { type: "separator" },
           { role: "quit" }
@@ -137,6 +139,14 @@ async function createWindow() {
 
 app.whenReady().then(async () => {
   protocol.handle("app", handle);
+  // The screen editor saves straight into the vault; the watcher then redraws.
+  ipcMain.handle("save-edits", async (_event, edits) => {
+    try {
+      return await applyEdits(VAULT_DIR, edits);
+    } catch (error) {
+      return { saved: [], conflicts: [], error: error.message };
+    }
+  });
   buildMenu();
   await createWindow();
 

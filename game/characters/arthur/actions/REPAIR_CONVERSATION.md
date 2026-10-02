@@ -10,6 +10,7 @@ effects:
   - flag reason-asked off
   - counter support-requests = 0
 portraitCue: friendly
+acknowledgesName: true
 dialogue: "[[repair-conversation]]"
 ---
 
@@ -24,6 +25,17 @@ any:
   - signal.unresolved-suspicion
   - some memory.tag in [threat, weapon, bribe, contradiction, dishonesty, lie, suspicion] since repair
   - signal.tension-raised
+```
+
+## Memory
+What Arthur remembers after this action. The first entry whose `when` holds is kept. (The Mock provider brings its own.)
+
+```yaml
+- fact: Player acknowledged their earlier conduct and attempted to repair trust
+  importance: 88
+  tags:
+    - repair
+    - cooperation
 ```
 
 %% Mock provider rules are still code in js/providers/mock.js (spec open question 2). %%

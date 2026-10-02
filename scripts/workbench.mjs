@@ -10,11 +10,12 @@ import { dirname, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readApiKey } from "../lib/env.mjs";
 import { MAX_REQUEST_BYTES, jevStatus, parseJevBody, proxyJevDecision } from "../lib/jev-proxy.mjs";
+import { applyEdits } from "../lib/editor-save.mjs";
 import { VAULT_DIR, compileVault } from "./compile-vault.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = Number(process.env.WORKBENCH_PORT) || 5174;
-const SERVED = ["workbench/", "player/", "js/", "data/", "game/assets/", "assets/fonts/", "assets/encounter/", "assets/vendor/"];
+const SERVED = ["workbench/", "player/", "js/", "data/", "game/", "assets/fonts/", "assets/encounter/", "assets/vendor/"];
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -89,6 +90,15 @@ createServer(async (request, response) => {
     sendJson(response, result.status, result.body);
     return;
   }
+  // The screen editor on /player/ saves here (local dev only, like the app).
+  if (request.method === "POST" && pathname === "/api/editor/save") {
+    try {
+      sendJson(response, 200, await applyEdits(VAULT_DIR, JSON.parse(await readBody(request))));
+    } catch (error) {
+      sendJson(response, 400, { saved: [], conflicts: [], error: error.message });
+    }
+    return;
+  }
   if (pathname === "/events") {
     response.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-store", Connection: "keep-alive" });
     response.write(": connected\n\n");
@@ -98,7 +108,7 @@ createServer(async (request, response) => {
   }
 
   const path = normalize(decodeURIComponent(pathname === "/" ? "/workbench/index.html" : pathname)).replace(/^\/+/, "");
-  if (!SERVED.some((prefix) => path.startsWith(prefix))) {
+  if (!SERVED.some((prefix) => path.startsWith(prefix)) || path.includes("/.")) {
     response.writeHead(404).end("Not found");
     return;
   }
