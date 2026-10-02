@@ -42,3 +42,9 @@ Lines not tied to an action. Scripts and effects use them by heading, for exampl
 
 ## company-call-result
 - All right. I rang the company. They have no record of sending you. The gate stays shut.
+
+## company-call-warning-1
+- I've got the company number here. Give me a reason not to check it.
+
+## company-call-warning-2
+- One last answer, then I'm phoning them.

@@ -1,5 +1,6 @@
 ---
 type: outcome
+sound: lockdown
 result: failure
 title: Security lockdown
 code: Perimeter sealed

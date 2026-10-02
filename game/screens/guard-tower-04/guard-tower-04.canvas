@@ -1,0 +1,23 @@
+{
+	"nodes": [
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 0,
+			"y": -300,
+			"width": 1100,
+			"height": 200,
+			"text": "# Guard Tower 04\nThe end of the current slice. Its layout is the `guard-tower-04` group on [[World.canvas]]."
+		},
+		{
+			"id": "n-screen",
+			"type": "file",
+			"file": "screens/guard-tower-04/guard-tower-04.md",
+			"x": 0,
+			"y": 0,
+			"width": 560,
+			"height": 360
+		}
+	],
+	"edges": []
+}

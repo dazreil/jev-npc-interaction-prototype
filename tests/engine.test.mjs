@@ -3,7 +3,7 @@ import test from "node:test";
 import { evaluate, interpolate, parseCondition } from "../js/engine/conditions.js";
 import { applyEffects, parseEffect } from "../js/engine/effects.js";
 import { buildWorld } from "../js/engine/canvas-world.js";
-import { resolveUi } from "../js/engine/ui.js";
+import { clipFrame, resolveUi } from "../js/engine/ui.js";
 import { compileVault } from "../scripts/compile-vault.mjs";
 
 const world = {
@@ -126,7 +126,7 @@ test("the sample vault compiles and its UI notes draw without warnings", async (
     assert.deepEqual(resolved.warnings, [], id);
     assert.ok(resolved.children.length > 3, id);
   }
-  assert.match(vault.world["south-gate"].elements[0].src, /^\/game\/assets\/scenes\/gate-closed\.webp$/);
+  assert.match(vault.world["south-gate"].elements[0].src, /^\/game\/screens\/south-gate\/art\/car-park-yard\/car-park-yard\.webp$/);
 });
 
 test("objects open and close in place, and a screen change closes them", () => {
@@ -157,7 +157,7 @@ test("the intercom is an in-world object with a UI on the gate screen", async ()
   const intercom = vault.notes.intercom;
   assert.equal(intercom.type, "object");
   assert.deepEqual(vault.world["south-gate"].objects.map((object) => object.id), ["intercom"], "placed on the World canvas");
-  assert.deepEqual(vault.world["south-gate"].objects[0].rect, [531, 137, 64, 72]);
+  assert.deepEqual(vault.world["south-gate"].objects[0].rect, [485, 185, 43, 69], "on the right gate post");
   assert.equal(vault.notes[intercom.props.ui].type, "ui");
   assert.equal(vault.notes["intercom-call"], undefined, "the intercom is no longer a separate screen");
 });
@@ -185,10 +185,91 @@ test("a canvas group becomes a screen placed by its picture", () => {
   assert.deepEqual(Object.keys(screens), ["yard", "hall"], "a group with no picture and no screen note is not a screen");
   const yard = screens.yard;
   assert.equal(yard.height, 360);
-  assert.deepEqual(yard.elements[0], { type: "image", id: "yard-picture", at: [0, 0, 640, 360], src: "/a/yard.webp", fit: "cover" });
+  assert.deepEqual(yard.elements[0], { type: "image", id: "yard-picture", node: "pic", at: [0, 0, 640, 360], src: "/a/yard.webp", fit: "cover" });
+  assert.deepEqual(yard.frame, { x: 100, y: 100, unit: 2, picture: "pic" }, "the editor can turn screen pixels back into canvas positions");
+  assert.equal(yard.exits[0].node, "go", "each part knows its canvas card");
   assert.deepEqual(yard.objects[0].rect, [100, 50, 64, 32]);
   assert.deepEqual(yard.elements[1].visible, ["flag.night"]);
   assert.deepEqual(yard.exits[0].do, ["screen hall"]);
   assert.deepEqual(yard.exits[0].visible, ["flag.door-open"]);
   assert.equal(screens.hall.elements[0].text, "HALL");
+});
+
+test("a swing opens on its condition; mirror flips; the two do not mix", () => {
+  const resolved = resolveUi(
+    {
+      width: 100,
+      height: 50,
+      elements: [
+        { type: "image", id: "leaf", src: "/leaf.webp", swing: { when: ["flag.gate-open"], hinge: "right", to: 0.2 } },
+        { type: "image", id: "post", src: "/post.webp", mirror: true },
+        { type: "image", src: "/bad.webp", mirror: true, swing: { when: true } }
+      ]
+    },
+    { world: { flag: { "gate-open": true } } }
+  );
+  const [leaf, post] = resolved.children;
+  assert.deepEqual(leaf.swing, { open: true, hinge: "right", to: 0.2, seconds: 1.5, steps: 6 });
+  assert.equal(post.mirror, true);
+  assert.equal(resolved.warnings.length, 2, "a swing without an id, and mirror with swing, are both flagged");
+  const closed = resolveUi({ elements: [{ type: "image", id: "leaf", src: "/l", swing: { when: ["flag.gate-open"] } }] }, { world: { flag: { "gate-open": false } } });
+  assert.equal(closed.children[0].swing.open, false);
+});
+
+test("a walk moves to its target and back on its condition; shade darkens", () => {
+  const ui = {
+    elements: [
+      { type: "image", id: "guard", at: [100, 20, 10, 20], src: "/g.webp", shade: 0.5, walk: { when: ["flag.arthur-out"], to: [40, 30], seconds: 12 } },
+      { type: "image", id: "dog", at: [0, 0, 10, 5], src: "/d.webp", walk: { to: [50, 0], seconds: 8, loop: true, back: false } }
+    ]
+  };
+  const out = resolveUi(ui, { world: { flag: { "arthur-out": true } } });
+  const [guard, dog] = out.children;
+  assert.deepEqual(guard.walk, { on: true, dx: -60, dy: 10, seconds: 12, back: true, loop: false, fps: 8 });
+  assert.equal(guard.shade, 0.5);
+  assert.deepEqual(dog.walk, { on: true, dx: 50, dy: 0, seconds: 8, back: false, loop: true, fps: 8 }, "no condition: always walking");
+  assert.equal(out.warnings.length, 0);
+  const home = resolveUi(ui, { world: { flag: { "arthur-out": false } } });
+  assert.equal(home.children[0].walk.on, false);
+});
+
+test("Arthur's patrol: a timer note drives arthur-out; the intercom goes unanswered while he is out", async () => {
+  const vault = await compileVault();
+  const patrol = vault.notes["arthur-patrol"];
+  assert.equal(patrol.type, "timer");
+  assert.equal(patrol.props.flag, "arthur-out");
+  assert.ok(patrol.props.for < patrol.props.every);
+  const intercom = vault.notes.intercom.props;
+  assert.equal(evaluate(intercom.noAnswer, { flag: { "arthur-out": true } }), true);
+  assert.equal(evaluate(intercom.noAnswer, { flag: { "arthur-out": false } }), false);
+  assert.ok(vault.notes["gate-yard"], "the yard layer with the walkers is in the vault");
+});
+
+test("a clip plays across, waits, then plays back mirrored; it can loop", () => {
+  const patrol = { frames: 40, fps: 8, back: true, gap: 13, wait: 1, loop: false };
+  assert.equal(clipFrame(patrol, 0.5), null, "waits first");
+  assert.deepEqual(clipFrame(patrol, 1), { frame: 0, flip: false });
+  assert.deepEqual(clipFrame(patrol, 5.99), { frame: 39, flip: false });
+  assert.equal(clipFrame(patrol, 10), null, "hidden between legs");
+  assert.deepEqual(clipFrame(patrol, 19), { frame: 0, flip: true });
+  assert.equal(clipFrame(patrol, 30), null, "done");
+  const dog = { ...patrol, wait: 0, gap: 2, loop: true };
+  assert.deepEqual(clipFrame(dog, 14), { frame: 0, flip: false }, "starts again after 5 + 2 + 5 + 2 seconds");
+  const out = resolveUi({ elements: [{ type: "image", id: "a", src: "/a-01.webp", clip: { when: ["flag.arthur-out"], frames: 40 } }] }, { world: { flag: {} } });
+  assert.equal(out.children[0].clip.on, false);
+  assert.equal(out.warnings.length, 0);
+});
+
+test("the screen editor saves boxes and order without touching anything else", async () => {
+  const { editCanvas, editUiNote } = await import("../lib/editor-save.mjs");
+  const note = ["---", "type: ui", "---", "", "## Elements", "```yaml", "# back", "- { type: rect, id: a, at: [0, 0, 10, 10] }", "# front", "- type: image", "  id: b", "  at: [5, 5, 20, 20] # the picture", "```", "after"].join("\n");
+  assert.equal(editUiNote(note, {}), note, "no change, no difference");
+  const moved = editUiNote(note, { boxes: [{ index: 1, at: [7.4, 8, 20, 20] }] });
+  assert.equal(moved, note.replace("at: [5, 5, 20, 20]", "at: [7, 8, 20, 20]"), "only the box changes; its comment stays");
+  const swapped = editUiNote(note, { order: [1, 0] });
+  assert.ok(swapped.indexOf("id: b") < swapped.indexOf("id: a") && swapped.includes("# front\n- type: image") && swapped.endsWith("```\nafter"), "comments travel with their element");
+  const canvas = JSON.stringify({ nodes: [{ id: "p", x: 0, y: 0, width: 1, height: 1 }, { id: "a", x: 0, y: 0, width: 1, height: 1 }, { id: "b", x: 0, y: 0, width: 1, height: 1 }], edges: [] });
+  const next = JSON.parse(editCanvas(canvas, { boxes: [{ node: "a", x: 10.4, y: 20, width: 30, height: 40 }], order: ["b", "a"] }));
+  assert.deepEqual(next.nodes.map((node) => node.id), ["p", "b", "a"]);
+  assert.deepEqual(next.nodes[2], { id: "a", x: 10, y: 20, width: 30, height: 40 });
 });

@@ -30,7 +30,23 @@ Use **Templates** (`Cmd+P` → "Templates: Insert template") in an empty note. S
 ## Play it
 Run the desktop app from the repo folder: `npm run app`. The intercom is an object in the gate scene. Click it, or press `C`.
 
-## What does not work yet
-The screens, objects, and UI come from this vault. Arthur's lines and rules still come from `data/*.json` and the code. Rebuild this vault from the live game with:
+## Check it
+Everything in the game comes from this vault: screens, objects, UI, Arthur's lines, profiles, actions, the dialogue tree, and the events that end the talk. To check the vault for broken links, missing lines, and detector tests:
 
-    npm run vault:export
+    npm run vault:check
+
+The result is in [[check]] (`_reports/check.md`).
+
+## Arrange a screen
+In the game, press **Cmd+E** (Game → Edit screen). Drag things to move them, drag a corner to resize, and use the layer list to change what is in front. Click **▸** on a layer to move the parts inside it. **Cmd+S** saves into the vault.
+
+## Make something new
+`Cmd+P` → **Game Tools: New character… / New scene… / New item…**. Give it a name and a one-line description. You get its own folder, its notes, and its own canvas with every art card ready to run. Each thing's art saves into its folder's `art/`.
+
+- [[Arthur.canvas]] — everything about Arthur.
+- [[south-gate.canvas]] — the gate screen and its art.
+- [[contractor-id.canvas]] — the ID card.
+- [[Assets.canvas]] — the art guide and the style library.
+
+## What does not work yet
+- The workbench hotspot tool and replay (spec section 12).

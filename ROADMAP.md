@@ -604,3 +604,16 @@ The current trial voice, `en_US-danny-low`, has MIT weights and identifies the M
 ## Immediate Next Milestone
 
 Run the documented blind human sessions and, before public hosting, repeat the smoke check in current Firefox and Edge builds. Those sessions are evaluation and release operations; no further game phase is required for the vertical slice.
+
+## Later Options
+
+Ideas that are parked, not planned. Each needs a decision before work starts.
+
+### Analog video effect (ntsc-rs)
+
+[ntsc-rs](https://github.com/ntsc-rs/ntsc-rs) emulates NTSC and VHS artefacts: chroma bleed, luma smear, tape wobble, snow, tracking noise, and head switching. It is MIT / ISC / Apache-2.0 licensed, and its core crate (`ntsc-rs`) has no platform dependencies, so it can be embedded. Two ways to use it, evaluated on 2 October 2026:
+
+- **A. Bake it into the art.** Add an `ntsc:` finish step to recipe cards in `scripts/assets.mjs`, run through the `ntsc-rs-cli` tool with a JSON preset (it can also turn a still into a short noise loop). Quick, free at runtime, and UI text stays sharp; but the effect is fixed in the file and cannot react to the game. Needs the ntsc-rs macOS app (v0.9.6), which includes the CLI.
+- **B. Run it live.** Compile the core crate to WebAssembly and apply it every frame to the camera scene and the intercom video, drawn into one canvas at low resolution. A live, moving signal that can react to events (the picture rolls when the gate opens, breaks up when Arthur is angry); UI text stays sharp. A bigger job: the scene is built from separate layers, so it must first be drawn into one canvas, and the frame cost must be measured first. Needs the Rust toolchain (rustup) to build, not to play.
+
+Recommendation at the time: B, starting with a speed test, because the whole game is seen through a security camera.

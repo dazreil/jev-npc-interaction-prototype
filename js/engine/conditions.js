@@ -4,7 +4,7 @@
 
 const COMPARE_PATTERN = /^([\w.-]+)\s*(<=|>=|!=|=|<|>)\s*([^<>=!\s].*)$/;
 const IN_PATTERN = /^(not\s+)?([\w.-]+)\s+in\s+\[(.*)\]$/;
-const MEMORY_PATTERN = /^(some|no)\s+memory\.tag\s+in\s+\[(.*)\](?:\s+since\s+([\w-]+))?$/;
+const MEMORY_PATTERN = /^(some|no)\s+memory\.(tag|topic)\s+in\s+\[(.*)\](?:\s+since\s+([\w-]+))?$/;
 const KEY_PATTERN = /^(not\s+)?([\w.-]+)$/;
 
 function splitList(text) {
@@ -27,7 +27,7 @@ export function parseCondition(text) {
   const source = String(text).trim();
   let match = source.match(MEMORY_PATTERN);
   if (match) {
-    return { kind: "memory", mode: match[1], tags: splitList(match[2]), since: match[3] ?? null };
+    return { kind: "memory", mode: match[1], field: match[2], tags: splitList(match[3]), since: match[4] ?? null };
   }
   match = source.match(IN_PATTERN);
   if (match) {
@@ -65,7 +65,7 @@ function compare(left, op, right) {
   }
 }
 
-function memoryMatches(world, { mode, tags, since }) {
+function memoryMatches(world, { mode, field = "tag", tags, since }) {
   const memories = Array.isArray(world.memories) ? world.memories : [];
   const cutoff = since
     ? memories.reduce(
@@ -75,7 +75,9 @@ function memoryMatches(world, { mode, tags, since }) {
       )
     : -Infinity;
   const found = memories.some(
-    (memory) => (Number(memory.createdTurn) || 0) > cutoff && memory.tags?.some((tag) => tags.includes(tag))
+    (memory) =>
+      (Number(memory.createdTurn) || 0) > cutoff &&
+      (field === "topic" ? tags.includes(memory.topic) : memory.tags?.some((tag) => tags.includes(tag)))
   );
   return mode === "some" ? found : !found;
 }

@@ -1,0 +1,71 @@
+{
+	"nodes": [
+		{
+			"id": "g-item",
+			"type": "group",
+			"label": "Contractor ID card",
+			"x": -40,
+			"y": -80,
+			"width": 2560,
+			"height": 900,
+			"color": "6"
+		},
+		{
+			"id": "n-item",
+			"type": "file",
+			"file": "items/contractor-id/contractor-id.md",
+			"x": 0,
+			"y": 0,
+			"width": 560,
+			"height": 320
+		},
+		{
+			"id": "krea-prop-green",
+			"type": "text",
+			"text": "## krea-prop-green\nstyle\n# Krea 2 props to cut out: a filmed 1990s look, flat on, on pure green.\ntemplate: \"A prop for a 1995 CD-ROM full-motion-video game, photographed straight on in a flat front view for chroma-key compositing: {prompt}. Isolated on a solid flat pure green #00FF00 background, evenly lit, no shadow on the background, no ground, no people, no text\"\n",
+			"x": 0,
+			"y": 360,
+			"width": 560,
+			"height": 360,
+			"color": "5"
+		},
+		{
+			"id": "contractor-id-card",
+			"type": "text",
+			"x": 700,
+			"y": 0,
+			"width": 560,
+			"height": 320,
+			"text": "## contractor-id-card\nimage\nstatus: idea\nmodel: krea-2\nsize: 1024x768\nseed: 81\nprompt: \"a laminated contractor access ID card for WEST SHIPPING CONCERN, site contractor, authorised service personnel, a small photo square, a barcode, a clip hole, slightly worn, lying flat, seen straight on\"\n"
+		},
+		{
+			"id": "contractor-id-card-cut",
+			"type": "text",
+			"x": 1900,
+			"y": 0,
+			"width": 520,
+			"height": 260,
+			"text": "## contractor-id-card-cut\ncutout\nstatus: idea\n# Free: the card keyed off the green screen.\ncrunch: 4\njpeg: 50"
+		}
+	],
+	"edges": [
+		{
+			"id": "e-style",
+			"fromNode": "krea-prop-green",
+			"fromSide": "right",
+			"toNode": "contractor-id-card",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-cut",
+			"fromNode": "contractor-id-card",
+			"fromSide": "right",
+			"toNode": "contractor-id-card-cut",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "cut out"
+		}
+	]
+}

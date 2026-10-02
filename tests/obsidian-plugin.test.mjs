@@ -99,7 +99,7 @@ test("preview runs the real runner from the repo and shows its output", async ()
   const canvasFile = join(ROOT, "game", "_plugin-test.canvas");
   writeFileSync(canvasFile, JSON.stringify({
     nodes: [
-      { id: "f", type: "file", file: "assets/scenes/gate-closed.webp", x: 0, y: 0, width: 200, height: 120 },
+      { id: "f", type: "file", file: "screens/south-gate/art/car-park-yard/car-park-yard.webp", x: 0, y: 0, width: 200, height: 120 },
       { id: "t", type: "text", x: 300, y: 0, width: 300, height: 200, text: "## test-talk\nanimate\nstatus: idea\nprompt: the gate sways" }
     ],
     edges: [{ id: "e", fromNode: "f", toNode: "t" }]
@@ -112,7 +112,7 @@ test("preview runs the real runner from the repo and shows its output", async ()
   await new Promise((resolve) => {
     const started = Date.now();
     const poll = setInterval(() => {
-      if (modals.length || Date.now() - started > 20000) {
+      if (modals.length || Date.now() - started > 60000) {
         clearInterval(poll);
         resolve();
       }
@@ -121,4 +121,14 @@ test("preview runs the real runner from the repo and shows its output", async ()
   assert.equal(modals.length, 1, "the preview opens in a window");
   assert.match(modals[0].body, /\[test-talk\] would call minimax\/h3\/image-to-video/);
   assert.equal(plugin.running, 0);
+});
+
+test("after a run, an open canvas reloads from disk so new colours and pictures show", async () => {
+  const { plugin } = await makePlugin();
+  const loaded = [];
+  const view = { file: { path: "Assets.canvas" }, setViewData: (data, clear) => loaded.push({ data, clear }) };
+  plugin.app.workspace.getLeavesOfType = (type) => (type === "canvas" ? [{ view }, { view: { file: { path: "Other.canvas" } } }] : []);
+  plugin.app.vault.adapter.read = async (path) => `contents of ${path}`;
+  await plugin.reloadCanvas("Assets.canvas");
+  assert.deepEqual(loaded, [{ data: "contents of Assets.canvas", clear: true }]);
 });

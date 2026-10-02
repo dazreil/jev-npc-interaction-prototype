@@ -9,6 +9,7 @@ effects:
   - state suspicion -2
   - state irritation -5
 portraitCue: friendly
+acknowledgesName: true
 dialogue: "[[show-sympathy]]"
 ---
 

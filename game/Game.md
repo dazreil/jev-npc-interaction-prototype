@@ -18,7 +18,7 @@ The player stands outside a locked warehouse car-park gate at night. Arthur, the
 
 ## Variables
 ```yaml
-flags: [gate-open, reason-asked, company-call-pending]
+flags: [gate-open, reason-asked, company-call-pending, arthur-out]
 counters: { refusals: 0, support-requests: 0, company-call-turns: 0 }
 ```
 

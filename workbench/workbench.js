@@ -1,6 +1,6 @@
 import { PlaySession, bindUiKeys } from "/js/engine/session.js";
 import { createSound } from "/js/engine/sound.js";
-import { chooseNpcAction as chooseJevAction } from "/js/providers/jev.js";
+import { chooseNpcAction as chooseJevAction } from "/js/providers/jev-vault.js";
 import { chooseNpcAction as chooseMockAction } from "/js/providers/mock.js";
 
 const $ = (selector) => document.querySelector(selector);
@@ -15,11 +15,7 @@ function log(text) {
   $("#log").prepend(item);
 }
 
-const [vault, npcTemplate, dialogueData] = await Promise.all(
-  ["/vault.json", "/data/arthur.json", "/data/dialogue.json"].map((url) =>
-    fetch(url, { cache: "no-store" }).then((response) => response.json())
-  )
-);
+const vault = await fetch("/vault.json", { cache: "no-store" }).then((response) => response.json());
 const sound = createSound({
   onProgress: ({ loaded, total }) => {
     if (total > 0) $("#play-status").textContent = loaded < total ? `Loading Arthur's voice… ${Math.round((loaded / total) * 100)}%` : "";
@@ -28,8 +24,6 @@ const sound = createSound({
 const session = new PlaySession({
   sound,
   vault,
-  npcTemplate,
-  dialogueData,
   providers: { mock: chooseMockAction, jev: chooseJevAction },
   providerId: $("#provider-select").value,
   onChange: (options) => {

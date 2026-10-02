@@ -7,6 +7,7 @@ effects:
   - state irritation +2
   - counter refusals +1
 portraitCue: dismissive
+acknowledgesName: true
 dialogue: "[[refuse-entry]]"
 ---
 

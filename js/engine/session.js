@@ -1,13 +1,15 @@
-// A play session: the vault's screens, objects, and UI notes, driven by the
-// Arthur encounter in js/game.js. Both the desktop app (player/) and the
-// workbench use it, so what you test is what ships.
+// A play session: the vault's screens, objects, and UI notes, driven by an
+// encounter with the vault's character (js/engine/encounter.js), whose rules
+// all come from notes. Both the desktop app (player/) and the workbench use
+// it, so what you test is what ships.
 //
 // Screens are drawn from their `ui` note. In-world objects (type: object) on
 // the current screen become hotspots; using one opens its own UI over the
 // scene, in place, instead of changing screen.
 
-import { ARTHUR_CHARACTER_IDS } from "../character.js";
-import { Game } from "../game.js";
+import { evaluate } from "./conditions.js";
+import { Encounter } from "./encounter.js";
+import { chooseNpcAction as chooseVaultMock } from "../providers/mock-vault.js";
 import { applyEffects, parseEffect } from "./effects.js";
 import { mountUi, resolveUi } from "./ui.js";
 
@@ -25,7 +27,7 @@ export class PlaySession {
    * `sound` (optional, from js/engine/sound.js) gives Arthur a voice and the
    * game its sound effects; without it lines are timed by their length.
    */
-  constructor({ vault, npcTemplate, dialogueData, providers, providerId = "mock", sound = null, onChange = () => {}, onLog = () => {} }) {
+  constructor({ vault, providers, providerId = "mock", sound = null, onChange = () => {}, onLog = () => {} }) {
     this.sound = sound;
     this.lineRun = 0;
     this.callRun = 0;
@@ -37,8 +39,6 @@ export class PlaySession {
       if (this.world.call.status !== before) this.onChange({});
     });
     this.vault = vault;
-    this.npcTemplate = npcTemplate;
-    this.dialogueData = dialogueData;
     this.providers = providers;
     this.providerId = providerId;
     this.onChange = onChange;
@@ -81,11 +81,22 @@ export class PlaySession {
    * line goes live and the greeting, if any, is spoken. UI notes read
    * `call.connecting` and `call.status`.
    */
-  connect(firstCall) {
+  connect(firstCall, object = {}) {
     const run = ++this.callRun;
     this.world.call = { connecting: true, status: "Ringing Tower 04…" };
     this.updateCallStatus();
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    // `noAnswer` on the object: while it holds (Arthur is out on patrol),
+    // the call rings out and nobody picks up. Try again later.
+    if (object.noAnswer !== undefined && evaluate(object.noAnswer, this.world)) {
+      wait(Number(object.ringSeconds ?? 6) * 1000).then(() => {
+        if (run !== this.callRun) return;
+        this.world.call = { connecting: true, unanswered: true, status: "Try again later" };
+        this.onLog("No answer");
+        this.onChange({});
+      });
+      return false;
+    }
     const ring = wait(firstCall ? 1800 : 1000);
     // The voice watchdog handles stalls; this cap only stops an endless wait.
     const voice = this.sound ? Promise.race([this.sound.whenReady, wait(180000)]) : Promise.resolve();
@@ -100,6 +111,7 @@ export class PlaySession {
       }
       this.onChange({ focusInput: true });
     });
+    return true;
   }
 
   /** "Ringing…", or the voice download while it is still coming in. */
@@ -107,6 +119,7 @@ export class PlaySession {
     if (!this.world?.call?.connecting) return;
     const { loaded, total } = this.sound?.progress ?? {};
     const downloading = this.sound && !this.sound.ready && total > 0;
+    if (this.world.call.unanswered) return;
     this.world.call.status = downloading ? `Tuning voice ${Math.min(99, Math.round((loaded / total) * 100))}%` : "Ringing Tower 04…";
   }
 
@@ -269,22 +282,31 @@ export class PlaySession {
     this.draft = "";
     this.busy = false;
     if (!play) {
+      clearInterval(this.timerId);
       this.game = null;
       this.world = this.freshWorld(profileId ?? this.notesOfType("profile")[0]?.id);
       return;
     }
-    // The game's first random call picks Arthur's profile.
-    let forced = profileId ? ARTHUR_CHARACTER_IDS.indexOf(profileId) : -1;
+    // The character to talk to: the one the start screen's conversation
+    // object names (the intercom: conversation: [[Arthur]]), else the first.
+    const startObjects = this.vault.world?.[this.vault.notes.Game?.props.startScreen]?.objects ?? [];
+    const talkTo = startObjects.map((object) => this.vault.notes[object.id]?.props.conversation).find(Boolean);
+    const characterNote = this.notesOfType("character").find((note) => note.id === talkTo) ?? this.notesOfType("character")[0];
+    // The encounter's first random call picks the character's profile.
+    const profileIds = this.notesOfType("profile").filter((profile) => profile.props.character === characterNote?.id).map((profile) => profile.id);
+    const listed = (characterNote?.sections ?? []).find((section) => section.title === "Profiles");
+    const order = listed ? [...listed.text.matchAll(/^- \[?\[?([\w-]+)/gm)].map((match) => match[1]) : profileIds;
+    let forced = profileId ? order.indexOf(profileId) : -1;
     const random = () => {
       if (forced < 0) return Math.random();
-      const value = (forced + 0.5) / ARTHUR_CHARACTER_IDS.length;
+      const value = (forced + 0.5) / order.length;
       forced = -1;
       return value;
     };
-    this.game = new Game({
-      npcTemplate: this.npcTemplate,
-      dialogueData: this.dialogueData,
-      provider: this.providers[this.providerId],
+    this.game = new Encounter({
+      vault: this.vault,
+      characterId: characterNote?.id,
+      provider: this.providerFor(this.providerId, characterNote?.id),
       providerId: this.providerId,
       random
     });
@@ -301,30 +323,69 @@ export class PlaySession {
       speech: this.game.characterProfile.speech
     }, { now: false });
     this.sync();
+    this.startTimers();
+  }
+
+  /**
+   * Timer notes (`type: timer`) switch a flag on a clock: each cycle of
+   * `every` seconds, `flag` is true for the last `for` seconds. The clock
+   * stops while `pause` holds (Arthur does not leave in the middle of a call).
+   */
+  startTimers() {
+    clearInterval(this.timerId);
+    const timers = this.notesOfType("timer").map((timer) => ({ ...timer.props, elapsed: 0 }));
+    if (!timers.length || typeof setInterval !== "function") return;
+    for (const timer of timers) this.world.flag[timer.flag] = false;
+    let last = Date.now();
+    this.timerId = setInterval(() => {
+      const now = Date.now();
+      const step = (now - last) / 1000;
+      last = now;
+      let changed = false;
+      for (const timer of timers) {
+        // The screen editor pauses the clocks, so the scene holds still.
+        if (this.paused) continue;
+        if (timer.pause === undefined || !evaluate(timer.pause, this.world)) timer.elapsed += step;
+        const every = Number(timer.every) || 60;
+        const on = timer.elapsed % every >= every - (Number(timer.for) || 0);
+        if (this.world.flag[timer.flag] !== on) {
+          this.world.flag[timer.flag] = on;
+          this.onLog(`${timer.flag}: ${on}`);
+          changed = true;
+        }
+      }
+      if (changed) this.onChange({});
+    }, 250);
+    this.timerId.unref?.();
   }
 
   setProvider(providerId) {
     this.providerId = providerId;
-    this.game?.setProvider(this.providers[providerId], providerId);
+    this.game?.setProvider(this.providerFor(providerId, this.game.character.id), providerId);
   }
 
-  /** Copies the encounter's state into the world the UI reads. */
+  /** A character with ## Mock rules in its actions uses the vault Mock offline. */
+  providerFor(providerId, characterId) {
+    const actions = this.notesOfType("action").filter((action) => action.props.character === characterId);
+    if (providerId === "mock" && actions.some((action) => action.blocks.Mock)) return chooseVaultMock;
+    return this.providers[providerId];
+  }
+
+  /** Copies the encounter's state, flags, counters and items into the world the UI reads. */
   sync() {
     const game = this.game;
     if (!game) return;
     this.world.state = { ...game.npc.state };
     this.world.profile = this.profileWorld(game.characterProfile.id);
-    this.world.item["contractor-id"] = game.fakeIdShown ? "shown" : "held";
-    this.world.flag["company-call-pending"] = game.companyCallPending;
-    this.world.flag["reason-asked"] = game.reasonPrompted;
-    this.world.flag["gate-open"] = game.outcome === "entry_granted";
-    this.world.counter.refusals = game.refusals;
-    this.world.counter["support-requests"] = game.supportRequests;
+    this.world.flag = { ...this.world.flag, ...game.flag };
+    this.world.counter = { ...this.world.counter, ...game.counter };
+    this.world.item = { ...this.world.item, ...game.item };
+    this.world.memories = game.memories;
     this.world.outcome = game.status === "active" ? null : game.outcome;
   }
 
   endingText(outcome) {
-    const note = this.vault.notes[String(outcome).replaceAll("_", "-")];
+    const note = this.vault.notes[outcome];
     return note ? `${note.props.title}. ${note.props.code ?? ""}`.trim() : `Encounter over: ${outcome}`;
   }
 
@@ -361,14 +422,19 @@ export class PlaySession {
     this.onChange({ focusInput: true });
   }
 
-  showId() {
+  /** The player uses an item on the character, such as showing the ID card. */
+  useItem(itemId) {
     const game = this.game;
     if (!game || game.status !== "active") return;
-    const result = game.presentFakeId();
+    const result = game.useItem(itemId);
+    this.sync();
     if (!result) return;
     this.chat.push({ speaker: "player", text: result.playerInput });
-    this.say(result.dialogue, "suspicious", { line: result.dialogue, tone: "neutral", action: "ASK_FOR_PROOF", speech: game.characterProfile.speech });
-    this.sync();
+    this.say(result.dialogue, result.npcPerformance?.portraitCue ?? "neutral", result.npcPerformance ?? null);
+    if (game.status !== "active") {
+      this.chat.push({ speaker: "system", text: this.endingText(game.outcome) });
+      this.onLog(`Ending: ${game.outcome}`);
+    }
   }
 
   /** Runs a button's effects. Game commands go to the encounter. */
@@ -382,7 +448,7 @@ export class PlaySession {
     for (const effect of [].concat(effects ?? [])) {
       const parsed = parseEffect(effect);
       if (this.game && parsed.kind === "send") this.send();
-      else if (this.game && parsed.kind === "item" && parsed.key === "contractor-id" && parsed.value === "shown") this.showId();
+      else if (this.game && parsed.kind === "item" && parsed.value === "shown" && this.vault.notes[parsed.key]?.props.usableOn) this.useItem(parsed.key);
       else rest.push(effect);
     }
     const { world, events } = applyEffects(rest, this.world);
@@ -391,10 +457,9 @@ export class PlaySession {
     for (const event of events) {
       if (event.kind === "open") {
         this.sound?.sfx.startAmbience();
-        if (this.vault.notes[event.key]?.props.conversation) {
-          this.connect(!this.called);
-          this.called = true;
-        }
+        const object = this.vault.notes[event.key]?.props ?? {};
+        // An unanswered call does not count: the greeting waits for a real one.
+        if (object.conversation && this.connect(!this.called, object)) this.called = true;
       }
       if (event.kind === "close") {
         this.callRun += 1;
