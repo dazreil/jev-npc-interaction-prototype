@@ -93,7 +93,10 @@ createServer(async (request, response) => {
   // The screen editor on /player/ saves here (local dev only, like the app).
   if (request.method === "POST" && pathname === "/api/editor/save") {
     try {
-      sendJson(response, 200, await applyEdits(VAULT_DIR, JSON.parse(await readBody(request))));
+      const result = await applyEdits(VAULT_DIR, JSON.parse(await readBody(request)));
+      // Rebuild now, so the page can load what was just saved (a new screen).
+      if (result.saved?.length) vault = await compileVault();
+      sendJson(response, 200, result);
     } catch (error) {
       sendJson(response, 400, { saved: [], conflicts: [], error: error.message });
     }

@@ -264,11 +264,20 @@ character: "[[${name}]]"
   await add(`${slug}-portraits.md`, `---
 type: portraits
 character: "[[${name}]]"
+offset: [0, 0]
+zoom: 1
+backdropFocus: [50, 50]
+backdropZoom: 1
 ---
 
 # ${name} — portraits
 
-Fill this in once the art on [[${name}.canvas]] is made: copy the layout of [[arthur-portraits]] (\`## Idle\`, \`## Talking\`, \`## Talking by mood\`, \`## Cues\`, \`## Blink\`) and link ${name}'s \`${slug}-booth-…\` frames.
+The talk portrait is two layers, each placed on its own (in the game: Cmd+E, select the portrait, then **Option-drag** moves ${name}, **Option-Shift-drag** moves the background):
+
+- **Background:** the screen behind them, cut around their click box with a 10 pixel bleed (\`${slug}-backdrop\` on [[${name}.canvas]]).
+- **Character:** ${name} cut out of the green screen (\`${slug}-actor-cut\`), standing in front.
+
+When those cards are made, add two blocks, each in its own yaml block, as in [[arthur-portraits]]: \`## Idle\` with \`frame:\` set to a link to ${slug}-actor-cut.webp, and \`## Backdrop\` with \`image:\` set to a link to ${slug}-backdrop.webp. For talking loops, moods and blinks, add \`## Talking\`, \`## Talking by mood\`, \`## Cues\` and \`## Blink\` with the \`${slug}-booth-…\` frames.
 `);
 
   await add(`${slug}-talk-over.md`, `---
@@ -294,6 +303,7 @@ ${name} has had enough and stops talking.
   // Their own canvas: notes on top, then every art recipe, ready to run.
   const look = 2000;
   const talk = look + 1700;
+  const scene = talk + 1600;
   const nodes = [
     text("readme", 0, -320, `# ${name}\n${description}\n\nEverything about ${name}, top to bottom. Right-click a recipe card to make its art; it saves into \`${base}/art/\`. Make them in order: room and actor, then the moods, then the talking loops, then the booth.`, 1600, 240),
     group("g-who", "Who they are", -40, -80, 1960, 520),
@@ -319,6 +329,13 @@ ${name} has had enough and stops talking.
     ...TALKING.map((mood, index) =>
       text(`${slug}-${mood}-talk`, 1900 + (index % 3) * 760, talk + Math.floor(index / 3) * 400, recipe(`${slug}-${mood}-talk`, "animate", { model: "h3-max-turbo", seconds: 5, from: 0.5, to: 4.5, frames: 8, fps: 8, pingpong: true },
         `talks into the camera in a ${mood} way, small natural movements`), 560, 340)),
+    group("g-scene", "In the scene: placed on a screen with a click shape, and the two talk-portrait layers", -40, scene - 80, 4200, 1300),
+    text(`${slug}-in-scene`, 700, scene, recipe(`${slug}-in-scene`, "edit", { model: "qwen-edit", size: "1024x1024", seed: 21 },
+      `Show the same person, with the same face, hair and clothes, now (say what they do in the scene, such as: seated behind their desk, looking up at the camera). Straight-on front view, the camera square to them at eye level: any desk front is perfectly level, parallel to the bottom of the picture. The whole person and any furniture fit in the frame with empty space on both sides. No green objects. Flat, evenly lit pure green screen background, no floor, no shadow, no walls.`), 560, 460),
+    text(`${slug}-in-scene-cut`, 1400, scene, `## ${slug}-in-scene-cut\ncutout\nstatus: idea\n# Free: keyed off the green screen. Put it on its screen on World.canvas, then draw an arrow from the click object card to it: the click area takes its shape. Option-drag in the editor slides it in its box.\nkeyLow: 0.5\nkeyHigh: 0.85\ndespill: strong\ncrunch: 4\njpeg: 50\n`, 560, 400),
+    text(`${slug}-actor-cut`, 700, scene + 560, `## ${slug}-actor-cut\ncutout\nstatus: idea\n# Free: ${name} keyed off the green screen, for the talk portrait.\ncrunch: 4\njpeg: 50\n`, 560, 260),
+    text(`${slug}-scene-picture`, 0, scene + 900, `### The screen behind ${name}\nDrag the screen's picture here from the file list, then draw an arrow from it to \`${slug}-backdrop\`. You can delete this note card.`, 560, 220),
+    text(`${slug}-backdrop`, 700, scene + 900, `## ${slug}-backdrop\ncrop\nstatus: idea\n# Free: the screen behind ${name}, cut around their click box on World.canvas (copy its x, y, width, height), with a 10 pixel bleed.\nbox: [0, 0, 320, 240]\nbleed: 10\n`, 560, 300),
     text(`${slug}-booth`, 700, talk + 900, `## ${slug}-booth\ncomposite\nstatus: idea\n# Free: every ${name} picture into the room, keyed together so moods and blinks line up.\nalign: true\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 3\ncrunch: 4\njpeg: 50\n`, 560, 380)
   ];
   const styles = [
@@ -339,6 +356,9 @@ ${name} has had enough and stops talking.
     edge(`${slug}-actor`, `${slug}-booth`, "actor"),
     ...Object.keys(MOODS).map((mood) => edge(`${slug}-${mood}`, `${slug}-booth`, "actor")),
     edge(`${slug}-talk`, `${slug}-booth`, "actor"),
+    edge(`${slug}-actor`, `${slug}-in-scene`, "edit"),
+    edge(`${slug}-in-scene`, `${slug}-in-scene-cut`, "cut out"),
+    edge(`${slug}-actor`, `${slug}-actor-cut`, "cut out"),
     ...TALKING.map((mood) => edge(`${slug}-${mood}-talk`, `${slug}-booth`, "actor"))
   ].filter(Boolean);
   await add(`${name}.canvas`, JSON.stringify({ nodes, edges }, null, "\t"));
@@ -425,13 +445,14 @@ ${description}
 Made from the item template. Its art is on [[${slug}.canvas]].
 
 - \`startWith: true\` puts it in the player's hands at the start.
-- \`usableOn: "[[Character]]"\` lets the player show it to that character; a \`if item.${slug} = shown\` arrow in their dialogue tree then reacts to it.
+- \`usableOn:\` set to a link to a character lets the player show it to them; a \`if item.${slug} = shown\` arrow in their dialogue tree then reacts to it.
+- **To lay it in a scene:** put this note's card and the \`${slug}-picture-cut\` picture on a screen on World.canvas, and draw an arrow from the note card to the picture. A click on the picture picks the item up (\`item.${slug}\` becomes \`held\`), and the picture goes. The click area has the picture's shape, and Option-drag in the editor slides the picture in its box.
 `);
   const nodes = [
     group("g-item", name, -40, -80, 2600, 900),
     file("n-item", `${base}/${slug}.md`, 0, 0, 560, 360),
     text(`${slug}-picture`, 700, 0, recipe(`${slug}-picture`, "image", { model: "krea-2", size: "1024x768", seed: 31 }, `${description}, lying flat, seen straight on`)),
-    text(`${slug}-picture-cut`, 1400, 0, `## ${slug}-picture-cut\ncutout\nstatus: idea\n# Free: keyed off the green screen.\ncrunch: 4\njpeg: 50\n`, 520, 260)
+    text(`${slug}-picture-cut`, 1400, 0, `## ${slug}-picture-cut\ncutout\nstatus: idea\n# Free: keyed off the green screen. Its see-through edge becomes the click shape in a scene.\nkeyLow: 0.5\nkeyHigh: 0.85\ndespill: strong\ncrunch: 4\njpeg: 50\n`, 520, 320)
   ];
   const style = await libraryStyle(vault, "krea-prop-green", 0, 420);
   if (style) nodes.push(style);

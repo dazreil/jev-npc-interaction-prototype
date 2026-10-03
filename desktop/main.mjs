@@ -143,7 +143,10 @@ app.whenReady().then(async () => {
   // The screen editor saves straight into the vault; the watcher then redraws.
   ipcMain.handle("save-edits", async (_event, edits) => {
     try {
-      return await applyEdits(VAULT_DIR, edits);
+      const result = await applyEdits(VAULT_DIR, edits);
+      // Rebuild now, so the page can load what was just saved (a new screen).
+      if (result.saved?.length) vault = await compileVault();
+      return result;
     } catch (error) {
       return { saved: [], conflicts: [], error: error.message };
     }

@@ -72,7 +72,12 @@ document.addEventListener("keydown", (event) => {
 const editorHost = window.engineHost ?? {
   saveEdits: (edits) => fetch("/api/editor/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(edits) }).then((response) => response.json())
 };
-editor = createEditor({ session, stage, render: () => render(), host: editorHost });
+// After a save that adds a screen, the editor loads the rebuilt vault.
+const reloadVault = async () => {
+  session.setVault(await load("/vault.json"));
+  render();
+};
+editor = createEditor({ session, stage, render: () => render(), host: editorHost, reloadVault });
 window.engineHost?.onToggleEditor?.(() => editor.toggle());
 document.addEventListener("keydown", (event) => {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "e" && !window.engineHost) {

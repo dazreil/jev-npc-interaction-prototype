@@ -6,9 +6,11 @@
 //   other cards in the frame   placed where they sit on the picture
 //     file card: image          an image layer
 //     file card: object note    an in-world object, at that spot
+//     file card: item note      an item lying there; a click picks it up
 //     file card: ui note        a UI drawn in that box
 //     text card                 text, or an image layer if it embeds a picture
 //   `if <condition>` first line  the card shows only when the condition holds
+//   `if: <condition>` on an image card  the same, for a picture
 //   arrow to another screen    the source card becomes a button to go there;
 //                              an arrow label `if <condition>` also gates it
 //   arrow object → ui card     where that object's UI opens (if in the frame)
@@ -84,6 +86,7 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
       width,
       height: Math.round(frame.height * scale),
       frame: { x: frame.x, y: frame.y, unit: frame.width / width, picture: picture?.id ?? null },
+      group: group.id,
       elements: [],
       objects: [],
       exits: [],
@@ -103,13 +106,17 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
           // picture inside its box; set with Option-drag in the editor.
           const image = { type: "image", id: node.id, node: node.id, at, src: asset(name), fit: "cover" };
           if (Array.isArray(node.focus)) image.focus = node.focus.map(Number);
+          // `if: <condition>` on an image card: the picture shows only while it holds.
+          if (node.if) image.visible = [String(node.if)];
           screen.elements.push(image);
           continue;
         }
         const note = notes[noteId(name)];
         if (note?.type === "object") screen.objects.push({ id: noteId(name), rect: at, node: node.id });
+        // An item lying in the scene: click it to pick it up (it is then held).
+        else if (note?.type === "item") screen.objects.push({ id: noteId(name), rect: at, node: node.id, item: true });
         else if (note?.type === "ui") screen.elements.push({ type: "ui", id: noteId(name), node: node.id, ui: noteId(name), at });
-        else errors.push(`World canvas: card "${name}" on screen "${id}" is not an image, object, or ui note`);
+        else errors.push(`World canvas: card "${name}" on screen "${id}" is not an image, object, item, or ui note`);
       } else if (node.type === "text") {
         const { condition, body } = readText(node.text);
         const embed = body.match(EMBED_PATTERN);
@@ -119,7 +126,7 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
         } else if (embed && notes[embed[1].trim()]?.type === "ui") {
           screen.elements.push({ type: "ui", id: node.id, node: node.id, ui: embed[1].trim(), at, visible });
         } else {
-          screen.elements.push({ type: "text", id: node.id, node: node.id, at, style: "card", text: plain(body), visible, card: node.id });
+          screen.elements.push({ type: "text", id: node.id, node: node.id, at, style: "card", text: plain(body), visible, card: node.id, raw: body, condition });
         }
       }
     }
@@ -151,6 +158,8 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
       object.rect = [...picture.at];
       object.mask = picture.src;
       if (picture.focus) object.maskFocus = picture.focus;
+      // An item's picture goes once the player picks the item up.
+      if (object.item) picture.visible = [...(picture.visible ?? []), `not item.${object.id}`];
       object.follows = picture.node;
       continue;
     }
@@ -162,6 +171,7 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
     const text = screen.elements[index];
     screen.elements.splice(index, 1);
     const visible = [...(text.visible ?? []), ...(labelCondition ? [labelCondition] : [])];
+    // `target`, `condition` and `edgeCondition` let the editor change the exit.
     screen.exits.push({
       type: "button",
       id: edge.fromNode,
@@ -170,7 +180,11 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
       style: "exit",
       label: text.text,
       visible: visible.length ? visible : undefined,
-      do: [`screen ${toScreen}`]
+      do: [`screen ${toScreen}`],
+      target: toScreen,
+      raw: text.raw,
+      condition: text.condition ?? null,
+      edgeCondition: labelCondition
     });
   }
 

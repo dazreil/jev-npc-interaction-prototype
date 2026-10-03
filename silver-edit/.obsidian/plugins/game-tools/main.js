@@ -12,7 +12,7 @@ const { Modal, Notice, Plugin } = require("obsidian");
 const { spawn } = require("child_process");
 const path = require("path");
 
-const RECIPE = /^##\s+([\w.-]+)\s*\n(style|image|edit|cutout|animate|composite)\s*(?:\n|$)/i;
+const RECIPE = /^##\s+([\w.-]+)\s*\n(style|image|edit|cutout|crop|animate|composite)\s*(?:\n|$)/i;
 const shellQuote = (value) => `'${String(value).replace(/'/g, `'\\''`)}'`;
 
 function readRecipe(text) {

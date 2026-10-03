@@ -593,7 +593,7 @@ export class PlaySession {
 
   /** Adds in-world objects: a hotspot when closed, their UI in place when open. */
   addObjects(elements, placements, width, height, opened = elements) {
-    for (const { id, rect, panel, mask, maskFocus } of placements) {
+    for (const { id, rect, panel, mask, maskFocus, item } of placements) {
       const props = this.vault.notes[id]?.props ?? {};
       if (this.world.open?.[id]) {
         // Opened objects go in `opened`, drawn above every hotspot and exit.
@@ -606,11 +606,12 @@ export class PlaySession {
           at: rect,
           style: "hotspot",
           label: props.label ?? props.name ?? id,
-          key: props.key,
-          visible: props.visible,
+          key: item ? undefined : props.key,
+          // An item in the scene shows until it is picked up; a click picks it up.
+          visible: item ? [...[].concat(props.visible ?? []), `not item.${id}`] : props.visible,
           mask,
           maskFocus,
-          do: props.use ?? [`open ${id}`]
+          do: props.use ?? (item ? [`item ${id} held`] : [`open ${id}`])
         });
       }
     }

@@ -7,19 +7,25 @@
 // boxes and order on the world canvas, element boxes and order in UI notes.
 
 import { evaluate } from "/js/engine/conditions.js";
-import { pictureShape, setEditorPreview } from "/js/engine/ui.js";
+import { ELEMENT_PROPS, pictureShape, setEditorPreview } from "/js/engine/ui.js";
 
 const PANEL_WIDTH = 320;
 const round = (value) => Math.round(value);
 const clone = (rect) => rect.map(Number);
 
-export function createEditor({ session, stage, render, host }) {
+export function createEditor({ session, stage, render, host, reloadVault }) {
   let on = false;
   let level = null; // null: the screen; else { uiId, box } (a UI layer opened for editing)
   let selected = null;
   let undo = [];
   let redo = [];
-  let edits = { boxes: new Map(), order: new Map(), props: new Map(), focus: new Map() };
+  const freshEdits = () => ({ boxes: new Map(), order: new Map(), props: new Map(), focus: new Map(), add: new Map(), links: new Map(), unlinks: new Map(), remove: new Map(), cards: new Map(), exits: new Map(), settings: new Map() });
+  let edits = freshEdits();
+  const editCount = () => Object.values(edits).reduce((count, map) => count + map.size, 0);
+  let adding = null; // null, "picture", "thing" or "screen": the open part of the Add section
+  let search = "";
+  let screenName = "";
+  let made = 0;
   let stale = false;
   let status = "";
   let lastClick = { key: null, at: 0 };
@@ -504,6 +510,572 @@ export function createEditor({ session, stage, render, host }) {
     hidden.clear();
   }
 
+  // ---------------------------------------------------------------- adding parts and screens
+
+  const slugOf = (text) => String(text).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  /** A card id the canvas does not have yet. */
+  function newNode(base) {
+    made += 1;
+    return `${slugOf(base) || "card"}-${Date.now().toString(36)}${made}`;
+  }
+
+  function pictureSize(url) {
+    return new Promise((resolve) => {
+      const image = new Image();
+      image.onload = () => resolve([image.naturalWidth || 4, image.naturalHeight || 3]);
+      image.onerror = () => resolve([4, 3]);
+      image.src = url;
+    });
+  }
+
+  /** Puts a new part on the screen (undoable); it is written to the canvas on Save. */
+  function addPart(label, part) {
+    change(label, () => {
+      part.list.push(part.ref);
+      edits.add.set(part.node, part);
+      selected = part.key;
+    }, () => {
+      const index = part.list.indexOf(part.ref);
+      if (index >= 0) part.list.splice(index, 1);
+      edits.add.delete(part.node);
+      edits.boxes.delete(part.key);
+      if (selected === part.key) selected = null;
+    });
+  }
+
+  /** A picture from the vault, a third of the screen wide, in the middle. */
+  async function addPicture(picture) {
+    const screen = built();
+    if (!screen) return;
+    const [width, height] = await pictureSize(picture.url);
+    const w = Math.round(screen.width / 3);
+    const h = Math.min(screen.height, Math.round((w * height) / width));
+    const node = newNode(picture.name.replace(/\.\w+$/, ""));
+    const ref = { type: "image", id: node, node, at: [Math.round((screen.width - w) / 2), Math.round((screen.height - h) / 2), w, h], src: picture.url, fit: "cover" };
+    addPart(`Add ${picture.name}`, { node, file: picture.path, ref, field: "at", list: screen.elements, key: `el:${node}` });
+  }
+
+  /** An object, item or UI note, as a card in the middle of the screen. */
+  function addThing(note) {
+    const screen = built();
+    if (!screen) return;
+    const ui = note.type === "ui";
+    const w = ui ? Math.round(screen.width / 2) : Math.round(screen.width / 8);
+    const h = ui ? Math.round(screen.height / 2) : w;
+    const at = [Math.round((screen.width - w) / 2), Math.round((screen.height - h) / 2), w, h];
+    const node = newNode(note.id);
+    const ref = ui ? { type: "ui", id: note.id, node, ui: note.id, at } : { id: note.id, rect: at, node, ...(note.type === "item" ? { item: true } : {}) };
+    addPart(`Add ${note.id}`, { node, file: note.path, ref, field: ui ? "at" : "rect", list: ui ? screen.elements : screen.objects, key: ui ? `el:${node}` : `obj:${node}` });
+  }
+
+  /** Gives an object the shape of a picture on this screen (an arrow on the canvas). */
+  function linkShape(object, image) {
+    const before = { rect: object.rect, mask: object.mask, follows: object.follows, maskFocus: object.maskFocus };
+    const key = `${object.node}>${image.node}`;
+    change(`Click shape for ${object.id}`, () => {
+      Object.assign(object, { rect: [...image.at], mask: image.src, follows: image.node, maskFocus: image.focus });
+      edits.links.set(key, { from: object.node, to: image.node, label: "shape" });
+      edits.unlinks.delete(key);
+      edits.boxes.set(`obj:${object.node}`, objectTarget(object));
+      selected = `el:${image.node}`;
+    }, () => {
+      Object.assign(object, before);
+      edits.links.delete(key);
+      selected = `obj:${object.node}`;
+    });
+  }
+
+  /** Takes the click shape off a picture: its objects get their own boxes again. */
+  function unlinkShape(image) {
+    const objects = built().objects.filter((object) => object.follows === image.node);
+    const before = objects.map((object) => ({ object, mask: object.mask, follows: object.follows, maskFocus: object.maskFocus }));
+    change("Remove the click shape", () => {
+      for (const object of objects) {
+        const key = `${object.node}>${image.node}`;
+        delete object.mask;
+        delete object.follows;
+        delete object.maskFocus;
+        if (edits.links.has(key)) edits.links.delete(key);
+        else edits.unlinks.set(key, { from: object.node, to: image.node });
+      }
+    }, () => {
+      for (const { object, ...was } of before) {
+        Object.assign(object, was);
+        const key = `${object.node}>${image.node}`;
+        if (edits.unlinks.has(key)) edits.unlinks.delete(key);
+        else edits.links.set(key, { from: object.node, to: image.node, label: "shape" });
+      }
+    });
+  }
+
+  /** Takes a card off the screen (undoable). A picture's click shape goes with it. */
+  function removePart(target) {
+    const screen = built();
+    const list = target.kind === "object" ? screen.objects : target.key.startsWith("exit:") ? screen.exits : screen.elements;
+    const index = list.indexOf(target.ref);
+    if (index < 0) return;
+    const followers = screen.objects.filter((object) => object.follows && object.follows === target.node).map((object) => ({ object, mask: object.mask, follows: object.follows, maskFocus: object.maskFocus }));
+    const wasAdded = edits.add.get(target.node);
+    const box = edits.boxes.get(target.key);
+    const exit = edits.exits.get(target.node);
+    const card = edits.cards.get(target.node);
+    change(`Remove ${target.label}`, () => {
+      list.splice(list.indexOf(target.ref), 1);
+      for (const { object } of followers) {
+        delete object.mask;
+        delete object.follows;
+        delete object.maskFocus;
+      }
+      edits.boxes.delete(target.key);
+      edits.focus.delete(target.node);
+      if (wasAdded) edits.add.delete(target.node);
+      else edits.remove.set(target.node, true);
+      edits.exits.delete(target.node);
+      edits.cards.delete(target.node);
+      selected = null;
+    }, () => {
+      list.splice(Math.min(index, list.length), 0, target.ref);
+      for (const { object, ...was } of followers) Object.assign(object, was);
+      if (box) edits.boxes.set(target.key, box);
+      if (wasAdded) edits.add.set(target.node, wasAdded);
+      else edits.remove.delete(target.node);
+      if (exit) edits.exits.set(target.node, exit);
+      if (card) edits.cards.set(target.node, card);
+      selected = target.key;
+    });
+  }
+
+  /** A button to another screen (a text card with an arrow to that screen's group). */
+  function addExit(to) {
+    const screen = built();
+    if (!screen) return;
+    const label = `GO TO ${String(to).toUpperCase()} →`;
+    const w = Math.round(screen.width / 4);
+    const h = Math.round(screen.height / 12);
+    const node = newNode(`exit-${to}`);
+    const ref = { type: "button", id: node, node, at: [Math.round((screen.width - w) / 2), screen.height - h - 12, w, h], style: "exit", label, do: [`screen ${to}`], target: to, condition: null, edgeCondition: null, raw: label };
+    const part = { node, text: label, ref, field: "at", list: screen.exits, key: `exit:${node}` };
+    change(`Add an exit to ${to}`, () => {
+      part.list.push(ref);
+      edits.add.set(node, part);
+      edits.exits.set(node, { node, to, condition: null });
+      selected = part.key;
+    }, () => {
+      const index = part.list.indexOf(ref);
+      if (index >= 0) part.list.splice(index, 1);
+      edits.add.delete(node);
+      edits.exits.delete(node);
+      edits.boxes.delete(part.key);
+      if (selected === part.key) selected = null;
+    });
+  }
+
+  // ---------------------------------------------------------------- settings
+
+  const plain = (body) => String(body).replace(/^#+\s*/gm, "").replace(/\*\*|__/g, "").trim();
+  const copyEdits = (from) => Object.fromEntries(Object.entries(from).map(([key, map]) => [key, new Map(map)]));
+
+  /**
+   * Changes settings as one undoable step. `refs` are the objects the change
+   * touches (an element, a note's props); they and the pending edits are
+   * restored as they were on undo.
+   */
+  function changeSettings(label, refs, apply) {
+    const snap = () => ({ refs: refs.map((ref) => ({ ref, copy: { ...ref } })), edits: copyEdits(edits) });
+    const restore = (state) => {
+      for (const { ref, copy } of state.refs) {
+        for (const key of Object.keys(ref)) if (!(key in copy)) delete ref[key];
+        Object.assign(ref, copy);
+      }
+      edits = copyEdits(state.edits);
+    };
+    const before = snap();
+    apply();
+    const after = snap();
+    undo.push({ label, apply: () => restore(after), revert: () => restore(before) });
+    redo = [];
+    refresh();
+  }
+
+  // Several conditions (all must hold) are written one per line.
+  const conditionOf = (visible) => [].concat(visible ?? []).join("\n");
+  const conditionsIn = (text) => String(text).split("\n").map((line) => line.trim()).filter(Boolean);
+  const toCondition = (text) => String(text).trim() || null;
+
+  /** One labelled field: a text box (or a list) that calls `onSet` with its new value. */
+  function field(label, value, onSet, { multiline = false, options = null, hint = "" } = {}) {
+    let input;
+    if (options) {
+      input = el("select", {}, options.map(([optionValue, text]) => el("option", { value: optionValue, textContent: text, selected: optionValue === value })));
+    } else {
+      input = el(multiline ? "textarea" : "input", { value: value ?? "", rows: multiline ? 3 : undefined, placeholder: hint });
+    }
+    input.onchange = () => onSet(input.value);
+    return el("label", { className: "editor-setting" }, [el("span", { textContent: label }), input]);
+  }
+
+  /** The settings for the selected part, by what it is. */
+  function settingsFor(target) {
+    const screen = built();
+    const cardFields = (node) => edits.cards.get(node) ?? {};
+    const setCard = (node, fields) => edits.cards.set(node, { ...cardFields(node), ...fields });
+    const ref = target.ref;
+    const rows = [];
+
+    if (target.lv) return layerSettings(target);
+
+    if (target.kind === "image") {
+      const pictures = session.vault.pictures ?? [];
+      const now = pictures.find((picture) => picture.url === ref.src);
+      rows.push(field("Picture", now?.path ?? "", (path) => {
+        const picture = pictures.find((item) => item.path === path);
+        if (picture) changeSettings("Change the picture", [ref], () => { ref.src = picture.url; setCard(ref.node, { file: picture.path }); });
+      }, { options: [...(now ? [] : [["", "(not in the list)"]]), ...pictures.map((picture) => [picture.path, picture.name])] }));
+      rows.push(field("Show when", conditionOf(ref.visible), (text) => changeSettings("Change when it shows", [ref], () => {
+        const condition = toCondition(conditionsIn(text)[0] ?? "");
+        if (condition) ref.visible = [condition];
+        else delete ref.visible;
+        setCard(ref.node, { if: condition });
+      }), { hint: "always, or a condition such as flag.gate-open" }));
+    }
+
+    if (target.kind === "text") {
+      const write = (raw, condition) => setCard(ref.node, { text: `${condition ? `if ${condition}\n` : ""}${raw}` });
+      rows.push(field("Text", ref.raw ?? ref.text, (text) => changeSettings("Change the text", [ref], () => {
+        Object.assign(ref, { raw: text, text: plain(text) });
+        write(text, ref.condition);
+      }), { multiline: true }));
+      rows.push(field("Show when", ref.condition ?? "", (text) => changeSettings("Change when it shows", [ref], () => {
+        const condition = toCondition(text);
+        ref.condition = condition;
+        if (condition) ref.visible = [condition];
+        else delete ref.visible;
+        write(ref.raw ?? ref.text, condition);
+      }), { hint: "always, or a condition" }));
+    }
+
+    if (target.kind === "exit") {
+      const screens = Object.keys(session.vault.world ?? {}).filter((id) => id !== screenId());
+      const visibleOf = () => [ref.condition, ref.edgeCondition].filter(Boolean);
+      rows.push(field("Label", ref.raw ?? ref.label, (text) => changeSettings("Change the label", [ref], () => {
+        Object.assign(ref, { raw: text, label: plain(text) });
+        setCard(ref.node, { text: `${ref.condition ? `if ${ref.condition}\n` : ""}${text}` });
+      }), { multiline: true }));
+      rows.push(field("Goes to", ref.target, (to) => changeSettings("Change where it goes", [ref], () => {
+        Object.assign(ref, { target: to, do: [`screen ${to}`] });
+        edits.exits.set(ref.node, { node: ref.node, to, condition: ref.edgeCondition });
+      }), { options: screens.map((id) => [id, id]) }));
+      rows.push(field("Show when", ref.edgeCondition ?? "", (text) => changeSettings("Change when it shows", [ref], () => {
+        ref.edgeCondition = toCondition(text);
+        const visible = visibleOf();
+        if (visible.length) ref.visible = visible;
+        else delete ref.visible;
+        edits.exits.set(ref.node, { node: ref.node, to: ref.target, condition: ref.edgeCondition });
+      }), { hint: "always, or a condition" }));
+    }
+
+    if (target.kind === "object") {
+      const note = session.vault.notes[ref.id];
+      if (note) {
+        const props = note.props;
+        const setProp = (name, value) => edits.props.set(note.path, { ...(edits.props.get(note.path) ?? {}), [name]: value });
+        rows.push(el("p", { className: "editor-hint", textContent: `${ref.id} is a note: these settings are the same on every screen it is on.` }));
+        rows.push(field("Label", props.label ?? "", (text) => changeSettings("Change the label", [props], () => {
+          const value = text.trim() || null;
+          if (value) props.label = value;
+          else delete props.label;
+          setProp("label", value);
+        }), { hint: props.name ?? ref.id }));
+        rows.push(field("Key", props.key ?? "", (text) => changeSettings("Change the key", [props], () => {
+          const value = text.trim().slice(0, 1).toUpperCase() || null;
+          if (value) props.key = value;
+          else delete props.key;
+          setProp("key", value);
+        }), { hint: "a keyboard shortcut, such as C" }));
+        rows.push(field("Show when", conditionOf(props.visible), (text) => changeSettings("Change when it shows", [props], () => {
+          const conditions = conditionsIn(text);
+          if (conditions.length) props.visible = conditions;
+          else delete props.visible;
+          setProp("visible", conditions.length ? conditions : null);
+        }), { multiline: true, hint: "always, or conditions (one per line, all must hold)" }));
+        rows.push(field("On click", [].concat(props.use ?? []).join("\n"), (text) => changeSettings("Change what a click does", [props], () => {
+          const effects = text.split("\n").map((line) => line.trim()).filter(Boolean);
+          if (effects.length) props.use = effects;
+          else delete props.use;
+          setProp("use", effects.length ? effects : null);
+        }), { multiline: true, hint: ref.item ? `item ${ref.id} held` : `open ${ref.id}` }));
+      }
+    }
+    return rows;
+  }
+
+  /** A new screen's note: its title now; objective and overlay are set in Screen settings. */
+  function screenNoteText(label, title) {
+    return `---\ntype: screen\ntitle: ${JSON.stringify(title || label)}\nwidth: 640\nheight: 360\n---\n\n# ${title || label}\n\nMade in the screen editor. Where things sit is the \`${label}\` group on [[World.canvas]]. Its title, objective and overlay are in the editor's Screen settings (Cmd+E, nothing selected).\n`;
+  }
+
+  /** Makes a note for a screen that has none (an older screen), and loads it. */
+  async function makeScreenNote() {
+    const label = screenId();
+    if (editCount()) {
+      status = "Save or undo your changes first.";
+      return drawPanel();
+    }
+    const result = await host?.saveEdits?.({ canvases: {}, notes: {}, create: { [`screens/${label}/${label}.md`]: screenNoteText(label, label) }, since: since() });
+    status = !result ? "Saving works in the desktop app (npm run app)." : result.error ? `Could not make the note: ${result.error}` : `Made screens/${label}/${label}.md.`;
+    if (result && !result.error) await reloadVault?.();
+    refresh();
+  }
+
+  /** Title, objective and overlay of the screen you are on (its screen note). */
+  function screenSettings() {
+    const note = session.vault.notes[screenId()];
+    if (note?.type !== "screen") {
+      return [el("p", { className: "editor-hint", textContent: "This screen has no screen note, so it has no title, objective or overlay." }), button("Make a screen note", makeScreenNote)];
+    }
+    const props = note.props;
+    const setProp = (name, value) => edits.props.set(note.path, { ...(edits.props.get(note.path) ?? {}), [name]: value });
+    const text = (name, label, hint) => field(label, props[name] ?? "", (value) => changeSettings(`Change the ${label.toLowerCase()}`, [props], () => {
+      const clean = value.trim() || null;
+      if (clean) props[name] = clean;
+      else delete props[name];
+      setProp(name, clean);
+    }), { hint });
+    const overlays = session.notesOfType("ui").map((ui) => ui.id);
+    return [
+      text("title", "Title", screenId()),
+      text("objective", "Objective", "what the player should do here"),
+      field("Overlay", props.ui ?? "", (value) => changeSettings("Change the overlay", [props], () => {
+        if (value) props.ui = value;
+        else delete props.ui;
+        // In the note it is a link; the game reads it by name.
+        setProp("ui", value ? `[[${value}]]` : null);
+      }), { options: [["", "(none)"], ...overlays.map((id) => [id, id])] }),
+      el("p", { className: "editor-hint", textContent: "The overlay is a UI note drawn over the whole screen, such as a frame with the title and objective." })
+    ];
+  }
+
+  // Settings with their own fields; anything else is a text box (text, a
+  // number, or JSON). `def` is the engine's default: a field left at it is
+  // not written.
+  const CONDITION = { kind: "conditions", hint: "always, or conditions (one per line, all must hold)" };
+  const GROUPS = {
+    swing: { types: null, title: "Swing (a gate leaf opening)", start: () => ({ when: ["flag.gate-open"], hinge: "left", to: 0.15 }), fields: {
+      when: { ...CONDITION, label: "Swings while", hint: "a condition such as flag.gate-open" },
+      hinge: { kind: "choice", label: "Hinge", options: ["left", "right"], def: "left" },
+      to: { kind: "number", label: "Opens to (share of its width)", def: 0.15, step: 0.01, min: 0, max: 1 },
+      seconds: { kind: "number", label: "Seconds", def: 1.5, step: 0.1, min: 0 },
+      steps: { kind: "number", label: "Held steps", def: 6, step: 1, min: 1 }
+    } },
+    walk: { types: null, title: "Walk (moves in a straight line)", start: (ref) => ({ to: [Math.round(ref.at[0] + 100), Math.round(ref.at[1])] }), fields: {
+      when: { ...CONDITION, label: "Walks while", hint: "always" },
+      to: { kind: "point", label: "Walks to (x, y)" },
+      seconds: { kind: "number", label: "Seconds each way", def: 10, step: 0.5, min: 0 },
+      fps: { kind: "number", label: "Steps a second", def: 8, step: 1, min: 1 },
+      back: { kind: "check", label: "Comes back", def: true },
+      loop: { kind: "check", label: "Repeats", def: false }
+    } },
+    clip: { types: ["image"], title: "Clip (plays numbered frames)", start: () => ({ frames: 8, fps: 8 }), fields: {
+      when: { ...CONDITION, label: "Plays while", hint: "always" },
+      frames: { kind: "number", label: "Frames", def: 1, step: 1, min: 1 },
+      fps: { kind: "number", label: "Frames a second", def: 8, step: 1, min: 1 },
+      wait: { kind: "number", label: "Wait first (seconds)", def: 0, step: 0.5, min: 0 },
+      gap: { kind: "number", label: "Hidden between (seconds)", def: 0, step: 0.5, min: 0 },
+      back: { kind: "check", label: "Plays back, mirrored", def: true },
+      loop: { kind: "check", label: "Repeats", def: false }
+    } }
+  };
+  const SINGLES = {
+    visible: { ...CONDITION, label: "Show when" },
+    opacity: { kind: "range", label: "Opacity", def: 1 },
+    shade: { kind: "range", label: "Shade (0 black, 1 as drawn)", def: 1 },
+    mirror: { kind: "check", label: "Mirror", def: false },
+    rotate: { kind: "number", label: "Rotate (degrees)", def: 0, step: 1 }
+  };
+
+  /** One field for a setting of a known kind; `onSet` gets the new value (undefined: remove it). */
+  function typedField(spec, value, onSet) {
+    const wrap = (input) => el("label", { className: `editor-setting${spec.kind === "check" ? " check" : ""}` }, [el("span", { textContent: spec.label }), input]);
+    if (spec.kind === "conditions") {
+      const input = el("textarea", { value: [].concat(value ?? []).join("\n"), rows: 2, placeholder: spec.hint });
+      input.onchange = () => {
+        const list = input.value.split("\n").map((line) => line.trim()).filter(Boolean);
+        onSet(list.length ? list : undefined);
+      };
+      return wrap(input);
+    }
+    if (spec.kind === "choice") {
+      const input = el("select", {}, spec.options.map((option) => el("option", { value: option, textContent: option, selected: option === (value ?? spec.def) })));
+      input.onchange = () => onSet(input.value === spec.def ? undefined : input.value);
+      return wrap(input);
+    }
+    if (spec.kind === "check") {
+      const input = el("input", { type: "checkbox", checked: value ?? spec.def });
+      input.onchange = () => onSet(input.checked === spec.def ? undefined : input.checked);
+      return wrap(input);
+    }
+    if (spec.kind === "range") {
+      const shown = el("output", { textContent: String(value ?? spec.def) });
+      const input = el("input", { type: "range", min: 0, max: 1, step: 0.05, value: value ?? spec.def });
+      input.oninput = () => (shown.textContent = input.value);
+      input.onchange = () => onSet(Number(input.value) === spec.def ? undefined : Number(input.value));
+      return el("label", { className: "editor-setting" }, [el("span", { textContent: spec.label }), el("div", { className: "editor-range" }, [input, shown])]);
+    }
+    if (spec.kind === "point") {
+      const [x, y] = Array.isArray(value) ? value : [0, 0];
+      const inputs = [x, y].map((n) => el("input", { type: "number", value: n, step: 1 }));
+      for (const input of inputs) input.onchange = () => onSet(inputs.map((item) => Math.round(Number(item.value) || 0)));
+      return el("label", { className: "editor-setting" }, [el("span", { textContent: spec.label }), el("div", { className: "editor-point" }, inputs)]);
+    }
+    const input = el("input", { type: "number", value: value ?? spec.def, step: spec.step ?? 1, min: spec.min, max: spec.max });
+    input.onchange = () => {
+      const number = Number(input.value);
+      onSet(input.value === "" || number === spec.def ? undefined : number);
+    };
+    return wrap(input);
+  }
+
+  /** A part inside a UI layer: proper fields for what the engine knows, text for the rest. */
+  function layerSettings(target) {
+    const ref = target.ref;
+    const key = `${target.lv.uiId}:${original.get(ref)}`;
+    const rows = [];
+    const setValue = (name, value) => changeSettings(`Change ${name}`, [ref], () => {
+      if (value === null || value === undefined) delete ref[name];
+      else ref[name] = value;
+      const entry = edits.settings.get(key) ?? { uiId: target.lv.uiId, index: original.get(ref), values: {} };
+      edits.settings.set(key, { ...entry, values: { ...entry.values, [name]: value ?? null } });
+    });
+
+    for (const [name, spec] of Object.entries(SINGLES)) {
+      if (name === "mirror" && ref.swing) continue;
+      rows.push(typedField(spec, ref[name], (value) => setValue(name, value)));
+    }
+    for (const [name, group] of Object.entries(GROUPS)) {
+      if (group.types && !group.types.includes(ref.type)) continue;
+      const current = ref[name];
+      if (!current || typeof current !== "object") {
+        rows.push(button(`＋ ${group.title}`, () => setValue(name, group.start(ref)), { className: "editor-add-group" }));
+        continue;
+      }
+      const setPart = (part, value) => {
+        const next = { ...current };
+        if (value === undefined) delete next[part];
+        else next[part] = value;
+        setValue(name, next);
+      };
+      rows.push(el("fieldset", { className: "editor-group" }, [
+        el("legend", { textContent: group.title }),
+        ...Object.entries(group.fields).map(([part, spec]) => typedField(spec, current[part], (value) => setPart(part, value))),
+        button(`Remove ${name}`, () => setValue(name, undefined), { className: "danger" })
+      ]));
+    }
+    if (!ref.id && (ref.swing || ref.walk || ref.clip)) rows.push(el("p", { className: "editor-hint warn", textContent: "Swing, walk and clip need an id (below), so they keep going across redraws." }));
+
+    // Everything else, as text: a number, text, or JSON for lists.
+    const known = new Set(["type", "at", "children", ...Object.keys(SINGLES), ...Object.keys(GROUPS)]);
+    const show = (value) => (typeof value === "string" ? value : JSON.stringify(value));
+    const read = (text) => {
+      const trimmed = text.trim();
+      if (trimmed === "") return undefined;
+      try {
+        return JSON.parse(trimmed);
+      } catch {
+        return trimmed;
+      }
+    };
+    for (const name of Object.keys(ref).filter((name) => !known.has(name))) rows.push(field(name, show(ref[name]), (text) => setValue(name, read(text))));
+    const offered = [...(ELEMENT_PROPS[ref.type] ?? []), "id", "style"].filter((item) => !known.has(item) && !(item in ref));
+    const name = el("input", { placeholder: "setting" });
+    name.setAttribute("list", "editor-known-settings");
+    const value = el("input", { placeholder: "value" });
+    rows.push(
+      el("datalist", { id: "editor-known-settings" }, offered.map((item) => el("option", { value: item }))),
+      el("div", { className: "editor-setting-new" }, [name, value, button("Add", () => name.value.trim() && setValue(name.value.trim(), read(value.value)))]),
+      el("p", { className: "editor-hint", textContent: "Empty a text value to remove it. Lists are JSON, such as [\"#000\", \"#fff\"]." })
+    );
+    return rows;
+  }
+
+  /** Makes a new screen on the world canvas from a picture, saves it, and goes there. */
+  async function makeScreen(picture) {
+    const label = slugOf(screenName);
+    const fail = (text) => { status = text; drawPanel(); };
+    if (!label) return fail("Give the new screen a name first.");
+    if (session.vault.world?.[label] || session.vault.notes[label]) return fail(`There is already a screen or note named ${label}.`);
+    if (editCount()) return fail("Save or undo your changes first, then make the screen.");
+    if (!host?.saveEdits) return fail("Saving works in the desktop app (npm run app).");
+    const [width, height] = await pictureSize(picture.url);
+    const worldPath = session.vault.worldPath ?? "World.canvas";
+    const title = screenName.trim();
+    const result = await host.saveEdits({
+      canvases: { [worldPath]: { boxes: [], screens: [{ label, file: picture.path, width, height }] } },
+      notes: {},
+      create: { [`screens/${label}/${label}.md`]: screenNoteText(label, title) },
+      since: since()
+    });
+    if (result.error) return fail(`Could not make the screen: ${result.error}`);
+    if (result.conflicts.length) return fail(`${result.conflicts.join(", ")} changed on disk. Reload the game, then try again.`);
+    await reloadVault?.();
+    session.runEffects([`screen ${label}`], "editor");
+    adding = null;
+    screenName = "";
+    selected = null;
+    level = null;
+    status = `Made screen ${label} on ${worldPath}. Add parts to it, and an exit to it from another screen.`;
+    refresh();
+  }
+
+  /** The Add section: pictures, things (objects, items, UI), or a new screen. */
+  function addSection() {
+    const tabs = el("div", { className: "editor-add-tabs" }, [
+      ["picture", "＋ Picture"],
+      ["thing", "＋ Thing"],
+      ["exit", "＋ Exit"],
+      ["screen", "＋ New screen"]
+    ].map(([mode, text]) => button(text, () => { adding = adding === mode ? null : mode; drawPanel(); }, { className: adding === mode ? "on" : "" })));
+    if (!adding) return el("div", { className: "editor-add" }, [tabs]);
+
+    const find = el("input", { type: "search", placeholder: "Search", value: search });
+    find.oninput = () => {
+      search = find.value;
+      drawPanel();
+      const again = panel.querySelector(".editor-add input[type=search]");
+      again?.focus();
+      again?.setSelectionRange(search.length, search.length);
+    };
+    const words = search.toLowerCase().split(/\s+/).filter(Boolean);
+    const matches = (text) => words.every((word) => text.toLowerCase().includes(word));
+    const parts = [tabs];
+
+    if (adding === "screen") {
+      const name = el("input", { type: "text", placeholder: "Screen name, such as home", value: screenName });
+      name.oninput = () => (screenName = name.value);
+      parts.push(name, el("p", { className: "editor-hint", textContent: "Then click the picture for its background. The name is also its title; a screen note is made with it." }));
+    }
+    if (adding === "exit") {
+      const screens = Object.keys(session.vault.world ?? {}).filter((id) => id !== screenId() && matches(id));
+      parts.push(el("p", { className: "editor-hint", textContent: "A button that goes to another screen. Choose where it goes:" }), el("ul", { className: "editor-things" }, screens.map((id) => el("li", {}, [button(`→ ${id}`, () => addExit(id))]))));
+    } else if (adding === "thing") {
+      const here = new Set([...(built()?.objects ?? []).map((object) => object.id), ...(built()?.elements ?? []).filter((element) => element.type === "ui").map((element) => element.ui)]);
+      const things = ["object", "item", "ui"].flatMap((type) => session.notesOfType(type).map((note) => ({ ...note, type })))
+        .filter((note) => !here.has(note.id) && matches(`${note.id} ${note.type}`));
+      parts.push(find, el("ul", { className: "editor-things" }, things.length
+        ? things.map((note) => el("li", {}, [button(`${note.id}`, () => addThing(note)), el("span", { textContent: note.type })]))
+        : [el("li", { textContent: "Nothing to add: every object, item and UI is on this screen." })]));
+    } else {
+      const pictures = (session.vault.pictures ?? []).filter((picture) => matches(picture.path));
+      parts.push(find, el("div", { className: "editor-pictures" }, pictures.slice(0, 60).map((picture) =>
+        el("button", { title: picture.path, onclick: () => (adding === "screen" ? makeScreen(picture) : addPicture(picture)) }, [
+          el("img", { src: picture.url, alt: "", loading: "lazy" }),
+          el("span", { textContent: picture.name })
+        ]))));
+      if (pictures.length > 60) parts.push(el("p", { className: "editor-hint", textContent: `${pictures.length - 60} more: search to find them.` }));
+    }
+    return el("div", { className: "editor-add" }, parts);
+  }
+
   // ---------------------------------------------------------------- panel
 
   const el = (tag, props = {}, children = []) => {
@@ -518,13 +1090,16 @@ export function createEditor({ session, stage, render, host }) {
     if (!on) return;
     const list = targets();
     const current = list.find((target) => target.key === selected);
-    const pending = edits.boxes.size + edits.order.size + edits.props.size + edits.focus.size;
+    const pending = editCount();
 
     const crumbs = el("div", { className: "editor-crumbs" }, level
       ? [button("‹ Screen", closeLayer), el("span", { textContent: ` ▸ ${level.label}` })]
-      : [el("span", { textContent: `Screen: ${screenId()}` })]);
+      : [el("span", { textContent: "Screen:" }), screenPicker()]);
 
-    let fields = el("p", { className: "editor-hint", textContent: "Click a box to select it. Double-click a layer to edit inside it." });
+    let fields = el("div", { className: "editor-fields" }, [
+      el("p", { className: "editor-hint", textContent: "Click a box to select it. Double-click a layer to edit inside it." }),
+      ...(level ? [] : [el("h3", { textContent: "Screen settings" }), el("div", { className: "editor-settings" }, screenSettings())])
+    ]);
     if (current) {
       const at = current.ref[current.field].map(round);
       const inputs = ["x", "y", "w", "h"].map((name, index) => {
@@ -546,7 +1121,14 @@ export function createEditor({ session, stage, render, host }) {
         el("div", { className: "editor-xywh" }, inputs),
         ...(current.canOpen ? [button("Edit inside ▸", () => openLayer(current))] : []),
         ...(isPortrait(current) && portraitNote() ? [framingFields(portraitNote())] : []),
-        ...(isPicture(current) ? [el("p", { className: "editor-hint", textContent: "Option-drag inside the box to slide the picture in it." })] : [])
+        ...(isPicture(current) ? [el("p", { className: "editor-hint", textContent: "Option-drag inside the box to slide the picture in it." })] : []),
+        ...(isPicture(current) && built().objects.some((object) => object.follows === current.node) ? [button("Remove the click shape", () => unlinkShape(current.ref))] : []),
+        ...(current.kind === "object" ? [shapePicker(current.ref)] : []),
+        ...(() => {
+          const rows = settingsFor(current);
+          return rows.length ? [el("h3", { textContent: "Settings" }), el("div", { className: "editor-settings" }, rows)] : [];
+        })(),
+        ...(!current.lv && current.node && !current.key.startsWith("panel:") ? [button("Remove from screen", () => removePart(current), { className: "danger" })] : [])
       ]);
     }
 
@@ -572,6 +1154,8 @@ export function createEditor({ session, stage, render, host }) {
       el("h2", { textContent: "Edit screen" }),
       crumbs,
       fields,
+      el("h3", { textContent: "Add" }),
+      level ? el("p", { className: "editor-hint", textContent: "Go back to the screen to add parts." }) : addSection(),
       el("h3", { textContent: "Layers (front at the top)" }),
       layers,
       el("h3", { textContent: "Preview" }),
@@ -584,6 +1168,37 @@ export function createEditor({ session, stage, render, host }) {
       ]),
       el("p", { className: `editor-status${stale ? " warn" : ""}`, textContent: status || (stale ? "The vault changed on disk while you were editing. Save will ask before overwriting." : "Cmd+S saves · Cmd+Z undoes · Esc goes back · arrows nudge (Shift: 10)") })
     );
+  }
+
+  /** A list of this screen's pictures; choosing one gives the object its shape. */
+  function shapePicker(object) {
+    const images = built().elements.filter((element) => element.type === "image" && element.node && element.id !== `${screenId()}-picture`);
+    const choose = el("select", {}, [
+      el("option", { value: "", textContent: images.length ? "Click shape from a picture…" : "No pictures on this screen to take a shape from" }),
+      ...images.map((image) => el("option", { value: image.node, textContent: image.id }))
+    ]);
+    choose.onchange = () => {
+      const image = images.find((item) => item.node === choose.value);
+      if (image) linkShape(object, image);
+    };
+    return choose;
+  }
+
+  /** Goes to another screen to edit it (after saving or undoing changes here). */
+  function screenPicker() {
+    const choose = el("select", { title: "Edit another screen" }, Object.keys(session.vault.world ?? {}).map((id) => el("option", { value: id, textContent: id, selected: id === screenId() })));
+    choose.onchange = () => {
+      if (editCount()) {
+        status = "Save or undo your changes first, then change screen.";
+        return drawPanel();
+      }
+      session.runEffects([`screen ${choose.value}`], "editor");
+      selected = null;
+      adding = null;
+      status = "";
+      refresh();
+    };
+    return choose;
   }
 
   /** Number fields for each portrait layer, for this character. */
@@ -655,6 +1270,21 @@ export function createEditor({ session, stage, render, host }) {
         (canvases[worldPath] ??= { boxes: [] }).boxes.push({ node: target.node, x: ox + x * unit, y: oy + y * unit, width: w * unit, height: h * unit });
       }
     }
+    // New cards first (the save adds them before it moves boxes), then arrows.
+    for (const part of edits.add.values()) {
+      const [x, y, w, h] = part.ref[part.field];
+      const card = part.text != null ? { text: part.text } : { file: part.file };
+      (canvases[worldPath] ??= { boxes: [] }).add = [...(canvases[worldPath].add ?? []), { node: part.node, ...card, x: ox + x * unit, y: oy + y * unit, width: w * unit, height: h * unit }];
+    }
+    if (edits.links.size) (canvases[worldPath] ??= { boxes: [] }).links = [...edits.links.values()];
+    if (edits.unlinks.size) (canvases[worldPath] ??= { boxes: [] }).unlinks = [...edits.unlinks.values()];
+    if (edits.remove.size) (canvases[worldPath] ??= { boxes: [] }).remove = [...edits.remove.keys()];
+    if (edits.cards.size) (canvases[worldPath] ??= { boxes: [] }).cards = [...edits.cards.entries()].map(([node, fields]) => ({ node, ...fields }));
+    if (edits.exits.size) (canvases[worldPath] ??= { boxes: [] }).exits = [...edits.exits.values()];
+    for (const { uiId, index, values } of edits.settings.values()) {
+      const path = vault.notes[uiId].path;
+      (notes[path] ??= { boxes: [] }).settings = [...(notes[path].settings ?? []), { index, values }];
+    }
     for (const [node, value] of edits.focus) {
       (canvases[worldPath] ??= { boxes: [] }).focus = [...(canvases[worldPath].focus ?? []), { node, value }];
     }
@@ -670,8 +1300,13 @@ export function createEditor({ session, stage, render, host }) {
         (notes[note.path] ??= { boxes: [] }).order = note.blocks.Elements.map((element) => original.get(element));
       }
     }
-    const since = lastSave && lastSave > vault.builtAt ? lastSave : vault.builtAt;
-    return { canvases, notes, since };
+    return { canvases, notes, since: since() };
+  }
+
+  /** When this copy of the vault was loaded (or last saved by us): later disk changes are someone else's. */
+  function since() {
+    const vault = session.vault;
+    return lastSave && lastSave > vault.builtAt ? lastSave : vault.builtAt;
   }
 
   async function save(force = false) {
@@ -690,7 +1325,13 @@ export function createEditor({ session, stage, render, host }) {
     } else {
       status = `Saved ${result.saved.join(", ")}.`;
       lastSave = new Date().toISOString();
-      edits = { boxes: new Map(), order: new Map(), props: new Map(), focus: new Map() };
+      // New cards and arrows: load the rebuilt world, so the screen is exactly what was saved.
+      const rebuilt = edits.add.size || edits.links.size || edits.unlinks.size || edits.remove.size || edits.exits.size;
+      if (rebuilt && reloadVault) {
+        await reloadVault();
+        lastSave = null;
+      }
+      edits = freshEdits();
       undo = [];
       redo = [];
       stale = false;
@@ -702,7 +1343,7 @@ export function createEditor({ session, stage, render, host }) {
 
   function toggle(value = !on) {
     if (value === on) return;
-    if (!value && (edits.boxes.size || edits.order.size || edits.props.size || edits.focus.size) && !confirm("Leave without saving? Your edits stay on screen until the game reloads.")) return;
+    if (!value && editCount() && !confirm("Leave without saving? Your edits stay on screen until the game reloads.")) return;
     on = value;
     session.paused = on;
     setEditorPreview(on);
@@ -717,7 +1358,7 @@ export function createEditor({ session, stage, render, host }) {
   }
 
   window.addEventListener("keydown", (event) => {
-    if (!on || event.target.closest?.("input, textarea")) return;
+    if (!on || event.target.closest?.("input, textarea, select")) return;
     const meta = event.metaKey || event.ctrlKey;
     if (meta && event.key.toLowerCase() === "s") { event.preventDefault(); save(); return; }
     if (meta && event.key.toLowerCase() === "z") { event.preventDefault(); (event.shiftKey ? doRedo : doUndo)(); return; }
@@ -758,7 +1399,7 @@ export function createEditor({ session, stage, render, host }) {
 
   return {
     get on() { return on; },
-    get dirty() { return Boolean(edits.boxes.size || edits.order.size || edits.props.size || edits.focus.size); },
+    get dirty() { return BooleaneditCount(); },
     panelWidth: () => (on ? PANEL_WIDTH : 0),
     toggle,
     /** The vault was rebuilt on disk while editing with unsaved changes. */

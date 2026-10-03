@@ -241,7 +241,14 @@ export async function compileVault(vaultDir = VAULT_DIR) {
     }
   }
 
-  return { builtAt: new Date().toISOString(), notes, world: world?.screens ?? null, worldPath, trees, errors };
+  // Pictures the screen editor can add: finished art, not clean originals,
+  // single animation frames, or the .jpg twins of .webp files.
+  const pictures = files
+    .map((file) => relative(vaultDir, file).split(sep).join("/"))
+    .filter((path) => /\.(webp|png|jpe?g|gif|svg)$/i.test(path) && !/(^|\/)(_source|_old|\.)/.test(path) && !/-\d{2}\.webp$/i.test(path))
+    .filter((path) => !/\.jpe?g$/i.test(path) || !files.some((file) => file.endsWith(path.replace(/\.jpe?g$/i, ".webp").split("/").join(sep))))
+    .map((path) => ({ name: path.split("/").pop(), path, url: assets.get(path.split("/").pop().toLowerCase()) }));
+  return { builtAt: new Date().toISOString(), notes, world: world?.screens ?? null, worldPath, trees, pictures, errors };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

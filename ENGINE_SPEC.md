@@ -688,11 +688,15 @@ The game's screens are built on one Obsidian Canvas, named in `Game.md` as `worl
 | The **image card** in a group | The scene picture. It sets the screen frame: its width becomes 640 game pixels, and everything else is measured from it. |
 | An **image card** on the picture | An image layer. |
 | An **object note** card on the picture | That object, clickable where the card sits. |
+| An **item note** card on the picture | That item lying in the scene. A click picks it up (`item <id> held`), and then it is gone from the scene. |
 | A **ui note** card on the picture | That UI, drawn in the card's box. |
 | A **text card** | Text on the screen. If it embeds a picture (`![[some-picture.webp]]`), it is an image layer. |
 | A first line `if <condition>` in a text card | The card shows only when the condition is true. |
 | An **arrow** from a text card to another screen group | That card becomes a button that goes there. An arrow label `if <condition>` also gates it. |
 | An **arrow** from an object card to a ui note card inside the frame | Where that object's UI opens. If the ui card is outside the frame, the object's `panel` property is used. |
+| An **arrow** from an object or item card to an image card | **Click shape.** The object takes that picture's box and its shape: only the picture's solid pixels take clicks and show the hover glow; a click on its see-through part goes to what is behind. The object moves with the picture. An item's picture also goes when the item is picked up. |
+| `if: <condition>` on an image card | The picture shows only while the condition holds (set it in the editor's settings). |
+| `focus: [x, y]` on an image card | Where the picture sits inside its box, in percent (`[50, 50]` is the middle, the default). A picture fills its box (cover), so it slides only the way it sticks out. Set it with **Option-drag** in the editor (12.7). The click shape slides with it. |
 | **Cards outside screen groups** | Notes for people. The engine ignores them. |
 
 Rules:
@@ -700,7 +704,8 @@ Rules:
 - **Order is layering.** Cards later in the canvas draw on top. The screen's `ui` note (for example the camera overlay) draws above the canvas cards. Objects and buttons draw above that.
 - **A variant picture** (for example the yard with the power cut) is a text card with `if flag.gate-open` and the picture. Put it *before* the main picture in the canvas order, so Obsidian shows the normal picture on top while you edit. The game draws it above when its condition holds.
 - **A screen with no picture** uses the group box as its frame and the theme's `screen` colour.
-- **The checker** reports a card that points to a missing file, and a card on a screen that is not an image, object, or ui note.
+- **The checker** reports a card that points to a missing file, and a card on a screen that is not an image, object, item, or ui note.
+- **A person or prop you click** (Arthur at his desk, a torch on a shelf): cut the picture out of a green screen (a `cutout` card), put it on the screen, put the object or item card on it, and draw an arrow from that card to the picture. The arrow label does not matter (`shape` is a good one).
 - **Screen notes still hold settings,** such as `title`, `objective`, and the overlay `ui`. A screen that is not on the world canvas falls back to its `ui` note and object `rect` values.
 
 ### 7.4 Make assets with AI on a canvas (working now)
@@ -715,7 +720,7 @@ Rules:
 
 `Assets.canvas` keeps the guide, the model list, and the **style library**. A canvas uses a style by holding its own copy of the card (copy it from the library) with an arrow to the recipe.
 
-**Templates.** `npm run new -- character "Mira" "a tired night nurse in her 50s, short grey hair, blue scrubs"` (or Game Tools → *New character…* in Obsidian) makes a character's folder: the character note, one profile, four starter actions with lines and `## Mock` rules (ask what they want, answer a question, say no, end the talk), a lines note, a dialogue tree, an outcome, a portraits note to fill in, and its canvas with every art recipe ready (room, actor, moods and blinks, talking loops, the booth composite), all `status: idea`. It can be talked to at once, offline, through the vault Mock. `scene` and `item` work the same: a screen note, its art canvas (background, a prop and its cut-out) and a group on `World.canvas`; or an item note and its art canvas. Nothing is generated or spent until you run a card.
+**Templates.** `npm run new -- character "Mira" "a tired night nurse in her 50s, short grey hair, blue scrubs"` (or Game Tools → *New character…* in Obsidian) makes a character's folder: the character note, one profile, four starter actions with lines and `## Mock` rules (ask what they want, answer a question, say no, end the talk), a lines note, a dialogue tree, an outcome, a two-layer portraits note, and its canvas with every art recipe ready (room, actor, moods and blinks, talking loops, the booth composite, and *In the scene*: the character placed in a screen and cut out, their talk-portrait cutout, and the background crop), all `status: idea`. It can be talked to at once, offline, through the vault Mock. `scene` and `item` work the same: a screen note, its art canvas (background, a prop and its cut-out) and a group on `World.canvas`; or an item note and its art canvas (a picture and its cut-out, ready to lay in a scene with a click shape). Nothing is generated or spent until you run a card.
 
 File names stay unique across the whole vault, so links such as `[[booth-guard-talk-01.webp]]` work wherever a file lives.
 
@@ -735,8 +740,9 @@ prompt: warehouse car-park gate at dawn …
 | `style` | Holds `lora:` (`<url> @0.9`, one or a list), `prefix:`, `suffix:`, and `template:` (wraps the recipe prompt where it says `{prompt}`, for LoRAs trained on a fixed caption). An arrow from it adds these to a recipe. It is never run by itself. |
 | `image` | Text to image. `model:` `z-image` (Z-Image Turbo, about $0.004 a picture, best for empty pre-rendered rooms), `krea-2` (Krea 2 Turbo, about $0.006, best for 1990s-looking actors on a chroma-key screen), `flux-lora` (FLUX.1 [dev], takes FLUX.1 LoRAs, about $0.035) or `flux-2-lora` (FLUX.2 [dev], FLUX.2 LoRAs only). Also `size`, `seed`, `steps`, `guidance`, `width` (output scale). |
 | `edit` | Changes the pictures that point to it (the references), as its prompt says: the same person with a new mood, pose or angle. `model:` `qwen-edit` (Qwen Image Edit 2511, about $0.024, the default: kept Arthur's face best) or `flux2-edit` (FLUX.2 [dev] edit, about $0.021). A style card's `template` is a good place for "keep the same man, framing and green screen; only change {prompt}". Blinks are edits too: eyes half closed, eyes closed. |
-| `cutout` | No AI call, free. Keys the picture that points to it off its green or blue screen, trims it, and keeps it transparent (crunched with transparency kept), so a prop can be layered over a scene. `mirror: true` also writes `<name>-mirrored.webp`. The gate leaf, posts and call panel are cut-outs. Fed by an `animate` card instead, it keys every frame of the clip (one screen colour, one trim box) into a transparent limited animation: a walk cycle in place that the engine moves with `walk`, or a walk across the whole frame that `clip` plays (`arthur-cross-cut`, `dog-cross-cut`). |
+| `cutout` | No AI call, free. Keys the picture that points to it off its green or blue screen, trims it, and keeps it transparent (crunched with transparency kept), so a prop can be layered over a scene. `mirror: true` also writes `<name>-mirrored.webp`. `keyLow` and `keyHigh` (0–1, defaults 0.3 and 0.65) set how green a pixel must be to go see-through; raise them (`0.5`, `0.85`) when green light makes parts of the picture half see-through. `despill: strong` pulls the green tint off what is left, for chrome and other shiny things. Keep green out of the picture itself: a green lamp shade vanishes with the screen. The gate leaf, posts and call panel are cut-outs. Fed by an `animate` card instead, it keys every frame of the clip (one screen colour, one trim box) into a transparent limited animation: a walk cycle in place that the engine moves with `walk`, or a walk across the whole frame that `clip` plays (`arthur-cross-cut`, `dog-cross-cut`). |
 | `composite` | No AI call, free. With several `actor` arrows it makes one picture per actor, `<card>-<actor>.webp`, all with the same placement; `align: true` keys them together (one screen colour, one trim box) so moods and blinks line up exactly. An arrow labelled `room` (a picture of an empty room) and one labelled `actor` (an actor on a green or blue screen) come in. The runner keys the actor off the screen with a colour-difference key, trims them, and pastes them over the room with slightly wrong lighting and hard edges, like a 1990s FMV game. `shot` (`full` or `waist-up`), `height` and `x` (shares of the frame), and `seed` place the actor; `brightness`, `contrast`, `temperature`, `feather` and `shadow` override the seeded look. Crunch applies as for images. | If the `actor` arrow comes from an `animate` card, every frame of that card's clean clip is keyed (one screen colour read from the first frame, one trim box for all frames, so nothing flickers or jumps) and pasted over the still room; the result is a limited animation (`name.webp`, frames, `name.mp4`) with the animate card's frame count and speed and the composite card's crunch and colours. Animate the actor on the green screen, not the finished composite: the room then stays perfectly still, as in the original games.
+| `crop` | No AI call, free. Cuts a box out of the picture that points to it: `box: [x, y, w, h]` (in that picture's pixels, or a World.canvas card box when the picture is a scene picture, as `[482, 260, 323, 250]`), plus `bleed: 10` pixels all round. Used for the background layer of a talk portrait: the scene behind the character's click box. |
 | `animate` | Image to video with `model: h3-max-turbo` (about $0.13 for 5 s at 480p) or `minimax-h3` (about $0.25), then **limited animation**. An arrow from an image (a file card or an image recipe) is the first frame. An arrow labelled `end` is the last frame. With no `end`, the clip ends on its first frame, so it loops. |
 
 Limited animation settings on `animate` cards:
@@ -946,7 +952,7 @@ provider(context, availableActions) → { action, confidence, reason, judgments?
 
 ## 11. Compiler and checker
 
-Command: `npm run vault:check` (also part of `npm run check`). It compiles the vault, builds every character, runs the detector tests, and writes the report (11.3). The app and the workbench compile the vault themselves when they start, and again each time you save a note. A `--watch` mode that rewrites the report on every save is not built yet.
+Command: `npm run vault:check` (also part of `npm run check`). It compiles the vault, builds every character, runs the detector tests, and writes the report (11.3). The app and the workbench compile the vault themselves when they start, and again each time you save a note. `npm run vault:watch` (`vault:watch:silver` for The Silver Edit) checks again after every save and rewrites the report; the report itself and `.obsidian` do not count as saves.
 
 ### 11.1 Reading notes
 
@@ -1031,14 +1037,32 @@ Obsidian does files, text, links, search, graph, and trees. It cannot do three t
 Press **Cmd+E** in the desktop app (**Game → Edit screen**) to edit the screen you are on, on top of the real game picture. The scene freezes (the clocks pause) and every part of the screen gets a box.
 
 - **Select** a box, or a row in the layer list. **Drag** to move; drag a **corner** to resize, with **Shift** to keep the shape; **arrow keys** nudge 1 pixel (Shift: 10). The x, y, w, h fields take exact numbers.
+- **Snap:** while you drag, a box's edges and middle snap to the edges and middles of the other boxes and of the screen, when they come within 6 pixels. Hold **Cmd** to drag freely.
+- **Pictures:** **Option-drag** inside a picture's box slides the picture inside it; the box stays put (saved as `focus` on its card, 7.3). A picture with a click shape (an arrow from an object or item card) is one box, labelled `picture (click: object)`: moving it moves the click area too, and its click shape shows inside the box (cyan; pink when selected).
+- **Talk portrait:** **Option-drag** inside the portrait box moves the character; **Option-Shift-drag** moves the background layer (saved in the character's portraits note as `offset`/`zoom` and `backdropFocus`/`backdropZoom`).
 - **Layers:** the screen's cards (UI layers, images, text), its objects, and its exits, front at the top. **▲ ▼** change the drawing order; **●** hides a layer while you edit (not saved). The scene picture is locked: it sets the screen's frame.
 - **Edit inside:** **▸**, or click a layer twice, opens a UI layer (such as [[gate-front]]) to edit its parts; **Esc** goes back.
 - **Preview:** switches for flags, open objects and items, to see the screen in another state.
-- **Undo / Redo** (Cmd+Z, Shift+Cmd+Z). **Save** (Cmd+S) writes into the vault: card boxes and order on `World.canvas`, and element boxes (`at`) and order in UI notes. Only the changed text is replaced, so comments and formatting stay (`lib/editor-save.mjs`). If a file changed on disk since you started (in Obsidian, say), it asks before overwriting.
+- **Add** (screen level only):
+  - **＋ Picture:** the vault's finished pictures (not `_source` originals, single animation frames, or `.jpg` twins), with search. A click puts the picture in the middle of the screen, a third of its width.
+  - **＋ Thing:** the object, item and UI notes not yet on this screen. An object or item goes in as a small box, a UI as half the screen.
+  - **＋ Exit:** choose a screen. A button that goes there appears at the bottom (a text card with an arrow to that screen's group). Change its label, where it goes, and when it shows in its settings.
+  - **＋ New screen:** type a name, then click a picture. It saves at once: a new group with that picture, below everything on `World.canvas`, and a screen note (`screens/<name>/<name>.md`, the name as its title), and the editor goes there. Then add parts, and an exit to it from another screen.
+- **Screen list** at the top of the panel: go to another screen to edit it (save or undo first).
+- **Screen settings** (nothing selected): the screen note's *Title*, *Objective* and *Overlay* (a UI note drawn over the whole screen). A screen with no note gets a **Make a screen note** button.
+- **Settings** for the selected part (each change can be undone, and is written on Save):
+  - **Picture:** which picture it shows, and *Show when* (a condition, saved as `if:` on its card).
+  - **Text card:** its text, and *Show when* (its first line `if …`).
+  - **Exit:** its label, *Goes to* (the screen), and *Show when* (the arrow label `if …`).
+  - **Object or item:** its note's `label`, `key`, `visible` (*Show when*, one condition per line) and `use` (*On click*, one effect per line). The note is shared, so this changes it on every screen.
+  - **A part inside a UI layer:** its own fields for what the engine knows: *Show when*, *Opacity* and *Shade* (sliders), *Mirror*, *Rotate*, and a group of fields each for **Swing** (while, hinge, how far, seconds, steps), **Walk** (while, to x and y, seconds, steps a second, comes back, repeats) and **Clip** (images only: while, frames, frames a second, wait, gap, plays back, repeats). **＋** adds one with starting values; *Remove* takes it off. A field left at the engine's default is not written. Every other setting is a text box (text, a number, or JSON for lists); an empty value removes it; *Add* adds one (the box suggests the settings that element type takes). Only that setting's text changes in the note, in the note's own style.
+- **Click shape:** select an object, then choose a picture in *Click shape from a picture…* (an arrow on the canvas). Select the picture and press **Remove the click shape** to undo it.
+- **Remove from screen** takes a card and its arrows off `World.canvas`. Removing a picture removes its click shape too.
+- **Undo / Redo** (Cmd+Z, Shift+Cmd+Z). **Save** (Cmd+S) writes into the vault: new and removed cards, arrows, card boxes and order on `World.canvas`, and element boxes (`at`) and order in UI notes. Only the changed text is replaced, so comments and formatting stay (`lib/editor-save.mjs`). If a file changed on disk since you started (in Obsidian, say), it asks before overwriting.
 - Parts of the screen stay on the scene picture, because a card dragged off it would drop out of the screen.
 - The game page on the workbench server (`/player/index.html`) has the same editor, saving through the workbench.
 
-**Not yet:** adding new parts from an asset panel, a settings panel for each part (picture, shade, swing, walk, clip, visible), making a new screen, editing parts nested deeper than one layer, and an animation timeline.
+**Not yet:** editing parts nested deeper than one layer, and an animation timeline.
 
 ## 13. Moving Arthur over
 
@@ -1053,7 +1077,7 @@ Each step keeps the game working. Steps 3 to 6 are proven by `tests/vault-engine
 | 5 | Endings and limits as event and outcome notes. | **Done.** Ending sounds are in the outcome notes. |
 | 6 | The fake ID and company call as Canvas tree `script` nodes. | **Done.** |
 | 7 | Screens and hotspots from notes. | **Done** (World.canvas). |
-| 8 | Reports in `_reports/` and `--watch`. | Half: `npm run vault:check`, no watch. |
+| 8 | Reports in `_reports/` and `--watch`. | **Done:** `npm run vault:check`, and `npm run vault:watch`. |
 | 9 | Workbench: hotspot tool. | Replaced by the screen editor (12.7): objects and exits are boxes you drag. |
 | 10 | Workbench: play and replay, with Open in Obsidian links. | Play done; replay not built. |
 | 11 | **Proof:** add a second NPC at Guard Tower 04 with notes and a canvas only. | Next. The character template and the vault Mock make this possible; it needs an object on the tower screen to talk to them. |

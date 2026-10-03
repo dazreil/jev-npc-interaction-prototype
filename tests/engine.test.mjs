@@ -214,6 +214,25 @@ test("an arrow from an object to a picture gives the object that picture's box a
   assert.deepEqual(slid.objects[0].maskFocus, [50, 0], "the click shape slides with it");
 });
 
+test("an item card on a screen is picked up by a click, and its picture goes with it", () => {
+  const canvas = {
+    nodes: [
+      { id: "g", type: "group", label: "shed", x: 0, y: 0, width: 1400, height: 900 },
+      { id: "pic", type: "file", file: "shed.webp", x: 0, y: 0, width: 1280, height: 720 },
+      { id: "torch-pic", type: "file", file: "torch-cut.webp", x: 200, y: 400, width: 100, height: 40 },
+      { id: "torch-card", type: "file", file: "torch.md", x: 0, y: 0, width: 50, height: 50 }
+    ],
+    edges: [{ id: "e", fromNode: "torch-card", toNode: "torch-pic", label: "shape" }]
+  };
+  const { screens, errors } = buildWorld(canvas, { notes: { torch: { type: "item" } }, asset: (name) => (name.endsWith(".webp") ? `/a/${name}` : null) });
+  assert.deepEqual(errors, []);
+  const [torch] = screens.shed.objects;
+  assert.equal(torch.item, true);
+  assert.deepEqual(torch.rect, [100, 200, 50, 20], "the item takes its picture's box");
+  assert.equal(torch.mask, "/a/torch-cut.webp");
+  assert.deepEqual(screens.shed.elements.find((element) => element.node === "torch-pic").visible, ["not item.torch"], "the picture goes once the torch is picked up");
+});
+
 test("a swing opens on its condition; mirror flips; the two do not mix", () => {
   const resolved = resolveUi(
     {
@@ -291,8 +310,57 @@ test("the screen editor saves boxes and order without touching anything else", a
   const next = JSON.parse(editCanvas(canvas, { boxes: [{ node: "a", x: 10.4, y: 20, width: 30, height: 40 }], order: ["b", "a"] }));
   assert.deepEqual(next.nodes.map((node) => node.id), ["p", "b", "a"]);
   assert.deepEqual(next.nodes[2], { id: "a", x: 10, y: 20, width: 30, height: 40 });
+  const grown = JSON.parse(editCanvas(canvas, {
+    screens: [{ label: "hall", file: "hall.webp", width: 1024, height: 768 }],
+    add: [{ node: "lamp", file: "lamp.webp", x: 10, y: 20, width: 30, height: 40 }],
+    links: [{ from: "a", to: "lamp", label: "shape" }]
+  }));
+  assert.deepEqual(grown.nodes.find((node) => node.type === "group"), { id: "screen-hall", type: "group", label: "hall", x: 0, y: 401, width: 1360, height: 1060 }, "a new screen goes below everything");
+  assert.deepEqual(grown.nodes.find((node) => node.id === "hall-picture"), { id: "hall-picture", type: "file", file: "hall.webp", x: 40, y: 461, width: 1280, height: 960 });
+  assert.equal(grown.nodes.find((node) => node.id === "lamp").file, "lamp.webp");
+  assert.deepEqual(grown.edges.map((edge) => [edge.fromNode, edge.toNode, edge.label]), [["a", "lamp", "shape"]]);
+  const shrunk = JSON.parse(editCanvas(JSON.stringify(grown), { remove: ["lamp"] }));
+  assert.ok(!shrunk.nodes.some((node) => node.id === "lamp") && shrunk.edges.length === 0, "removing a card removes its arrows");
+  assert.throws(() => editCanvas(JSON.stringify(grown), { screens: [{ label: "hall", file: "x.webp", width: 4, height: 3 }] }), /already exists/);
+  const exit = JSON.parse(editCanvas(JSON.stringify(grown), {
+    add: [{ node: "go", text: "GO TO HALL →", x: 0, y: 0, width: 10, height: 10 }],
+    exits: [{ node: "go", to: "hall", condition: "flag.lit" }],
+    cards: [{ node: "lamp", if: "flag.lit", file: "lamp2.webp" }]
+  }));
+  assert.deepEqual(exit.edges.filter((edge) => edge.fromNode === "go").map((edge) => [edge.toNode, edge.label]), [["screen-hall", "if flag.lit"]], "an exit is a text card with an arrow to the screen's group");
+  assert.equal(exit.nodes.find((node) => node.id === "go").type, "text");
+  assert.deepEqual([exit.nodes.find((node) => node.id === "lamp").file, exit.nodes.find((node) => node.id === "lamp").if], ["lamp2.webp", "flag.lit"]);
+  const retargeted = JSON.parse(editCanvas(JSON.stringify(exit), { exits: [{ node: "go", to: "hall" }], cards: [{ node: "lamp", if: null }] }));
+  assert.equal(retargeted.edges.filter((edge) => edge.fromNode === "go").length, 1, "changing an exit replaces its arrow");
+  assert.equal(retargeted.nodes.find((node) => node.id === "lamp").if, undefined, "an empty condition is removed");
   const slid = JSON.parse(editCanvas(canvas, { focus: [{ node: "b", value: [50.4, 0] }] }));
   assert.deepEqual(slid.nodes[2].focus, [50, 0], "a picture's slide is kept on its card");
+});
+
+test("the settings panel changes and removes Properties, and changes UI element settings", async () => {
+  const { editProps, editUiNote } = await import("../lib/editor-save.mjs");
+  const note = ["---", "type: object", "label: Desk", "visible:", "  - flag.a", "  - flag.b", "use: [open x]", "---", "body"].join("\n");
+  assert.equal(editProps(note, { visible: null, use: ["item torch held"] }), ["---", "type: object", "label: Desk", "use: [item torch held]", "---", "body"].join("\n"));
+  const ui = ["---", "type: ui", "---", "", "## Elements", "```yaml", "# the frame", "- { type: rect, id: a, at: [0, 0, 10, 10] }", "```"].join("\n");
+  const changed = editUiNote(ui, { settings: [{ index: 0, values: { fill: "#fff", id: null } }] });
+  assert.ok(changed.includes("# the frame") && changed.includes('fill: "#fff"') && !changed.includes("id: a"), changed);
+});
+
+test("a save can make a new note, but never over an existing file", async () => {
+  const { applyEdits } = await import("../lib/editor-save.mjs");
+  const { mkdtemp, readFile, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const vault = await mkdtemp(join(tmpdir(), "vault-"));
+  try {
+    const result = await applyEdits(vault, { create: { "screens/hall/hall.md": "---\ntype: screen\n---\n" } });
+    assert.deepEqual(result.saved, ["screens/hall/hall.md"]);
+    assert.equal(await readFile(join(vault, "screens/hall/hall.md"), "utf8"), "---\ntype: screen\n---\n");
+    await assert.rejects(applyEdits(vault, { create: { "screens/hall/hall.md": "again" } }), /already exists/);
+    await assert.rejects(applyEdits(vault, { create: { "../out.md": "x" } }), /Not a vault file/);
+  } finally {
+    await rm(vault, { recursive: true, force: true });
+  }
 });
 
 test("the screen editor can change one Properties value, such as an object's panel", async () => {
