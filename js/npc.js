@@ -8,8 +8,9 @@ export function clamp(value, minimum = 0, maximum = 100) {
   return Math.min(maximum, Math.max(minimum, value));
 }
 
+/** Changes the character's own state keys (Arthur's four by default, or any a character note lists). */
 export function applyStateChanges(npc, changes = {}) {
-  for (const key of STATE_KEYS) {
+  for (const key of Object.keys(npc.state ?? {})) {
     const delta = Number(changes[key]);
 
     if (Number.isFinite(delta)) {

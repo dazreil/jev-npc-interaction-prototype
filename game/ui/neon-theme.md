@@ -42,11 +42,24 @@ label:
   color: $muted
   uppercase: true
   letterSpacing: 1
+card:
+  font: $body
+  size: 18
+  color: $muted
+  uppercase: true
+  letterSpacing: 1
 value:
   font: $body
   size: 18
   color: $text
 hotspot:
+  font: $body
+  size: 14
+  color: $cyan
+  stroke: "#62f7ff66"
+  hoverFill: "#62f7ff22"
+  hoverLabel: true
+exit:
   font: $body
   size: 14
   color: $cyan

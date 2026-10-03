@@ -4,7 +4,7 @@
 // writes the result to game/_reports/check.md for reading in Obsidian.
 //
 //   npm run vault:check
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { buildCharacter } from "../js/engine/character-data.js";
 import { VAULT_DIR, compileVault } from "./compile-vault.mjs";
@@ -84,6 +84,7 @@ ${problems.length ? `## ${problems.length} problem(s)\n${problems.map((problem) 
 | Events | ${ofType("event").length} |
 | Detector tests | ${detectorTests} |
 `;
+await mkdir(join(VAULT_DIR, "_reports"), { recursive: true });
 await writeFile(join(VAULT_DIR, "_reports", "check.md"), report);
 console.log(problems.length ? `${problems.length} problem(s):` : "All clear.");
 for (const problem of problems) console.log(`  - ${problem}`);

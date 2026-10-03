@@ -6,13 +6,17 @@
 //
 //   node scripts/compile-vault.mjs          writes build/vault.json
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
-import { dirname, join, relative, sep } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import { buildWorld } from "../js/engine/canvas-world.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-export const VAULT_DIR = join(ROOT, "game");
+// The vault to use: game/ (the gate game), or another, such as
+// GAME_VAULT=silver-edit. Every tool reads it from here.
+export const VAULT_DIR = resolve(ROOT, process.env.GAME_VAULT || "game");
+/** The vault folder as served to the game page, such as "game/". */
+export const VAULT_URL_PREFIX = `${relative(ROOT, VAULT_DIR).split(sep).join("/")}/`;
 const ASSET_PATTERN = /\.(webp|png|jpe?g|gif|svg|mp3|ogg|wav|ttf|woff2?)$/i;
 const LINK_PATTERN = /\[\[([^\]|#]+)(?:[#|][^\]]*)?\]\]/g;
 const TOKENS = new Set(["address", "playername"]);

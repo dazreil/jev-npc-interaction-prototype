@@ -11,6 +11,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { VAULT_DIR } from "./compile-vault.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const FENCE = "```";
@@ -439,7 +440,7 @@ Made from the item template. Its art is on [[${slug}.canvas]].
   return { canvas: `${base}/${slug}.canvas`, written };
 }
 
-export async function newThing(kind, name, description = "", vault = join(ROOT, "game")) {
+export async function newThing(kind, name, description = "", vault = VAULT_DIR) {
   if (!name || !slugOf(name)) throw new Error("Give it a name.");
   const make = { character: newCharacter, scene: newScene, item: newItem }[kind];
   if (!make) throw new Error(`Make a character, scene, or item (not "${kind}").`);
@@ -449,7 +450,7 @@ export async function newThing(kind, name, description = "", vault = join(ROOT, 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
   const vaultFlag = args.indexOf("--vault");
-  const vault = vaultFlag >= 0 ? args.splice(vaultFlag, 2)[1] : join(ROOT, "game");
+  const vault = vaultFlag >= 0 ? args.splice(vaultFlag, 2)[1] : VAULT_DIR;
   const [kind, name, description] = args;
   try {
     const { canvas, written } = await newThing(kind, name, description, vault);

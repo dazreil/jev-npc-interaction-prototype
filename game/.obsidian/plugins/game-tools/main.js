@@ -12,7 +12,7 @@ const { Modal, Notice, Plugin } = require("obsidian");
 const { spawn } = require("child_process");
 const path = require("path");
 
-const RECIPE = /^##\s+([\w.-]+)\s*\n(style|image|edit|cutout|animate|composite)\s*(?:\n|$)/i;
+const RECIPE = /^##\s+([\w.-]+)\s*\n(style|image|edit|cutout|crop|animate|composite)\s*(?:\n|$)/i;
 const shellQuote = (value) => `'${String(value).replace(/'/g, `'\\''`)}'`;
 
 function readRecipe(text) {
@@ -78,8 +78,10 @@ class NewThingModal extends Modal {
 
 module.exports = class GameTools extends Plugin {
   async onload() {
-    // The vault is the repo's game/ folder; the scripts live one level up.
+    // The vault is a folder in the repo (game/, silver-edit/, ...); the
+    // scripts live one level up and are told which vault to use.
     this.repo = path.dirname(this.app.vault.adapter.getBasePath());
+    this.vaultName = path.basename(this.app.vault.adapter.getBasePath());
     this.watcher = null;
     this.workbench = null;
     this.running = 0;
@@ -155,6 +157,7 @@ module.exports = class GameTools extends Plugin {
     const shell = process.env.SHELL || "/bin/zsh";
     return spawn(shell, ["-lc", command], {
       cwd: this.repo,
+      env: { ...process.env, GAME_VAULT: this.vaultName },
       detached,
       stdio: detached ? "ignore" : ["ignore", "pipe", "pipe"]
     });

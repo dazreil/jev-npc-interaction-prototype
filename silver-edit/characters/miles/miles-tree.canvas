@@ -1,0 +1,23 @@
+{
+	"nodes": [
+		{
+			"id": "legend",
+			"type": "text",
+			"x": -700,
+			"y": 0,
+			"width": 600,
+			"height": 300,
+			"text": "### How to read this\n\n**open** node: the player types freely and the model picks an action.\n**script** node: fixed lines, no model call.\n\nSee [[arthur-tree.canvas]] for a fuller example (an item and a phone call)."
+		},
+		{
+			"id": "talk",
+			"type": "text",
+			"x": 0,
+			"y": 0,
+			"width": 480,
+			"height": 220,
+			"text": "## talk\nopen\nsay opening\n\nFree talk with [[Miles]]."
+		}
+	],
+	"edges": []
+}

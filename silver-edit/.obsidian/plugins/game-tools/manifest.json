@@ -1,0 +1,9 @@
+{
+  "id": "game-tools",
+  "name": "Game Tools",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Generate assets from recipe cards, and play the game, without leaving Obsidian. Local to this vault.",
+  "author": "jev npc",
+  "isDesktopOnly": true
+}

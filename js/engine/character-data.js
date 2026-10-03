@@ -137,14 +137,14 @@ export function buildDialogueData(vault, characterId) {
 }
 
 /** A profile note in the old profile-table shape, plus its own extras. */
-function buildProfile(note, id) {
+function buildProfile(note, id, stateKeys = STATE_KEYS) {
   const props = note.props;
   return {
     id,
     label: props.label,
     decisionStyle: section(note, "Decision style")?.text ?? "",
     personality: pick(props, PERSONALITY_KEYS),
-    initialState: pick(props, STATE_KEYS),
+    initialState: pick(props, stateKeys),
     speech: pick(props, ["rate", "pitch", "preDelayMs", "voice"]),
     address: props.address ?? id,
     trustThreshold: props.trustThreshold
@@ -176,6 +176,10 @@ export function buildCharacter(vault, characterId) {
   if (note?.type !== "character") throw new Error(`No character note named ${characterId}`);
   const props = note.props;
   const profileIds = listedIds(note, "Profiles");
+  // A character may list its own state in a "## State" block (such as
+  // { closeness: 20, temptation: 10 }); otherwise Arthur's four from Properties.
+  const ownState = note.blocks.State && typeof note.blocks.State === "object" ? note.blocks.State : null;
+  const stateKeys = ownState ? Object.keys(ownState) : STATE_KEYS;
   const actionIds = listedIds(note, "Actions");
   return {
     id: characterId,
@@ -185,10 +189,11 @@ export function buildCharacter(vault, characterId) {
       role: props.role,
       cognition: { estimatedIq: props.iq, style: section(note, "Style")?.text ?? "" },
       personality: pick(props, PERSONALITY_KEYS),
-      state: pick(props, STATE_KEYS),
+      state: ownState ? { ...ownState } : pick(props, STATE_KEYS),
       goals: note.blocks.Goals ?? []
     },
-    profiles: Object.fromEntries(profileIds.map((id) => [id, buildProfile(notes[id], id)])),
+    profiles: Object.fromEntries(profileIds.map((id) => [id, buildProfile(notes[id], id, stateKeys)])),
+    stateKeys,
     profileIds,
     actions: actionIds.map((id) => buildAction(notes[id], id)),
     tones: note.blocks.Tones ?? [{ tone: "neutral" }],

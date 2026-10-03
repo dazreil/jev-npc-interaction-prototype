@@ -20,6 +20,8 @@ body.editing .frame { right: 320px; }
 body:not(.editing) .editor-overlay { display: none; }
 .editor-box { position: absolute; border: 1px dashed #62f7ff88; cursor: move; }
 .editor-box:hover { border-color: #62f7ff; background: #62f7ff14; }
+.editor-shape { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; background: #62f7ff59; }
+.editor-box.selected .editor-shape { background: #ff68e866; }
 .editor-box.selected { border: 2px solid #ff68e8; background: #ff68e81a; }
 .editor-object, .editor-exit { border-color: #ffd36288; }
 .editor-level { position: absolute; outline: 9999px solid #00000088; pointer-events: none; }

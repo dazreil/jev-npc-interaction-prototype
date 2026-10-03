@@ -12,17 +12,17 @@ import { evaluate, interpolate, readPath } from "./conditions.js";
 
 const COMMON = ["type", "id", "at", "style", "visible", "opacity", "rotate", "children", "note", "layer", "mirror", "swing", "shade", "walk", "clip", "node"];
 const PAINT = ["fill", "stroke", "strokeWidth", "radius", "glow", "pattern", "blur"];
-const TEXT = ["text", "size", "color", "font", "align", "valign", "bold", "letterSpacing", "uppercase", "padding"];
+const TEXT = ["text", "size", "color", "font", "align", "valign", "bold", "italic", "letterSpacing", "uppercase", "padding"];
 export const ELEMENT_PROPS = Object.freeze({
   rect: [...PAINT],
   ellipse: [...PAINT],
   line: ["from", "to", "stroke", "strokeWidth", "dash", "glow"],
   polygon: ["points", "fill", "stroke", "strokeWidth", "glow"],
   text: [...TEXT, "fill"],
-  image: ["src", "fit", "pixelated"],
+  image: ["src", "fit", "pixelated", "focus"],
   "nine-slice": ["src", "slice", "border", "pixelated"],
   bar: ["value", "max", "fill", "back", "stroke", "strokeWidth", "radius", "vertical"],
-  button: [...PAINT, ...TEXT, "label", "do", "key", "image", "hoverImage", "pressedImage", "hoverFill", "disabled", "hoverLabel"],
+  button: [...PAINT, ...TEXT, "label", "do", "key", "image", "hoverImage", "pressedImage", "hoverFill", "disabled", "hoverLabel", "mask", "maskFit", "maskFocus"],
   group: [...PAINT, "clip"],
   ui: ["ui"],
   slot: ["name", ...PAINT]
@@ -219,6 +219,7 @@ function typeset(style, props) {
   if (props.bold) style.fontWeight = "700";
   if (props.letterSpacing !== undefined) style.letterSpacing = `${props.letterSpacing}px`;
   if (props.uppercase) style.textTransform = "uppercase";
+  if (props.italic) style.fontStyle = "italic";
   if (props.padding !== undefined) style.padding = `${props.padding}px`;
   style.display = "flex";
   style.justifyContent = { left: "flex-start", center: "center", right: "flex-end" }[props.align ?? "left"];
@@ -443,6 +444,7 @@ function mountNode(node, parentBox, options) {
       element.src = props.src;
       element.alt = "";
       style.objectFit = props.fit ?? "contain";
+      if (Array.isArray(props.focus)) style.objectPosition = `${props.focus[0]}% ${props.focus[1]}%`;
       if (props.pixelated) style.imageRendering = "pixelated";
       break;
     case "nine-slice": {
@@ -506,6 +508,19 @@ function mountNode(node, parentBox, options) {
       element.append(label);
       if (props.label) element.setAttribute("aria-label", props.label);
       element.addEventListener("click", () => options.onAction?.(props.do ?? [], node));
+      // mask: the hotspot takes the shape of a picture (a character on a
+      // screen). Only its solid pixels take clicks and show the hover fill.
+      if (props.mask) {
+        const focus = Array.isArray(props.maskFocus) ? props.maskFocus.map(Number) : [50, 50];
+        const key = `${props.mask}|${Math.round(node.box.w)}|${Math.round(node.box.h)}|${props.maskFit ?? "cover"}|${focus.join(",")}`;
+        const hit = document.createElement("span");
+        hit.className = "ui-hit";
+        hit.dataset.maskKey = key;
+        const path = maskPath(key, props.mask, node.box.w, node.box.h, props.maskFit ?? "cover", focus);
+        if (path) hit.style.clipPath = path;
+        element.dataset.mask = "";
+        element.prepend(hit);
+      }
       break;
     }
     case "ui": {
@@ -533,6 +548,60 @@ function mountNode(node, parentBox, options) {
   return element;
 }
 
+// Clip paths for masked hotspots, by picture and size. A picture's shape is
+// worked out once, after it loads; until then the whole box takes clicks.
+const MASK_CELL = 3;
+const maskCache = new Map();
+
+function maskPath(key, src, width, height, fit, focus = [50, 50]) {
+  if (maskCache.has(key)) return maskCache.get(key);
+  maskCache.set(key, null);
+  if (typeof Image === "undefined") return null;
+  const image = new Image();
+  image.onload = () => {
+    const w = Math.max(1, Math.round(width));
+    const h = Math.max(1, Math.round(height));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    // Place the picture the same way the image element does (cover or contain, at its focus).
+    const k = (fit === "contain" ? Math.min : Math.max)(w / image.naturalWidth, h / image.naturalHeight);
+    const dw = image.naturalWidth * k;
+    const dh = image.naturalHeight * k;
+    context.drawImage(image, ((w - dw) * focus[0]) / 100, ((h - dh) * focus[1]) / 100, dw, dh);
+    const alpha = context.getImageData(0, 0, w, h).data;
+    const solid = (x, y) => alpha[(Math.min(h - 1, y) * w + Math.min(w - 1, x)) * 4 + 3] > 96;
+    let path = "";
+    for (let y = 0; y < h; y += MASK_CELL) {
+      let start = -1;
+      for (let x = 0; x <= w; x += MASK_CELL) {
+        const on = x < w && solid(x + 1, y + 1);
+        if (on && start < 0) start = x;
+        if (!on && start >= 0) {
+          path += `M${start} ${y}h${x - start}v${MASK_CELL}h${start - x}Z`;
+          start = -1;
+        }
+      }
+    }
+    const clip = `path("${path || "M0 0Z"}")`;
+    maskCache.set(key, clip);
+    for (const hit of document.querySelectorAll(".ui-hit")) if (hit.dataset.maskKey === key) hit.style.clipPath = clip;
+    window.dispatchEvent(new CustomEvent("ui-mask-ready", { detail: { key } }));
+  };
+  image.src = src;
+  return null;
+}
+
+/**
+ * The clip path for a picture's shape at this size (null until it has loaded;
+ * then "ui-mask-ready" fires on window). The editor uses it to draw click shapes.
+ */
+export function pictureShape(src, width, height, fit = "cover", focus = [50, 50]) {
+  const key = `${src}|${Math.round(width)}|${Math.round(height)}|${fit}|${focus.join(",")}`;
+  return maskPath(key, src, width, height, fit, focus);
+}
+
 const BASE_CSS = `
 .ui-root { position: relative; overflow: hidden; transform-origin: 0 0; }
 .ui-root .ui-button { border: 0; padding: 0; color: inherit; font: inherit; background: transparent; }
@@ -545,6 +614,10 @@ const BASE_CSS = `
 .ui-root .ui-button .ui-hover-label { opacity: 0; transition: opacity .12s; }
 .ui-root .ui-button:hover .ui-hover-label, .ui-root .ui-button:focus-visible .ui-hover-label { opacity: 1; }
 .ui-root .ui-button:disabled { opacity: 0.45; }
+.ui-root .ui-button[data-mask], .ui-root .ui-button[data-mask][data-hover-fill]:not(:disabled):hover, .ui-root .ui-button[data-mask]:not(:disabled):hover, .ui-root .ui-button[data-mask]:not(:disabled):active { pointer-events: none; background: transparent !important; filter: none !important; }
+.ui-root .ui-button[data-mask] .ui-hit { position: absolute; inset: 0; pointer-events: auto; cursor: pointer; }
+.ui-root .ui-button[data-mask]:hover .ui-hit { background: var(--ui-hover-fill, #ffffff22); }
+.ui-root .ui-button[data-mask] > span:not(.ui-hit) { pointer-events: none; }
 .ui-root .ui-slot-preview { outline: 1px dashed rgba(255,255,255,.45); color: rgba(255,255,255,.6); font: 12px monospace; display: flex; align-items: center; justify-content: center; }
 `;
 

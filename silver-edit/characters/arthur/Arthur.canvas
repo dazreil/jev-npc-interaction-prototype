@@ -1,0 +1,1040 @@
+{
+	"nodes": [
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 0,
+			"y": -320,
+			"width": 1600,
+			"height": 240,
+			"text": "# Arthur\nArthur Thorne, publisher of Vellum & Vine, a tall man in his late forties, dark hair greying at the temples, rumpled tweed jacket, tired grief in his eyes\n\nEverything about Arthur, top to bottom. Right-click a recipe card to make its art; it saves into `characters/arthur/art/`. Make them in order: room and actor, then the moods, then the talking loops, then the booth."
+		},
+		{
+			"id": "g-who",
+			"type": "group",
+			"label": "Who they are",
+			"x": -40,
+			"y": -80,
+			"width": 1960,
+			"height": 520,
+			"color": "6"
+		},
+		{
+			"id": "n-character",
+			"type": "file",
+			"file": "characters/arthur/Arthur.md",
+			"x": 0,
+			"y": 0,
+			"width": 560,
+			"height": 400
+		},
+		{
+			"id": "n-profile",
+			"type": "file",
+			"file": "characters/arthur/profiles/arthur-default.md",
+			"x": 640,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-portraits",
+			"type": "file",
+			"file": "characters/arthur/arthur-portraits.md",
+			"x": 1100,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "g-decides",
+			"type": "group",
+			"label": "How they decide, and what they say",
+			"x": -40,
+			"y": 520,
+			"width": 2820,
+			"height": 820,
+			"color": "6"
+		},
+		{
+			"id": "n-tree",
+			"type": "file",
+			"file": "characters/arthur/arthur-tree.canvas",
+			"x": 0,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-lines",
+			"type": "file",
+			"file": "characters/arthur/dialogue/arthur-lines.md",
+			"x": 0,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "g-look",
+			"type": "group",
+			"label": "Look: the room, the actor, moods and blinks",
+			"x": -40,
+			"y": 1920,
+			"width": 4200,
+			"height": 1560,
+			"color": "6"
+		},
+		{
+			"id": "arthur-room",
+			"type": "text",
+			"x": 700,
+			"y": 2000,
+			"width": 560,
+			"height": 340,
+			"text": "## arthur-room\nimage\nstatus: done\nmodel: z-image\nsize: 1024x768\nseed: 11\nprompt: \"a small glass-walled publisher's office at the back of an old converted mill, a heavy oak desk buried in manuscripts and proofs, a green banker's lamp, rain on a tall window behind, red maple leaves outside, nobody in the room\"\n",
+			"color": "4"
+		},
+		{
+			"id": "arthur-actor",
+			"type": "text",
+			"x": 700,
+			"y": 2400,
+			"width": 560,
+			"height": 340,
+			"text": "## arthur-actor\nimage\nstatus: done\nmodel: krea-2\nsize: 1024x768\nseed: 12\nprompt: \"Arthur Thorne, publisher of Vellum & Vine, a tall man in his late forties, dark hair greying at the temples, rumpled tweed jacket, tired grief in his eyes, seen waist-up, facing the camera\"\n",
+			"color": "4"
+		},
+		{
+			"id": "arthur-keep",
+			"type": "text",
+			"x": 0,
+			"y": 2800,
+			"width": 560,
+			"height": 360,
+			"text": "## arthur-keep\nstyle\n# Holds Arthur steady in edits: only the named part changes.\ntemplate: \"Keep the exact same person: same face, hair and clothes (Arthur Thorne, publisher of Vellum & Vine, a tall man in his late forties, dark hair greying at the temples, rumpled tweed jacket, tired grief in his eyes). Keep the exact same framing, crop, camera position and pose, and the same flat, evenly lit chroma-key green screen background, lighting and camera quality. Only change {prompt}\"\n"
+		},
+		{
+			"id": "arthur-friendly",
+			"type": "text",
+			"x": 1900,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## arthur-friendly\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now a warm, slightly awkward friendly smile with raised eyebrows.\"\n"
+		},
+		{
+			"id": "arthur-irritated",
+			"type": "text",
+			"x": 2660,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## arthur-irritated\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now irritated and impatient: jaw clenched, brows lowered, lips pressed thin.\"\n"
+		},
+		{
+			"id": "arthur-hostile",
+			"type": "text",
+			"x": 3420,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## arthur-hostile\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now hostile: glaring hard at the camera, brows pulled down, mouth open mid-snarl.\"\n"
+		},
+		{
+			"id": "arthur-suspicious",
+			"type": "text",
+			"x": 1900,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## arthur-suspicious\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now suspicious: eyes narrowed, one eyebrow raised, head tilted slightly.\"\n"
+		},
+		{
+			"id": "arthur-afraid",
+			"type": "text",
+			"x": 2660,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## arthur-afraid\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now afraid: eyes wide, eyebrows raised high, mouth slightly open.\"\n"
+		},
+		{
+			"id": "arthur-blink-half",
+			"type": "text",
+			"x": 3420,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## arthur-blink-half\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the eyes, which are now half closed, halfway through a blink. Nothing else changes.\"\n"
+		},
+		{
+			"id": "arthur-blink-closed",
+			"type": "text",
+			"x": 1900,
+			"y": 3520,
+			"width": 560,
+			"height": 300,
+			"text": "## arthur-blink-closed\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the eyes, which are now fully closed in a natural blink. Nothing else changes.\"\n"
+		},
+		{
+			"id": "g-talk",
+			"type": "group",
+			"label": "Talking: a loop per mood, then everything into the room",
+			"x": -40,
+			"y": 3620,
+			"width": 4200,
+			"height": 1500,
+			"color": "6"
+		},
+		{
+			"id": "arthur-talk",
+			"type": "text",
+			"x": 700,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## arthur-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat and unchanged\"\n"
+		},
+		{
+			"id": "arthur-friendly-talk",
+			"type": "text",
+			"x": 1900,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## arthur-friendly-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a friendly way, small natural movements\"\n"
+		},
+		{
+			"id": "arthur-irritated-talk",
+			"type": "text",
+			"x": 2660,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## arthur-irritated-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a irritated way, small natural movements\"\n"
+		},
+		{
+			"id": "arthur-hostile-talk",
+			"type": "text",
+			"x": 3420,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## arthur-hostile-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a hostile way, small natural movements\"\n"
+		},
+		{
+			"id": "arthur-suspicious-talk",
+			"type": "text",
+			"x": 1900,
+			"y": 4100,
+			"width": 560,
+			"height": 340,
+			"text": "## arthur-suspicious-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a suspicious way, small natural movements\"\n"
+		},
+		{
+			"id": "arthur-afraid-talk",
+			"type": "text",
+			"x": 2660,
+			"y": 4100,
+			"width": 560,
+			"height": 340,
+			"text": "## arthur-afraid-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a afraid way, small natural movements\"\n"
+		},
+		{
+			"id": "arthur-booth",
+			"type": "text",
+			"x": 700,
+			"y": 4600,
+			"width": 560,
+			"height": 380,
+			"text": "## arthur-booth\ncomposite\nstatus: idea\n# Free: every Arthur picture into the room, keyed together so moods and blinks line up.\nalign: true\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 3\ncrunch: 4\njpeg: 50\n"
+		},
+		{
+			"id": "style-room",
+			"type": "text",
+			"text": "## fmv-room\nstyle\n# Pre-rendered 1990s CG rooms. Use with model: z-image.\nprefix: A still frame from a 1995 CD-ROM computer game, a pre-rendered 3D CGI background, early 1990s 3D rendering with flat shading, low-polygon models and simple textures\nsuffix: no people, no text or lettering",
+			"x": 0,
+			"y": 2000,
+			"width": 520,
+			"height": 260,
+			"color": "5"
+		},
+		{
+			"id": "style-actor-green",
+			"type": "text",
+			"text": "## fmv-actor-green\nstyle\n# Live actors on a green screen, to key out. Use with model: krea-2.\n# Keep green out of the wardrobe.\nprefix: A 1995 video capture of a live-action actor filmed for a CD-ROM game on a chroma-key stage\nsuffix: standing in front of a solid bright chroma-key green screen, solid pure green #00FF00 background, evenly lit",
+			"x": 0,
+			"y": 2400,
+			"width": 520,
+			"height": 300,
+			"color": "5"
+		},
+		{
+			"id": "talk-loop",
+			"type": "text",
+			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The night guard {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
+			"x": 0,
+			"y": 3700,
+			"width": 560,
+			"height": 320,
+			"color": "5"
+		},
+		{
+			"id": "n-ARTHUR_TALK_SHOP",
+			"type": "file",
+			"file": "characters/arthur/actions/ARTHUR_TALK_SHOP.md",
+			"x": 480,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-arthur-talk-shop",
+			"type": "file",
+			"file": "characters/arthur/dialogue/arthur-talk-shop.md",
+			"x": 480,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-ARTHUR_THAW",
+			"type": "file",
+			"file": "characters/arthur/actions/ARTHUR_THAW.md",
+			"x": 940,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-arthur-thaw",
+			"type": "file",
+			"file": "characters/arthur/dialogue/arthur-thaw.md",
+			"x": 940,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-ARTHUR_DEFLECT",
+			"type": "file",
+			"file": "characters/arthur/actions/ARTHUR_DEFLECT.md",
+			"x": 1400,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-arthur-deflect",
+			"type": "file",
+			"file": "characters/arthur/dialogue/arthur-deflect.md",
+			"x": 1400,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-ARTHUR_OPEN_UP",
+			"type": "file",
+			"file": "characters/arthur/actions/ARTHUR_OPEN_UP.md",
+			"x": 1860,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-arthur-open-up",
+			"type": "file",
+			"file": "characters/arthur/dialogue/arthur-open-up.md",
+			"x": 1860,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-ARTHUR_DISMISS",
+			"type": "file",
+			"file": "characters/arthur/actions/ARTHUR_DISMISS.md",
+			"x": 2320,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-arthur-dismiss",
+			"type": "file",
+			"file": "characters/arthur/dialogue/arthur-dismiss.md",
+			"x": 2320,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "arthur-portrait",
+			"type": "text",
+			"x": 1460,
+			"y": 4600,
+			"width": 560,
+			"height": 380,
+			"text": "## arthur-portrait\ncomposite\nstatus: done\n# Free: the actor pasted into the room. A still portrait until the talking loops are made.\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 5\ncrunch: 4\njpeg: 50\n",
+			"color": "4"
+		},
+		{
+			"id": "made-arthur-room-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-room/arthur-room.webp",
+			"x": 1340,
+			"y": 2000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-portrait-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-portrait/arthur-portrait.webp",
+			"x": 2100,
+			"y": 4600,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "g-office",
+			"type": "group",
+			"label": "In the open-plan office (sitting at their desk, cut out)",
+			"x": -40,
+			"y": 4920,
+			"width": 2700,
+			"height": 900,
+			"color": "6"
+		},
+		{
+			"id": "arthur-at-desk",
+			"type": "text",
+			"x": 700,
+			"y": 5000,
+			"width": 560,
+			"height": 460,
+			"text": "## arthur-at-desk\nedit\nstatus: done\nmodel: qwen-edit\nsize: 1024x1024\nseed: 31\nprompt: \"Show the same person, with the same face, grey hair, glasses and clothes, now seated behind a 1970s Italian modern desk, a cool older man who collects retro modern furniture. The desk is a long, low, sculptural Italian design piece: a glossy white lacquer top with rounded edges on polished chrome legs. On it: a curved orange space-age desk lamp, a few neat manuscripts, a smoked-glass ashtray. He sits in a tan leather and chrome Italian swivel chair, a pen in his hand, looking at the camera. Straight-on front view, the camera square to the desk at seated eye level: the front edge of the desk is perfectly horizontal and parallel to the bottom of the picture, both ends of the desk at the same height, the desk top barely visible. The whole desk, lamp and chair fit in the frame with empty space on both sides. No green objects. Flat, evenly lit pure green screen background, no floor, no shadow, no walls.\"\n",
+			"color": "4"
+		},
+		{
+			"id": "arthur-at-desk-cut",
+			"type": "text",
+			"x": 1340,
+			"y": 5000,
+			"width": 520,
+			"height": 260,
+			"text": "## arthur-at-desk-cut\ncutout\nstatus: done\n# Free: keyed off the green screen, to sit in the office scene.\nkeyLow: 0.5\nkeyHigh: 0.85\ndespill: strong\ncrunch: 4\njpeg: 50\n",
+			"color": "4"
+		},
+		{
+			"id": "arthur-at-desk-amber",
+			"type": "text",
+			"x": 700,
+			"y": 5420,
+			"width": 560,
+			"height": 300,
+			"text": "## arthur-at-desk-amber\nedit\nstatus: idea\nmodel: qwen-edit\nsize: 1024x1024\nseed: 25\n# Not used now: the 70s desk has no green. A green lamp shade vanishes with the green screen, so it becomes amber.\nprompt: \"Change only the green glass shade of the desk lamp into warm amber glass. Keep everything else exactly the same: the man, the desk, the papers, the framing, and the flat green screen background.\"\n",
+			"color": "4"
+		},
+		{
+			"id": "g-portrait-layers",
+			"type": "group",
+			"label": "Talk portrait layers: background (cut from the screen around them) and character (cut out)",
+			"x": -40,
+			"y": 6020,
+			"width": 2700,
+			"height": 900,
+			"color": "6"
+		},
+		{
+			"id": "arthur-scene-picture",
+			"type": "file",
+			"file": "screens/office/art/office-empty/office-empty.webp",
+			"x": 0,
+			"y": 6100,
+			"width": 560,
+			"height": 315
+		},
+		{
+			"id": "arthur-backdrop",
+			"type": "text",
+			"x": 700,
+			"y": 6100,
+			"width": 560,
+			"height": 300,
+			"text": "## arthur-backdrop\ncrop\nstatus: done\n# Free: the screen behind Arthur, cut around their click box on World.canvas, with a 10 pixel bleed.\nbox: [482, 260, 323, 250]\nbleed: 10\n",
+			"color": "4"
+		},
+		{
+			"id": "arthur-actor-cut",
+			"type": "text",
+			"x": 700,
+			"y": 6500,
+			"width": 560,
+			"height": 260,
+			"text": "## arthur-actor-cut\ncutout\nstatus: done\n# Free: Arthur keyed off the green screen, for the talk portrait.\ncrunch: 4\njpeg: 50\n",
+			"color": "4"
+		},
+		{
+			"id": "made-arthur-backdrop-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-backdrop/arthur-backdrop.webp",
+			"x": 1340,
+			"y": 6100,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-actor-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-actor/arthur-actor.webp",
+			"x": 1340,
+			"y": 2400,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-actor-cut-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-actor-cut/arthur-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-at-desk-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-at-desk/arthur-at-desk.webp",
+			"x": 1340,
+			"y": 5000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-at-desk-cut-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-at-desk-cut/arthur-at-desk-cut.webp",
+			"x": 1940,
+			"y": 5000,
+			"width": 240,
+			"height": 135
+		}
+	],
+	"edges": [
+		{
+			"id": "e-style-room-arthur-room",
+			"fromNode": "style-room",
+			"fromSide": "right",
+			"toNode": "arthur-room",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-style-actor-green-arthur-actor",
+			"fromNode": "style-actor-green",
+			"fromSide": "right",
+			"toNode": "arthur-actor",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-actor-arthur-friendly",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "arthur-friendly",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-keep-arthur-friendly",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-friendly",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-actor-arthur-irritated",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "arthur-irritated",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-keep-arthur-irritated",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-irritated",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-actor-arthur-hostile",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "arthur-hostile",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-keep-arthur-hostile",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-hostile",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-actor-arthur-suspicious",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "arthur-suspicious",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-keep-arthur-suspicious",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-suspicious",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-actor-arthur-afraid",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "arthur-afraid",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-keep-arthur-afraid",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-afraid",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-actor-arthur-blink-half",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "arthur-blink-half",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-keep-arthur-blink-half",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-blink-half",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-actor-arthur-blink-closed",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "arthur-blink-closed",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-keep-arthur-blink-closed",
+			"fromNode": "arthur-keep",
+			"fromSide": "right",
+			"toNode": "arthur-blink-closed",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-actor-arthur-talk",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "arthur-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-arthur-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-friendly-arthur-friendly-talk",
+			"fromNode": "arthur-friendly",
+			"fromSide": "right",
+			"toNode": "arthur-friendly-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-arthur-friendly-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-friendly-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-irritated-arthur-irritated-talk",
+			"fromNode": "arthur-irritated",
+			"fromSide": "right",
+			"toNode": "arthur-irritated-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-arthur-irritated-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-irritated-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-hostile-arthur-hostile-talk",
+			"fromNode": "arthur-hostile",
+			"fromSide": "right",
+			"toNode": "arthur-hostile-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-arthur-hostile-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-hostile-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-suspicious-arthur-suspicious-talk",
+			"fromNode": "arthur-suspicious",
+			"fromSide": "right",
+			"toNode": "arthur-suspicious-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-arthur-suspicious-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-suspicious-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-afraid-arthur-afraid-talk",
+			"fromNode": "arthur-afraid",
+			"fromSide": "right",
+			"toNode": "arthur-afraid-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-arthur-afraid-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "arthur-afraid-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-room-arthur-booth",
+			"fromNode": "arthur-room",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "room"
+		},
+		{
+			"id": "e-arthur-actor-arthur-booth",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-friendly-arthur-booth",
+			"fromNode": "arthur-friendly",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-irritated-arthur-booth",
+			"fromNode": "arthur-irritated",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-hostile-arthur-booth",
+			"fromNode": "arthur-hostile",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-suspicious-arthur-booth",
+			"fromNode": "arthur-suspicious",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-afraid-arthur-booth",
+			"fromNode": "arthur-afraid",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-blink-half-arthur-booth",
+			"fromNode": "arthur-blink-half",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-blink-closed-arthur-booth",
+			"fromNode": "arthur-blink-closed",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-talk-arthur-booth",
+			"fromNode": "arthur-talk",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-friendly-talk-arthur-booth",
+			"fromNode": "arthur-friendly-talk",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-irritated-talk-arthur-booth",
+			"fromNode": "arthur-irritated-talk",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-hostile-talk-arthur-booth",
+			"fromNode": "arthur-hostile-talk",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-suspicious-talk-arthur-booth",
+			"fromNode": "arthur-suspicious-talk",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-afraid-talk-arthur-booth",
+			"fromNode": "arthur-afraid-talk",
+			"fromSide": "right",
+			"toNode": "arthur-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-arthur-room-portrait",
+			"fromNode": "arthur-room",
+			"fromSide": "right",
+			"toNode": "arthur-portrait",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "room"
+		},
+		{
+			"id": "e-arthur-actor-portrait",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "arthur-portrait",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "made-arthur-room-1-edge",
+			"fromNode": "arthur-room",
+			"fromSide": "right",
+			"toNode": "made-arthur-room-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-portrait-1-edge",
+			"fromNode": "arthur-portrait",
+			"fromSide": "right",
+			"toNode": "made-arthur-portrait-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-arthur-desk",
+			"fromNode": "arthur-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-at-desk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-amber",
+			"fromNode": "arthur-at-desk",
+			"fromSide": "bottom",
+			"toNode": "arthur-at-desk-amber",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-amber-cut",
+			"fromNode": "arthur-at-desk",
+			"fromSide": "right",
+			"toNode": "arthur-at-desk-cut",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "cut out"
+		},
+		{
+			"id": "e-arthur-crop",
+			"fromNode": "arthur-scene-picture",
+			"fromSide": "right",
+			"toNode": "arthur-backdrop",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "crop"
+		},
+		{
+			"id": "e-arthur-actor-cut",
+			"fromNode": "arthur-actor",
+			"fromSide": "bottom",
+			"toNode": "arthur-actor-cut",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "cut out"
+		},
+		{
+			"id": "made-arthur-backdrop-1-edge",
+			"fromNode": "arthur-backdrop",
+			"fromSide": "right",
+			"toNode": "made-arthur-backdrop-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-actor-1-edge",
+			"fromNode": "arthur-actor",
+			"fromSide": "right",
+			"toNode": "made-arthur-actor-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-actor-cut-1-edge",
+			"fromNode": "arthur-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-arthur-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-at-desk-1-edge",
+			"fromNode": "arthur-at-desk",
+			"fromSide": "right",
+			"toNode": "made-arthur-at-desk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-at-desk-cut-1-edge",
+			"fromNode": "arthur-at-desk-cut",
+			"fromSide": "right",
+			"toNode": "made-arthur-at-desk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		}
+	]
+}

@@ -1,0 +1,137 @@
+{
+	"nodes": [
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 0,
+			"y": -320,
+			"width": 1600,
+			"height": 240,
+			"text": "# Dream\nan endless black velvet void, drifting silk ribbons of shadow, a single cold silver light, surreal and seductive\n\nRight-click a recipe card to make its art; it saves into `screens/dream/art/`. Then place it on [[World.canvas]] in the `dream` group."
+		},
+		{
+			"id": "g-screen",
+			"type": "group",
+			"label": "The screen",
+			"x": -40,
+			"y": -80,
+			"width": 700,
+			"height": 500,
+			"color": "6"
+		},
+		{
+			"id": "n-screen",
+			"type": "file",
+			"file": "screens/dream/dream.md",
+			"x": 0,
+			"y": 0,
+			"width": 560,
+			"height": 360
+		},
+		{
+			"id": "g-art",
+			"type": "group",
+			"label": "Art: the background, and a prop cut out of green (left to right: make, cut out)",
+			"x": -40,
+			"y": 520,
+			"width": 3000,
+			"height": 900,
+			"color": "6"
+		},
+		{
+			"id": "dream-background",
+			"type": "text",
+			"x": 700,
+			"y": 600,
+			"width": 560,
+			"height": 340,
+			"text": "## dream-background\nimage\nstatus: done\nmodel: z-image\nsize: 1280x720\nseed: 21\nprompt: \"an endless black velvet void, drifting silk ribbons of shadow, a single cold silver light, surreal and seductive, seen straight on from a security camera\"\n",
+			"color": "4"
+		},
+		{
+			"id": "dream-prop",
+			"type": "text",
+			"x": 700,
+			"y": 1000,
+			"width": 560,
+			"height": 340,
+			"text": "## dream-prop\nimage\nstatus: idea\nmodel: krea-2\nsize: 768x1024\nseed: 22\nprompt: \"(a prop for this scene), seen straight on\"\n"
+		},
+		{
+			"id": "dream-prop-cut",
+			"type": "text",
+			"x": 1400,
+			"y": 1000,
+			"width": 520,
+			"height": 260,
+			"text": "## dream-prop-cut\ncutout\nstatus: idea\n# Free: keyed off the green screen. mirror: true also makes a mirror image.\ncrunch: 4\njpeg: 50\n"
+		},
+		{
+			"id": "style-room",
+			"type": "text",
+			"text": "## fmv-room\nstyle\n# Pre-rendered 1990s CG rooms. Use with model: z-image.\nprefix: A still frame from a 1995 CD-ROM computer game, a pre-rendered 3D CGI background, early 1990s 3D rendering with flat shading, low-polygon models and simple textures\nsuffix: no people, no text or lettering",
+			"x": 0,
+			"y": 600,
+			"width": 520,
+			"height": 260,
+			"color": "5"
+		},
+		{
+			"id": "krea-prop-green",
+			"type": "text",
+			"text": "## krea-prop-green\nstyle\n# Krea 2 props to cut out: a filmed 1990s look, flat on, on pure green.\ntemplate: \"A prop for a 1995 CD-ROM full-motion-video game, photographed straight on in a flat front view for chroma-key compositing: {prompt}. Isolated on a solid flat pure green #00FF00 background, evenly lit, no shadow on the background, no ground, no people, no text\"\n",
+			"x": 0,
+			"y": 1000,
+			"width": 560,
+			"height": 360,
+			"color": "5"
+		},
+		{
+			"id": "made-dream-background-1",
+			"type": "file",
+			"file": "screens/dream/art/dream-background/dream-background.webp",
+			"x": 1340,
+			"y": 600,
+			"width": 240,
+			"height": 135
+		}
+	],
+	"edges": [
+		{
+			"id": "e-style-room-dream-background",
+			"fromNode": "style-room",
+			"fromSide": "right",
+			"toNode": "dream-background",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-krea-prop-green-dream-prop",
+			"fromNode": "krea-prop-green",
+			"fromSide": "right",
+			"toNode": "dream-prop",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-dream-prop-dream-prop-cut",
+			"fromNode": "dream-prop",
+			"fromSide": "right",
+			"toNode": "dream-prop-cut",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "cut out"
+		},
+		{
+			"id": "made-dream-background-1-edge",
+			"fromNode": "dream-background",
+			"fromSide": "right",
+			"toNode": "made-dream-background-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		}
+	]
+}

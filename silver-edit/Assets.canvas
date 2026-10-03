@@ -1,0 +1,94 @@
+{
+	"nodes": [
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 0,
+			"y": -1100,
+			"width": 1100,
+			"height": 520,
+			"text": "# Assets \u2014 The Silver Edit\nEach character, screen, and item has its own canvas in its own folder, and its art saves beside it in `art/`. Right-click a recipe card to make its art.\n\nThis canvas keeps the model list and the **style library** below. To use a style on another canvas, copy its card there and draw an arrow from it."
+		},
+		{
+			"id": "g-styles",
+			"type": "group",
+			"label": "Style library (copy a card onto any canvas)",
+			"x": -40,
+			"y": 180,
+			"width": 2640,
+			"height": 1000,
+			"color": "5"
+		},
+		{
+			"id": "models",
+			"type": "text",
+			"text": "## Models (checked 1 Oct 2026)\n| model: | What | Cost |\n| --- | --- | --- |\n| `z-image` | Z-Image Turbo: rooms and backgrounds | $0.005 / MP |\n| `krea-2` | Krea 2 Turbo: actors and props on green | $0.008 / MP |\n| `qwen-edit` | Qwen Image Edit 2511: change part of a picture | about $0.024 |\n| `flux2-edit` | FLUX.2 edit | \u2014 |\n| `h3-max-turbo` | MiniMax H3 Max Turbo, image to video | $0.025 / s (480p) |\n| `minimax-h3` | MiniMax H3, image to video, first + last frame | \u2014 |\n| `flux-lora`, `flux-2-lora` | FLUX with a LoRA (not used now) | \u2014 |\n\nAny other fal model: set `endpoint:` and `params:`.",
+			"x": 1200,
+			"y": -1100,
+			"width": 900,
+			"height": 600,
+			"color": "3"
+		},
+		{
+			"id": "style-room",
+			"type": "text",
+			"text": "## fmv-room\nstyle\n# Pre-rendered 1990s CG rooms. Use with model: z-image.\nprefix: A still frame from a 1995 CD-ROM computer game, a pre-rendered 3D CGI background, early 1990s 3D rendering with flat shading, low-polygon models and simple textures\nsuffix: no people, no text or lettering",
+			"x": 0,
+			"y": 260,
+			"width": 520,
+			"height": 260,
+			"color": "5"
+		},
+		{
+			"id": "style-actor-green",
+			"type": "text",
+			"text": "## fmv-actor-green\nstyle\n# Live actors on a green screen, to key out. Use with model: krea-2.\n# Keep green out of the wardrobe.\nprefix: A 1995 video capture of a live-action actor filmed for a CD-ROM game on a chroma-key stage\nsuffix: standing in front of a solid bright chroma-key green screen, solid pure green #00FF00 background, evenly lit",
+			"x": 640,
+			"y": 260,
+			"width": 520,
+			"height": 300,
+			"color": "5"
+		},
+		{
+			"id": "talk-loop",
+			"type": "text",
+			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The night guard {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
+			"x": 1920,
+			"y": 260,
+			"width": 560,
+			"height": 320,
+			"color": "5"
+		},
+		{
+			"id": "fmv-prop-green",
+			"type": "text",
+			"text": "## fmv-prop-green\nstyle\n# Props to cut out and layer over a scene: flat, front-on, on pure green.\ntemplate: \"A 1995 pre-rendered 3D CGI game asset, early 1990s 3D rendering with flat shading, low-polygon model and simple textures, seen straight on in a front orthographic view: {prompt}. Isolated on a solid flat pure green #00FF00 background, evenly lit, no shadow on the background, no ground, no text\"\n",
+			"x": 0,
+			"y": 720,
+			"width": 560,
+			"height": 360,
+			"color": "5"
+		},
+		{
+			"id": "krea-prop-green",
+			"type": "text",
+			"text": "## krea-prop-green\nstyle\n# Krea 2 props to cut out: a filmed 1990s look, flat on, on pure green.\ntemplate: \"A prop for a 1995 CD-ROM full-motion-video game, photographed straight on in a flat front view for chroma-key compositing: {prompt}. Isolated on a solid flat pure green #00FF00 background, evenly lit, no shadow on the background, no ground, no people, no text\"\n",
+			"x": 640,
+			"y": 720,
+			"width": 560,
+			"height": 360,
+			"color": "5"
+		},
+		{
+			"id": "prop-keep",
+			"type": "text",
+			"text": "## prop-keep\nstyle\n# Holds a prop steady in edits: only the named part changes.\ntemplate: \"Keep the exact same object, same shape, size, position, framing, materials, colours, lighting and camera quality, and the same solid flat green screen background. {prompt}\"\n",
+			"x": 1280,
+			"y": 720,
+			"width": 560,
+			"height": 300,
+			"color": "5"
+		}
+	],
+	"edges": []
+}

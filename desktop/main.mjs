@@ -12,10 +12,10 @@ import { fileURLToPath } from "node:url";
 import { readApiKey } from "../lib/env.mjs";
 import { MAX_REQUEST_BYTES, jevStatus, parseJevBody, proxyJevDecision } from "../lib/jev-proxy.mjs";
 import { applyEdits } from "../lib/editor-save.mjs";
-import { VAULT_DIR, compileVault } from "../scripts/compile-vault.mjs";
+import { VAULT_DIR, VAULT_URL_PREFIX, compileVault } from "../scripts/compile-vault.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SERVED = ["player/", "js/", "data/", "game/", "assets/fonts/", "assets/encounter/", "assets/vendor/"];
+const SERVED = ["player/", "js/", "data/", VAULT_URL_PREFIX, "assets/fonts/", "assets/encounter/", "assets/vendor/"];
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -65,7 +65,8 @@ async function handle(request) {
   if (!SERVED.some((prefix) => path.startsWith(prefix)) || path.includes("/.")) return new Response("Not found", { status: 404 });
   try {
     const body = await readFile(join(ROOT, path));
-    return new Response(body, { headers: { "Content-Type": MIME[extname(path).toLowerCase()] ?? "application/octet-stream" } });
+    // no-store: after an edit, a restart always shows the new code and art.
+    return new Response(body, { headers: { "Content-Type": MIME[extname(path).toLowerCase()] ?? "application/octet-stream", "Cache-Control": "no-store" } });
   } catch (error) {
     if (process.env.ENGINE_DEBUG) console.log(`[app] ${error.message}`);
     return new Response("Not found", { status: 404 });

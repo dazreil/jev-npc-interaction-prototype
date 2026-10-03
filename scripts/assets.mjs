@@ -19,13 +19,14 @@ import { tmpdir } from "node:os";
 import { basename, dirname, extname, isAbsolute, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readEnv } from "../lib/env.mjs";
+import { VAULT_DIR } from "./compile-vault.mjs";
 import { animationSettings, applyResult, buildRequest, compositeOverrides, crunchSettings, latestOutput, readRecipes } from "../lib/asset-canvas.mjs";
 import { chooseParameters, composite, key, keyFrames, seeded } from "../lib/composite.mjs";
 import { download, runFal } from "../lib/fal.mjs";
-import { crunch, crunchRgba, ensureMinSize, extractFrames, finishFrames, makeLimitedAnimation, mediaSize, mirrorImage, toJpeg, toPng, toWebp } from "../lib/limited-animation.mjs";
+import { crunch, crunchRgba, cropImage, ensureMinSize, extractFrames, finishFrames, makeLimitedAnimation, mediaSize, mirrorImage, toJpeg, toPng, toWebp } from "../lib/limited-animation.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const VAULT = join(ROOT, "game");
+const VAULT = VAULT_DIR;
 const CANVAS = join(VAULT, process.argv.find((arg) => arg.endsWith(".canvas")) ?? "Assets.canvas");
 // Every recipe gets its own folder: <art>/<name>/ holds the finished files,
 // and <name>/_source/ the clean originals (the leading underscore keeps them
@@ -320,7 +321,14 @@ async function runCutout(recipe, canvas) {
   await update(recipe.nodeId, { status: "running" });
   await mkdir(sourceDir(recipe.name), { recursive: true });
   const source = sourcePath(recipe.name, "png");
-  const { screen, box } = await key(picture, source);
+  // keyLow / keyHigh: how green a pixel must be to start and to finish
+  // fading out. Higher keeps green-lit edges (thin desk legs) solid.
+  const keyOptions = {
+    ...(recipe.fields.keyLow != null ? { low: Number(recipe.fields.keyLow) } : {}),
+    ...(recipe.fields.keyHigh != null ? { high: Number(recipe.fields.keyHigh) } : {}),
+    ...(recipe.fields.despill != null ? { despill: recipe.fields.despill } : {})
+  };
+  const { screen, box } = await key(picture, source, keyOptions);
   const work = await mkdtemp(join(tmpdir(), "cutout-"));
   try {
     const finished = settings ? await crunchRgba(source, join(work, "crunched.png"), settings) : source;
@@ -370,8 +378,38 @@ async function runAnimatedCutout(recipe, animation) {
   }
 }
 
+/**
+ * A crop card: cuts a box out of the picture that points to it, such as the
+ * part of the office behind a character, for their portrait background.
+ * `box: [x, y, w, h]` in that picture's pixels; `bleed` adds that many pixels
+ * on every side (kept inside the picture). Free.
+ */
+async function runCrop(recipe, canvas) {
+  if (recipe.references.length !== 1) throw new Error("draw one arrow from the picture to crop into this card");
+  const picture = cleanSource(canvas, recipe.references[0]);
+  const box = [].concat(recipe.fields.box ?? []).map(Number);
+  if (box.length !== 4 || box.some((value) => !Number.isFinite(value))) throw new Error("set box: [x, y, w, h]");
+  const bleed = Number(recipe.fields.bleed ?? 0);
+  const { width, height } = await mediaSize(picture);
+  const x = Math.max(0, Math.round(box[0] - bleed));
+  const y = Math.max(0, Math.round(box[1] - bleed));
+  const w = Math.min(width - x, Math.round(box[2] + 2 * bleed));
+  const h = Math.min(height - y, Math.round(box[3] + 2 * bleed));
+  if (DRY_RUN) {
+    console.log(`\n[${recipe.name}] would crop ${relative(ROOT, picture)} to ${w}x${h} at ${x},${y} (free)`);
+    return;
+  }
+  await update(recipe.nodeId, { status: "running" });
+  await mkdir(outDir(recipe.name), { recursive: true });
+  const out = join(outDir(recipe.name), `${recipe.name}.webp`);
+  await cropImage(picture, out, { x, y, width: w, height: h });
+  await update(recipe.nodeId, { status: "done", files: [vaultPath(out)] });
+  console.log(`[${recipe.name}] cropped ${w}x${h} at ${x},${y} → ${vaultPath(out)}`);
+}
+
 async function runRecipe(recipe, canvas) {
   if (recipe.kind === "composite") return runComposite(recipe, canvas);
+  if (recipe.kind === "crop") return runCrop(recipe, canvas);
   if (recipe.kind === "cutout") return runCutout(recipe, canvas);
   if (REFINISH) {
     if (DRY_RUN) console.log(`[${recipe.name}] would refinish from the saved original (free)`, crunchSettings(recipe) ?? "(no crunch)");
@@ -428,7 +466,7 @@ async function runRecipe(recipe, canvas) {
 }
 
 // Composites of an animation run after it, so composites go last.
-const ORDER = { image: 0, edit: 1, cutout: 2, animate: 3, composite: 4 };
+const ORDER = { image: 0, edit: 1, cutout: 2, crop: 2, animate: 3, composite: 4 };
 
 async function runPending() {
   const canvas = await readCanvas();

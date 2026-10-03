@@ -7,7 +7,7 @@
 // boxes and order on the world canvas, element boxes and order in UI notes.
 
 import { evaluate } from "/js/engine/conditions.js";
-import { setEditorPreview } from "/js/engine/ui.js";
+import { pictureShape, setEditorPreview } from "/js/engine/ui.js";
 
 const PANEL_WIDTH = 320;
 const round = (value) => Math.round(value);
@@ -19,7 +19,7 @@ export function createEditor({ session, stage, render, host }) {
   let selected = null;
   let undo = [];
   let redo = [];
-  let edits = { boxes: new Map(), order: new Map() };
+  let edits = { boxes: new Map(), order: new Map(), props: new Map(), focus: new Map() };
   let stale = false;
   let status = "";
   let lastClick = { key: null, at: 0 };
@@ -42,8 +42,9 @@ export function createEditor({ session, stage, render, host }) {
   /** The layer for a screen-level UI target, for editing the parts inside it. */
   function layerOf(target) {
     const note = session.vault.notes[target.ref.ui];
-    if (!note?.blocks.Elements) return null;
-    return { uiId: target.ref.ui, box: clone(target.ref.at), width: Number(note.props.width) || target.ref.at[2], height: Number(note.props.height) || target.ref.at[3], label: target.label };
+    const at = target.ref[target.field];
+    if (!note?.blocks.Elements || !Array.isArray(at)) return null;
+    return { uiId: target.ref.ui, box: clone(at), width: Number(note.props.width) || at[2], height: Number(note.props.height) || at[3], label: target.label };
   }
 
   /** What can be edited at a level (the screen, or inside a layer), back to front. */
@@ -52,9 +53,10 @@ export function createEditor({ session, stage, render, host }) {
     if (!screen) return [];
     if (!lv) {
       // The scene picture sets the screen's frame, so it is not moved here.
+      const linked = (element) => screen.objects.filter((object) => object.follows && object.follows === element.node).map((object) => object.id);
       const elements = screen.elements.filter((element) => element.id !== `${screen.id}-picture`).map((element) => ({
         key: `el:${element.node ?? element.id}`,
-        label: element.type === "ui" ? element.ui : element.type === "text" ? `“${String(element.text).slice(0, 24)}”` : element.id === `${screen.id}-picture` ? "Scene picture" : element.id,
+        label: element.type === "ui" ? element.ui : element.type === "text" ? `“${String(element.text).slice(0, 24)}”` : linked(element).length ? `${element.id} (click: ${linked(element).join(", ")})` : element.id,
         kind: element.type,
         ref: element,
         field: "at",
@@ -62,8 +64,21 @@ export function createEditor({ session, stage, render, host }) {
         orderable: element.id !== `${screen.id}-picture`,
         canOpen: element.type === "ui"
       }));
-      const objects = screen.objects.map((object) => ({ key: `obj:${object.node}`, label: `${object.id} (object)`, kind: "object", ref: object, field: "rect", node: object.node }));
+      // An object linked to a picture (an arrow on the canvas) moves with that
+      // picture, so it is not a box of its own.
+      const objects = screen.objects.filter((object) => !object.follows).map(objectTarget);
       const exits = screen.exits.map((exit) => ({ key: `exit:${exit.node}`, label: `${exit.label} (exit)`, kind: "exit", ref: exit, field: "at", node: exit.node }));
+      // An object that is open (a talk panel, the intercom) shows its panel:
+      // move it (saved as the object's `panel`), or open it to edit its parts.
+      const panels = screen.objects
+        .filter((object) => session.world.open?.[object.id] && Array.isArray(session.vault.notes[object.id]?.props.panel))
+        .map((object) => {
+          const props = session.vault.notes[object.id].props;
+          return { key: `panel:${object.id}`, label: `${props.ui} (open panel)`, kind: "ui", ref: props, field: "panel", objectId: object.id, orderable: false, canOpen: true };
+        });
+      // While a panel is open the scene behind it is dimmed: only the panel
+      // (and anything drawn above it, `layer: top`) can be picked.
+      if (panels.length) return [...elements.filter((target) => target.ref.layer === "top"), ...panels];
       return [...elements, ...objects, ...exits];
     }
     const note = session.vault.notes[lv.uiId];
@@ -73,7 +88,7 @@ export function createEditor({ session, stage, render, host }) {
       .map((element, index) => ({
         lv,
         key: `ui:${lv.uiId}:${original.get(element)}`,
-        label: element.id ?? `${element.type} ${index + 1}`,
+        label: element.id ?? (element.type === "slot" && element.name ? `${element.name} (slot)` : `${element.type} ${index + 1}`),
         kind: element.type,
         ref: element,
         field: "at",
@@ -81,6 +96,10 @@ export function createEditor({ session, stage, render, host }) {
         orderable: true
       }))
       .filter((target) => Array.isArray(target.ref.at));
+  }
+
+  function objectTarget(object) {
+    return { key: `obj:${object.node}`, label: `${object.id} (object)`, kind: "object", ref: object, field: "rect", node: object.node };
   }
 
   /** A target's box in screen pixels. */
@@ -104,6 +123,11 @@ export function createEditor({ session, stage, render, host }) {
       x = Math.min(Math.max(0, x), screen.width - w);
       y = Math.min(Math.max(0, y), screen.height - h);
       target.ref[target.field] = [x, y, w, h].map(round);
+      // Objects linked to this picture take its new box too.
+      for (const object of screen.objects.filter((item) => item.follows && item.follows === target.node)) {
+        object.rect = [...target.ref[target.field]];
+        edits.boxes.set(`obj:${object.node}`, objectTarget(object));
+      }
     } else {
       const { box, width, height } = target.lv;
       const sx = box[2] / width;
@@ -159,6 +183,17 @@ export function createEditor({ session, stage, render, host }) {
       box.className = `editor-box editor-${target.kind}${target.key === selected ? " selected" : ""}`;
       Object.assign(box.style, { left: `${x * k}px`, top: `${y * k}px`, width: `${w * k}px`, height: `${h * k}px` });
       box.title = target.label;
+      // A picture with a linked click object shows that click shape inside its box.
+      const object = isPicture(target) && built().objects.find((item) => item.follows && item.follows === target.node);
+      if (object?.mask) {
+        const clip = pictureShape(object.mask, w, h, "cover", object.maskFocus ?? [50, 50]);
+        if (clip) {
+          const shape = document.createElement("div");
+          shape.className = "editor-shape";
+          Object.assign(shape.style, { width: `${w}px`, height: `${h}px`, transform: `scale(${k})`, clipPath: clip });
+          box.append(shape);
+        }
+      }
       if (target.key === selected) {
         const name = document.createElement("span");
         name.className = "editor-name";
@@ -175,7 +210,128 @@ export function createEditor({ session, stage, render, host }) {
     }
   }
 
+  // ---------------------------------------------------------------- pictures on the screen
+
+  /** A picture card on the world canvas (not the scene picture itself). */
+  const isPicture = (target) => !target?.lv && target?.kind === "image" && Boolean(target.node);
+
+  /** Sets where a picture sits inside its box, and moves its linked click shape with it. */
+  function setFocus(target, focus) {
+    const value = focus.map((n) => Math.round(Math.min(100, Math.max(0, n))));
+    target.ref.focus = value;
+    for (const object of built().objects.filter((item) => item.follows && item.follows === target.node)) object.maskFocus = value;
+    edits.focus.set(target.node, value);
+  }
+
+  /**
+   * Option-drag inside a picture's box slides the picture inside it (the box
+   * stays put), as for the talk portrait. A picture fills its box, so it slides
+   * only the way it sticks out.
+   */
+  function startSlide(event, target) {
+    event.preventDefault();
+    event.stopPropagation();
+    selected = target.key;
+    const before = target.ref.focus ? [...target.ref.focus] : [50, 50];
+    const [, , boxWidth, boxHeight] = rectOf(target);
+    const k = scale();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    let frame = null;
+    const onMove = (move) => {
+      const dx = ((move.clientX - startX) / k / boxWidth) * 100;
+      const dy = ((move.clientY - startY) / k / boxHeight) * 100;
+      setFocus(target, [before[0] - dx, before[1] - dy]);
+      if (!frame) frame = requestAnimationFrame(() => { frame = null; render(); drawOverlay(); });
+    };
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      const after = [...target.ref.focus ?? before];
+      change(`Slide ${target.label}`, () => setFocus(target, after), () => setFocus(target, before));
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
+
+  // ---------------------------------------------------------------- portrait framing
+
+  const isPortrait = (target) => target?.ref?.type === "slot" && target.ref.name === "portrait";
+
+  /** The talking character's portraits note, which holds their framing. */
+  function portraitNote() {
+    const character = session.vault.notes[session.active];
+    return session.vault.notes[character?.props.portraits] ?? null;
+  }
+
+  /**
+   * The picture's placement inside the portrait box. A portrait with a
+   * background (`## Backdrop`) has two layers: the character (`offset`, `zoom`)
+   * and the background (`backdropFocus`, `backdropZoom`). A plain portrait has
+   * one (`focus`, `zoom`).
+   */
+  const hasBackdrop = (note) => Boolean(note.blocks?.Backdrop);
+  const LAYERS = {
+    character: { position: "offset", zoom: "zoom", start: [0, 0], range: [-100, 100], sign: 1 },
+    backdrop: { position: "backdropFocus", zoom: "backdropZoom", start: [50, 50], range: [0, 100], sign: -1 },
+    picture: { position: "focus", zoom: "zoom", start: [50, 50], range: [0, 100], sign: -1 }
+  };
+
+  function framingOf(note, layer) {
+    const keys = LAYERS[layer];
+    const position = Array.isArray(note.props[keys.position]) ? note.props[keys.position].map(Number) : [...keys.start];
+    return { position, zoom: Number(note.props[keys.zoom]) || 1 };
+  }
+
+  function setFraming(note, layer, { position, zoom }) {
+    const keys = LAYERS[layer];
+    const [low, high] = keys.range;
+    note.props[keys.position] = position.map((value) => Math.round(Math.min(high, Math.max(low, value))));
+    note.props[keys.zoom] = Math.round(Math.min(4, Math.max(0.3, zoom)) * 100) / 100;
+    edits.props.set(note.path, { ...(edits.props.get(note.path) ?? {}), [keys.position]: note.props[keys.position], [keys.zoom]: note.props[keys.zoom] });
+  }
+
+  function reframe(note, layer, before, after) {
+    change(`Place the ${layer}`, () => setFraming(note, layer, after), () => setFraming(note, layer, before));
+  }
+
+  /**
+   * Option-drag inside the portrait box moves the character (or the one
+   * picture); Option-Shift-drag moves the background. The box stays put.
+   */
+  function startPan(event, target) {
+    const note = portraitNote();
+    if (!note) return false;
+    const layer = !hasBackdrop(note) ? "picture" : event.shiftKey ? "backdrop" : "character";
+    event.preventDefault();
+    event.stopPropagation();
+    selected = target.key;
+    const before = framingOf(note, layer);
+    const [, , boxWidth, boxHeight] = rectOf(target);
+    const k = scale();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const sign = LAYERS[layer].sign;
+    let frame = null;
+    const onMove = (move) => {
+      const dx = ((move.clientX - startX) / k / boxWidth) * 100;
+      const dy = ((move.clientY - startY) / k / boxHeight) * 100;
+      setFraming(note, layer, { position: [before.position[0] + sign * dx, before.position[1] + sign * dy], zoom: before.zoom });
+      if (!frame) frame = requestAnimationFrame(() => { frame = null; render(); drawOverlay(); });
+    };
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      reframe(note, layer, before, framingOf(note, layer));
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return true;
+  }
+
   function startDrag(event, target, mode) {
+    if (mode === "move" && event.altKey && isPortrait(target) && startPan(event, target)) return;
+    if (mode === "move" && event.altKey && isPicture(target)) return startSlide(event, target);
     event.preventDefault();
     event.stopPropagation();
     selected = target.key;
@@ -208,6 +364,7 @@ export function createEditor({ session, stage, render, host }) {
         w = Math.max(2, w);
         h = Math.max(2, h);
       }
+      if (!move.metaKey) [x, y, w, h] = snap(target, [x, y, w, h], mode);
       setRect(target, [x, y, w, h]);
       if (!frame) frame = requestAnimationFrame(() => { frame = null; render(); drawOverlay(); });
     };
@@ -219,6 +376,36 @@ export function createEditor({ session, stage, render, host }) {
     };
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
+  }
+
+  /**
+   * Snaps a box being dragged to the edges and middles of the other boxes
+   * (and the screen) when it comes within a few pixels. Hold Cmd to drag freely.
+   */
+  function snap(target, rect, mode) {
+    const reach = 6 / scale();
+    const screen = built();
+    const others = targets(target.lv ?? null).filter((other) => other.key !== target.key && !hidden.has(other.key)).map(rectOf);
+    if (!target.lv && screen) others.push([0, 0, screen.width, screen.height]);
+    const lines = (axis) => others.flatMap((box) => [box[axis], box[axis] + box[axis + 2] / 2, box[axis] + box[axis + 2]]);
+    const out = [...rect];
+    for (const axis of [0, 1]) {
+      const near = lines(axis);
+      const best = (value) => near.reduce((found, line) => (Math.abs(line - value) < Math.abs(found - value) ? line : found), Infinity);
+      const low = mode === "move" || mode.includes(axis ? "n" : "w");
+      const high = mode === "move" || mode.includes(axis ? "s" : "e");
+      const start = out[axis];
+      const end = out[axis] + out[axis + 2];
+      const middle = start + out[axis + 2] / 2;
+      if (mode === "move") {
+        const shifts = [best(start) - start, best(middle) - middle, best(end) - end].filter((shift) => Math.abs(shift) <= reach);
+        if (shifts.length) out[axis] += shifts.reduce((a, b) => (Math.abs(b) < Math.abs(a) ? b : a));
+      } else {
+        if (low && Math.abs(best(start) - start) <= reach) { out[axis + 2] += start - best(start); out[axis] = best(start); }
+        if (high && Math.abs(best(end) - end) <= reach) out[axis + 2] = best(end) - out[axis];
+      }
+    }
+    return out;
   }
 
   /** A click selects; a second click soon after opens a layer. (Redraws replace the
@@ -331,7 +518,7 @@ export function createEditor({ session, stage, render, host }) {
     if (!on) return;
     const list = targets();
     const current = list.find((target) => target.key === selected);
-    const pending = edits.boxes.size + edits.order.size;
+    const pending = edits.boxes.size + edits.order.size + edits.props.size + edits.focus.size;
 
     const crumbs = el("div", { className: "editor-crumbs" }, level
       ? [button("‹ Screen", closeLayer), el("span", { textContent: ` ▸ ${level.label}` })]
@@ -357,7 +544,9 @@ export function createEditor({ session, stage, render, host }) {
       fields = el("div", { className: "editor-fields" }, [
         el("strong", { textContent: current.label }),
         el("div", { className: "editor-xywh" }, inputs),
-        ...(current.canOpen ? [button("Edit inside ▸", () => openLayer(current))] : [])
+        ...(current.canOpen ? [button("Edit inside ▸", () => openLayer(current))] : []),
+        ...(isPortrait(current) && portraitNote() ? [framingFields(portraitNote())] : []),
+        ...(isPicture(current) ? [el("p", { className: "editor-hint", textContent: "Option-drag inside the box to slide the picture in it." })] : [])
       ]);
     }
 
@@ -397,6 +586,35 @@ export function createEditor({ session, stage, render, host }) {
     );
   }
 
+  /** Number fields for each portrait layer, for this character. */
+  function framingFields(note) {
+    const name = session.vault.notes[session.active]?.props.name ?? "This character";
+    const group = (layer, title) => {
+      const { position, zoom } = framingOf(note, layer);
+      const field = (label, value, step, apply) => {
+        const input = el("input", { type: "number", value, step, title: label });
+        input.onchange = () => {
+          const before = framingOf(note, layer);
+          reframe(note, layer, before, apply({ position: [...before.position], zoom: before.zoom }, Number(input.value)));
+        };
+        return el("label", {}, [el("span", { textContent: label }), input]);
+      };
+      return el("div", {}, [
+        el("p", { className: "editor-hint", textContent: title }),
+        el("div", { className: "editor-xywh" }, [
+          field("x %", position[0], 1, (framing, value) => ({ ...framing, position: [value, framing.position[1]] })),
+          field("y %", position[1], 1, (framing, value) => ({ ...framing, position: [framing.position[0], value] })),
+          field("zoom", zoom, 0.05, (framing, value) => ({ ...framing, zoom: value }))
+        ])
+      ]);
+    };
+    if (!hasBackdrop(note)) return el("div", { className: "editor-framing" }, [group("picture", `${name}'s picture: Option-drag inside the box to slide it.`)]);
+    return el("div", { className: "editor-framing" }, [
+      group("character", `${name}: Option-drag to move.`),
+      group("backdrop", "Background: Option-Shift-drag to move.")
+    ]);
+  }
+
   function doUndo() {
     const step = undo.pop();
     if (!step) return;
@@ -425,7 +643,10 @@ export function createEditor({ session, stage, render, host }) {
     const ox = screen.frame?.x ?? 0;
     const oy = screen.frame?.y ?? 0;
     for (const target of edits.boxes.values()) {
-      if (target.key.startsWith("ui:")) {
+      if (target.key.startsWith("panel:")) {
+        const path = vault.notes[target.objectId].path;
+        (notes[path] ??= { boxes: [] }).props = { ...(notes[path]?.props ?? {}), panel: target.ref.panel.map(round) };
+      } else if (target.key.startsWith("ui:")) {
         const [, uiId, index] = target.key.split(":");
         const path = vault.notes[uiId].path;
         (notes[path] ??= { boxes: [] }).boxes.push({ index: Number(index), at: target.ref.at.map(round) });
@@ -433,6 +654,12 @@ export function createEditor({ session, stage, render, host }) {
         const [x, y, w, h] = target.ref[target.field];
         (canvases[worldPath] ??= { boxes: [] }).boxes.push({ node: target.node, x: ox + x * unit, y: oy + y * unit, width: w * unit, height: h * unit });
       }
+    }
+    for (const [node, value] of edits.focus) {
+      (canvases[worldPath] ??= { boxes: [] }).focus = [...(canvases[worldPath].focus ?? []), { node, value }];
+    }
+    for (const [path, props] of edits.props) {
+      (notes[path] ??= { boxes: [] }).props = { ...(notes[path]?.props ?? {}), ...props };
     }
     for (const key of edits.order.keys()) {
       if (key === "world") {
@@ -463,7 +690,7 @@ export function createEditor({ session, stage, render, host }) {
     } else {
       status = `Saved ${result.saved.join(", ")}.`;
       lastSave = new Date().toISOString();
-      edits = { boxes: new Map(), order: new Map() };
+      edits = { boxes: new Map(), order: new Map(), props: new Map(), focus: new Map() };
       undo = [];
       redo = [];
       stale = false;
@@ -475,7 +702,7 @@ export function createEditor({ session, stage, render, host }) {
 
   function toggle(value = !on) {
     if (value === on) return;
-    if (!value && (edits.boxes.size || edits.order.size) && !confirm("Leave without saving? Your edits stay on screen until the game reloads.")) return;
+    if (!value && (edits.boxes.size || edits.order.size || edits.props.size || edits.focus.size) && !confirm("Leave without saving? Your edits stay on screen until the game reloads.")) return;
     on = value;
     session.paused = on;
     setEditorPreview(on);
@@ -513,6 +740,7 @@ export function createEditor({ session, stage, render, host }) {
     }
   }, true);
   window.addEventListener("resize", () => on && drawOverlay());
+  window.addEventListener("ui-mask-ready", () => on && drawOverlay());
   overlay.addEventListener("pointerdown", (event) => {
     if (event.target.classList.contains("editor-handle")) return;
     const bounds = overlay.getBoundingClientRect();
@@ -530,7 +758,7 @@ export function createEditor({ session, stage, render, host }) {
 
   return {
     get on() { return on; },
-    get dirty() { return Boolean(edits.boxes.size || edits.order.size); },
+    get dirty() { return Boolean(edits.boxes.size || edits.order.size || edits.props.size || edits.focus.size); },
     panelWidth: () => (on ? PANEL_WIDTH : 0),
     toggle,
     /** The vault was rebuilt on disk while editing with unsaved changes. */
