@@ -1,0 +1,1054 @@
+{
+	"nodes": [
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 0,
+			"y": -320,
+			"width": 1600,
+			"height": 240,
+			"text": "# Miles\nMiles Parker, a hip NYC-born graphic designer in his early thirties, sharp undercut, vintage band t-shirt under a blazer, an easy grin\n\nEverything about Miles, top to bottom. Right-click a recipe card to make its art; it saves into `characters/miles/art/`. Make them in order: room and actor, then the moods, then the talking loops, then the booth."
+		},
+		{
+			"id": "g-who",
+			"type": "group",
+			"label": "Who they are",
+			"x": -40,
+			"y": -80,
+			"width": 1960,
+			"height": 520,
+			"color": "6"
+		},
+		{
+			"id": "n-character",
+			"type": "file",
+			"file": "characters/miles/Miles.md",
+			"x": 0,
+			"y": 0,
+			"width": 560,
+			"height": 400
+		},
+		{
+			"id": "n-profile",
+			"type": "file",
+			"file": "characters/miles/profiles/miles-default.md",
+			"x": 640,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-portraits",
+			"type": "file",
+			"file": "characters/miles/miles-portraits.md",
+			"x": 1100,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "g-decides",
+			"type": "group",
+			"label": "How they decide, and what they say",
+			"x": -40,
+			"y": 520,
+			"width": 2820,
+			"height": 820,
+			"color": "6"
+		},
+		{
+			"id": "n-tree",
+			"type": "file",
+			"file": "characters/miles/miles-tree.canvas",
+			"x": 0,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-lines",
+			"type": "file",
+			"file": "characters/miles/dialogue/miles-lines.md",
+			"x": 0,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "g-look",
+			"type": "group",
+			"label": "Look: the room, the actor, moods and blinks",
+			"x": -40,
+			"y": 1920,
+			"width": 4200,
+			"height": 1560,
+			"color": "6"
+		},
+		{
+			"id": "miles-room",
+			"type": "text",
+			"x": 700,
+			"y": 2000,
+			"width": 560,
+			"height": 340,
+			"text": "## miles-room\nimage\nstatus: done\nmodel: z-image\nsize: 1024x768\nseed: 11\nprompt: \"the corner of a long design table in an old mill office, two monitors, a record player, mood boards with book covers pinned up, rain on tall windows, red maples outside, warm lamplight, nobody in the room\"\n",
+			"color": "4"
+		},
+		{
+			"id": "miles-actor",
+			"type": "text",
+			"x": 700,
+			"y": 2400,
+			"width": 560,
+			"height": 340,
+			"text": "## miles-actor\nimage\nstatus: done\nmodel: krea-2\nsize: 1024x768\nseed: 12\nprompt: \"Miles Parker, a hip NYC-born graphic designer in his early thirties, sharp undercut, vintage band t-shirt under a blazer, an easy grin, seen waist-up, facing the camera\"\n",
+			"color": "4"
+		},
+		{
+			"id": "miles-keep",
+			"type": "text",
+			"x": 0,
+			"y": 2800,
+			"width": 560,
+			"height": 360,
+			"text": "## miles-keep\nstyle\n# Holds Miles steady in edits: only the named part changes.\ntemplate: \"Keep the exact same person: same face, hair and clothes (Miles Parker, a hip NYC-born graphic designer in his early thirties, sharp undercut, vintage band t-shirt under a blazer, an easy grin). Keep the exact same framing, crop, camera position and pose, and the same flat, evenly lit chroma-key green screen background, lighting and camera quality. Only change {prompt}\"\n"
+		},
+		{
+			"id": "miles-friendly",
+			"type": "text",
+			"x": 1900,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## miles-friendly\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now a warm, slightly awkward friendly smile with raised eyebrows.\"\n"
+		},
+		{
+			"id": "miles-irritated",
+			"type": "text",
+			"x": 2660,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## miles-irritated\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now irritated and impatient: jaw clenched, brows lowered, lips pressed thin.\"\n"
+		},
+		{
+			"id": "miles-hostile",
+			"type": "text",
+			"x": 3420,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## miles-hostile\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now hostile: glaring hard at the camera, brows pulled down, mouth open mid-snarl.\"\n"
+		},
+		{
+			"id": "miles-suspicious",
+			"type": "text",
+			"x": 1900,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## miles-suspicious\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now suspicious: eyes narrowed, one eyebrow raised, head tilted slightly.\"\n"
+		},
+		{
+			"id": "miles-afraid",
+			"type": "text",
+			"x": 2660,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## miles-afraid\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now afraid: eyes wide, eyebrows raised high, mouth slightly open.\"\n"
+		},
+		{
+			"id": "miles-blink-half",
+			"type": "text",
+			"x": 3420,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## miles-blink-half\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the eyes, which are now half closed, halfway through a blink. Nothing else changes.\"\n"
+		},
+		{
+			"id": "miles-blink-closed",
+			"type": "text",
+			"x": 1900,
+			"y": 3520,
+			"width": 560,
+			"height": 300,
+			"text": "## miles-blink-closed\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the eyes, which are now fully closed in a natural blink. Nothing else changes.\"\n"
+		},
+		{
+			"id": "g-talk",
+			"type": "group",
+			"label": "Talking: a loop per mood, then everything into the room",
+			"x": -40,
+			"y": 3620,
+			"width": 4200,
+			"height": 1500,
+			"color": "6"
+		},
+		{
+			"id": "miles-talk",
+			"type": "text",
+			"x": 700,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## miles-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat and unchanged\"\n"
+		},
+		{
+			"id": "miles-friendly-talk",
+			"type": "text",
+			"x": 1900,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## miles-friendly-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a friendly way, small natural movements\"\n"
+		},
+		{
+			"id": "miles-irritated-talk",
+			"type": "text",
+			"x": 2660,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## miles-irritated-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a irritated way, small natural movements\"\n"
+		},
+		{
+			"id": "miles-hostile-talk",
+			"type": "text",
+			"x": 3420,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## miles-hostile-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a hostile way, small natural movements\"\n"
+		},
+		{
+			"id": "miles-suspicious-talk",
+			"type": "text",
+			"x": 1900,
+			"y": 4100,
+			"width": 560,
+			"height": 340,
+			"text": "## miles-suspicious-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a suspicious way, small natural movements\"\n"
+		},
+		{
+			"id": "miles-afraid-talk",
+			"type": "text",
+			"x": 2660,
+			"y": 4100,
+			"width": 560,
+			"height": 340,
+			"text": "## miles-afraid-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a afraid way, small natural movements\"\n"
+		},
+		{
+			"id": "miles-booth",
+			"type": "text",
+			"x": 700,
+			"y": 4600,
+			"width": 560,
+			"height": 380,
+			"text": "## miles-booth\ncomposite\nstatus: idea\n# Free: every Miles picture into the room, keyed together so moods and blinks line up.\nalign: true\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 3\ncrunch: 4\njpeg: 50\n"
+		},
+		{
+			"id": "style-room",
+			"type": "text",
+			"text": "## fmv-room\nstyle\n# Pre-rendered 1990s CG rooms. Use with model: z-image.\nprefix: A still frame from a 1995 CD-ROM computer game, a pre-rendered 3D CGI background, early 1990s 3D rendering with flat shading, low-polygon models and simple textures\nsuffix: no people, no text or lettering",
+			"x": 0,
+			"y": 2000,
+			"width": 520,
+			"height": 260,
+			"color": "5"
+		},
+		{
+			"id": "style-actor-green",
+			"type": "text",
+			"text": "## fmv-actor-green\nstyle\n# Live actors on a green screen, to key out. Use with model: krea-2.\n# Keep green out of the wardrobe.\nprefix: A 1995 video capture of a live-action actor filmed for a CD-ROM game on a chroma-key stage\nsuffix: standing in front of a solid bright chroma-key green screen, solid pure green #00FF00 background, evenly lit",
+			"x": 0,
+			"y": 2400,
+			"width": 520,
+			"height": 300,
+			"color": "5"
+		},
+		{
+			"id": "talk-loop",
+			"type": "text",
+			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The night guard {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
+			"x": 0,
+			"y": 3700,
+			"width": 560,
+			"height": 320,
+			"color": "5"
+		},
+		{
+			"id": "n-MILES_JOKE",
+			"type": "file",
+			"file": "characters/miles/actions/MILES_JOKE.md",
+			"x": 480,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-miles-joke",
+			"type": "file",
+			"file": "characters/miles/dialogue/miles-joke.md",
+			"x": 480,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-MILES_FLIRT",
+			"type": "file",
+			"file": "characters/miles/actions/MILES_FLIRT.md",
+			"x": 940,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-miles-flirt",
+			"type": "file",
+			"file": "characters/miles/dialogue/miles-flirt.md",
+			"x": 940,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-MILES_GOSSIP",
+			"type": "file",
+			"file": "characters/miles/actions/MILES_GOSSIP.md",
+			"x": 1400,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-miles-gossip",
+			"type": "file",
+			"file": "characters/miles/dialogue/miles-gossip.md",
+			"x": 1400,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-MILES_BACK_OFF",
+			"type": "file",
+			"file": "characters/miles/actions/MILES_BACK_OFF.md",
+			"x": 1860,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-miles-back-off",
+			"type": "file",
+			"file": "characters/miles/dialogue/miles-back-off.md",
+			"x": 1860,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-MILES_WRAP_UP",
+			"type": "file",
+			"file": "characters/miles/actions/MILES_WRAP_UP.md",
+			"x": 2320,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-miles-wrap-up",
+			"type": "file",
+			"file": "characters/miles/dialogue/miles-wrap-up.md",
+			"x": 2320,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "miles-portrait",
+			"type": "text",
+			"x": 1460,
+			"y": 4600,
+			"width": 560,
+			"height": 380,
+			"text": "## miles-portrait\ncomposite\nstatus: done\n# Free: the actor pasted into the room. A still portrait until the talking loops are made.\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 5\ncrunch: 4\njpeg: 50\n",
+			"color": "4"
+		},
+		{
+			"id": "made-miles-room-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-room/miles-room.webp",
+			"x": 1340,
+			"y": 2000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-actor-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-actor/miles-actor.webp",
+			"x": 1340,
+			"y": 2400,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-portrait-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-portrait/miles-portrait.webp",
+			"x": 2100,
+			"y": 4600,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "g-office",
+			"type": "group",
+			"label": "In the open-plan office (sitting at their desk, cut out)",
+			"x": -40,
+			"y": 4920,
+			"width": 2700,
+			"height": 520,
+			"color": "6"
+		},
+		{
+			"id": "miles-at-desk",
+			"type": "text",
+			"x": 700,
+			"y": 5000,
+			"width": 560,
+			"height": 460,
+			"text": "## miles-at-desk\nedit\nstatus: done\nmodel: qwen-edit\nsize: 1024x1024\nseed: 31\nprompt: \"Show the same person, with the same face, hair and clothes, now seated behind a 1970s Italian modern desk from his boss's retro furniture collection: a low desk with a glossy orange lacquer top with rounded corners on polished chrome legs. On it: a beige 1990s computer monitor, a small white space-age record player, a few design sketches. He leans back in a white moulded plastic and chrome Italian swivel chair, grinning at the camera. Straight-on front view, the camera square to the desk at seated eye level: the front edge of the desk is perfectly horizontal and parallel to the bottom of the picture, both ends of the desk at the same height, the desk top barely visible. The whole desk and chair fit in the frame with empty space on both sides. No green objects. Flat, evenly lit pure green screen background, no floor, no shadow, no walls.\"\n",
+			"color": "4"
+		},
+		{
+			"id": "miles-at-desk-cut",
+			"type": "text",
+			"x": 1340,
+			"y": 5000,
+			"width": 520,
+			"height": 260,
+			"text": "## miles-at-desk-cut\ncutout\nstatus: done\n# Free: keyed off the green screen, to sit in the office scene.\ncrunch: 4\njpeg: 50\n# Keeps the green-lit desk legs solid.\nkeyLow: 0.5\nkeyHigh: 0.85\ndespill: strong\n",
+			"color": "4"
+		},
+		{
+			"id": "g-portrait-layers",
+			"type": "group",
+			"label": "Talk portrait layers: background (cut from the screen around them) and character (cut out)",
+			"x": -40,
+			"y": 6020,
+			"width": 2700,
+			"height": 900,
+			"color": "6"
+		},
+		{
+			"id": "miles-scene-picture",
+			"type": "file",
+			"file": "screens/office/art/office-empty/office-empty.webp",
+			"x": 0,
+			"y": 6100,
+			"width": 560,
+			"height": 315
+		},
+		{
+			"id": "miles-backdrop",
+			"type": "text",
+			"x": 700,
+			"y": 6100,
+			"width": 560,
+			"height": 300,
+			"text": "## miles-backdrop\ncrop\nstatus: done\n# Free: the screen behind Miles, cut around their click box on World.canvas, with a 10 pixel bleed.\nbox: [70, 330, 409, 340]\nbleed: 10\n",
+			"color": "4"
+		},
+		{
+			"id": "miles-actor-cut",
+			"type": "text",
+			"x": 700,
+			"y": 6500,
+			"width": 560,
+			"height": 260,
+			"text": "## miles-actor-cut\ncutout\nstatus: done\n# Free: Miles keyed off the green screen, for the talk portrait.\ncrunch: 4\njpeg: 50\n",
+			"color": "4"
+		},
+		{
+			"id": "made-miles-actor-cut-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-actor-cut/miles-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-backdrop-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-backdrop/miles-backdrop.webp",
+			"x": 1340,
+			"y": 6100,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-at-desk-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-at-desk/miles-at-desk.webp",
+			"x": 1340,
+			"y": 5000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "miles-at-desk-wood",
+			"type": "text",
+			"x": 700,
+			"y": 5960,
+			"width": 560,
+			"height": 320,
+			"text": "## miles-at-desk-wood\nedit\nstatus: done\nmodel: qwen-edit\nsize: 1024x1024\nseed: 32\n# The desk legs become dark wood.\nprompt: \"Change only the chrome desk legs into dark walnut wood legs, slim and tapered, in exactly the same places. Keep everything else exactly the same: the person, the desk top, everything on the desk, the chair, the framing, and the flat green screen background.\"",
+			"color": "4"
+		},
+		{
+			"id": "made-miles-at-desk-wood-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-at-desk-wood/miles-at-desk-wood.webp",
+			"x": 1340,
+			"y": 5960,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-at-desk-cut-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-at-desk-cut/miles-at-desk-cut.webp",
+			"x": 1940,
+			"y": 5000,
+			"width": 240,
+			"height": 135
+		}
+	],
+	"edges": [
+		{
+			"id": "e-style-room-miles-room",
+			"fromNode": "style-room",
+			"fromSide": "right",
+			"toNode": "miles-room",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-style-actor-green-miles-actor",
+			"fromNode": "style-actor-green",
+			"fromSide": "right",
+			"toNode": "miles-actor",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-actor-miles-friendly",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "miles-friendly",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-miles-keep-miles-friendly",
+			"fromNode": "miles-keep",
+			"fromSide": "right",
+			"toNode": "miles-friendly",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-actor-miles-irritated",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "miles-irritated",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-miles-keep-miles-irritated",
+			"fromNode": "miles-keep",
+			"fromSide": "right",
+			"toNode": "miles-irritated",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-actor-miles-hostile",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "miles-hostile",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-miles-keep-miles-hostile",
+			"fromNode": "miles-keep",
+			"fromSide": "right",
+			"toNode": "miles-hostile",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-actor-miles-suspicious",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "miles-suspicious",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-miles-keep-miles-suspicious",
+			"fromNode": "miles-keep",
+			"fromSide": "right",
+			"toNode": "miles-suspicious",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-actor-miles-afraid",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "miles-afraid",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-miles-keep-miles-afraid",
+			"fromNode": "miles-keep",
+			"fromSide": "right",
+			"toNode": "miles-afraid",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-actor-miles-blink-half",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "miles-blink-half",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-miles-keep-miles-blink-half",
+			"fromNode": "miles-keep",
+			"fromSide": "right",
+			"toNode": "miles-blink-half",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-actor-miles-blink-closed",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "miles-blink-closed",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-miles-keep-miles-blink-closed",
+			"fromNode": "miles-keep",
+			"fromSide": "right",
+			"toNode": "miles-blink-closed",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-actor-miles-talk",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "miles-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-miles-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "miles-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-friendly-miles-friendly-talk",
+			"fromNode": "miles-friendly",
+			"fromSide": "right",
+			"toNode": "miles-friendly-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-miles-friendly-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "miles-friendly-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-irritated-miles-irritated-talk",
+			"fromNode": "miles-irritated",
+			"fromSide": "right",
+			"toNode": "miles-irritated-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-miles-irritated-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "miles-irritated-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-hostile-miles-hostile-talk",
+			"fromNode": "miles-hostile",
+			"fromSide": "right",
+			"toNode": "miles-hostile-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-miles-hostile-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "miles-hostile-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-suspicious-miles-suspicious-talk",
+			"fromNode": "miles-suspicious",
+			"fromSide": "right",
+			"toNode": "miles-suspicious-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-miles-suspicious-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "miles-suspicious-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-afraid-miles-afraid-talk",
+			"fromNode": "miles-afraid",
+			"fromSide": "right",
+			"toNode": "miles-afraid-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-miles-afraid-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "miles-afraid-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-room-miles-booth",
+			"fromNode": "miles-room",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "room"
+		},
+		{
+			"id": "e-miles-actor-miles-booth",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-friendly-miles-booth",
+			"fromNode": "miles-friendly",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-irritated-miles-booth",
+			"fromNode": "miles-irritated",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-hostile-miles-booth",
+			"fromNode": "miles-hostile",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-suspicious-miles-booth",
+			"fromNode": "miles-suspicious",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-afraid-miles-booth",
+			"fromNode": "miles-afraid",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-blink-half-miles-booth",
+			"fromNode": "miles-blink-half",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-blink-closed-miles-booth",
+			"fromNode": "miles-blink-closed",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-talk-miles-booth",
+			"fromNode": "miles-talk",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-friendly-talk-miles-booth",
+			"fromNode": "miles-friendly-talk",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-irritated-talk-miles-booth",
+			"fromNode": "miles-irritated-talk",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-hostile-talk-miles-booth",
+			"fromNode": "miles-hostile-talk",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-suspicious-talk-miles-booth",
+			"fromNode": "miles-suspicious-talk",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-afraid-talk-miles-booth",
+			"fromNode": "miles-afraid-talk",
+			"fromSide": "right",
+			"toNode": "miles-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-miles-room-portrait",
+			"fromNode": "miles-room",
+			"fromSide": "right",
+			"toNode": "miles-portrait",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "room"
+		},
+		{
+			"id": "e-miles-actor-portrait",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "miles-portrait",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "made-miles-room-1-edge",
+			"fromNode": "miles-room",
+			"fromSide": "right",
+			"toNode": "made-miles-room-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-actor-1-edge",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "made-miles-actor-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-portrait-1-edge",
+			"fromNode": "miles-portrait",
+			"fromSide": "right",
+			"toNode": "made-miles-portrait-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-miles-desk",
+			"fromNode": "miles-actor",
+			"fromSide": "bottom",
+			"toNode": "miles-at-desk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-miles-desk-cut",
+			"fromNode": "miles-at-desk-wood",
+			"fromSide": "right",
+			"toNode": "miles-at-desk-cut",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "cut out"
+		},
+		{
+			"id": "e-miles-crop",
+			"fromNode": "miles-scene-picture",
+			"fromSide": "right",
+			"toNode": "miles-backdrop",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "crop"
+		},
+		{
+			"id": "e-miles-actor-cut",
+			"fromNode": "miles-actor",
+			"fromSide": "bottom",
+			"toNode": "miles-actor-cut",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "cut out"
+		},
+		{
+			"id": "made-miles-actor-cut-1-edge",
+			"fromNode": "miles-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-miles-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-backdrop-1-edge",
+			"fromNode": "miles-backdrop",
+			"fromSide": "right",
+			"toNode": "made-miles-backdrop-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-at-desk-1-edge",
+			"fromNode": "miles-at-desk",
+			"fromSide": "right",
+			"toNode": "made-miles-at-desk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "miles-desk-to-wood",
+			"fromNode": "miles-at-desk",
+			"toNode": "miles-at-desk-wood"
+		},
+		{
+			"id": "made-miles-at-desk-wood-1-edge",
+			"fromNode": "miles-at-desk-wood",
+			"fromSide": "right",
+			"toNode": "made-miles-at-desk-wood-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-at-desk-cut-1-edge",
+			"fromNode": "miles-at-desk-cut",
+			"fromSide": "right",
+			"toNode": "made-miles-at-desk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		}
+	]
+}

@@ -44,9 +44,9 @@ export class DecisionProviderError extends Error {
   }
 }
 
-function validateStateChanges(value) {
+function validateStateChanges(value, keys = STATE_KEYS) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
-  return STATE_KEYS.reduce((changes, key) => {
+  return keys.reduce((changes, key) => {
     const delta = Number(value[key]);
     if (Number.isFinite(delta)) changes[key] = clamp(delta, -25, 25);
     return changes;
@@ -71,7 +71,7 @@ function validateMemory(value) {
  * bring its own `stateChanges` and `memory` (the Mock does); otherwise the
  * action note's effects and `## Memory` decide them.
  */
-export function validateDecision(raw, availableActions, fallbackAction) {
+export function validateDecision(raw, availableActions, fallbackAction, stateKeys = STATE_KEYS) {
   const answer = raw && typeof raw === "object" ? raw : {};
   const fallbackUsed = !availableActions.includes(answer.action);
   const reason =
@@ -84,7 +84,7 @@ export function validateDecision(raw, availableActions, fallbackAction) {
     action: fallbackUsed ? fallbackAction : answer.action,
     confidence: clamp(Number(answer.confidence) || 0, 0, 1),
     reason,
-    stateChanges: fallbackUsed ? {} : validateStateChanges(answer.stateChanges),
+    stateChanges: fallbackUsed ? {} : validateStateChanges(answer.stateChanges, stateKeys),
     memory: fallbackUsed ? null : validateMemory(answer.memory),
     ownsStateChanges: fallbackUsed || "stateChanges" in answer,
     ownsMemory: fallbackUsed || "memory" in answer,
@@ -125,7 +125,7 @@ function firstMemory(rules, view) {
   return validateMemory(memory);
 }
 
-const SCRIPT_WORDS = new Set(["say", "action", "tone", "cue", "end"]);
+const SCRIPT_WORDS = new Set(["say", "narrate", "action", "tone", "cue", "end"]);
 
 export class Encounter {
   /**
@@ -419,6 +419,7 @@ export class Encounter {
     let tone = "neutral";
     let cue = null;
     let line = null;
+    let narration = null;
     const effects = [];
     for (const command of node.commands) {
       if (command.startsWith("> ")) {
@@ -428,6 +429,7 @@ export class Encounter {
       const [word, ...rest] = command.split(/\s+/);
       const arg = rest.join(" ");
       if (word === "say") line = this.character.dialogue.lines[arg] ?? line;
+      else if (word === "narrate") narration = this.character.dialogue.lines[arg] ?? arg;
       else if (word === "action") action = arg;
       else if (word === "tone") tone = arg;
       else if (word === "cue") cue = arg;
@@ -441,10 +443,11 @@ export class Encounter {
         }
       }
     }
-    line = this.personalize(line ?? "");
+    const spoken = line !== null;
+    line = this.personalize(line ?? narration ?? "");
     this.turn += 1;
     this.history.push({ speaker: "player", text: playerText });
-    this.history.push({ speaker: "arthur", text: line, ...(action ? { action } : {}) });
+    this.history.push({ speaker: spoken ? "arthur" : "narrator", text: line, ...(action ? { action } : {}) });
     this.history = this.history.slice(-this.character.historyMax);
     const events = [];
     for (const effect of this.applyWorldEffects([...effects, ...node.do])) {
@@ -478,7 +481,8 @@ export class Encounter {
     });
     return {
       playerInput: playerText,
-      dialogue: line,
+      dialogue: spoken ? line : null,
+      narration,
       decision: action ? { action, confidence: 1, reason: `Script node ${name}.`, tone } : null,
       npcPerformance: structuredClone(performance),
       status: this.status,
@@ -486,6 +490,32 @@ export class Encounter {
       events,
       node: name
     };
+  }
+
+  /**
+   * The choice buttons here: arrows out of the current node labelled with
+   * quoted text. `"Wake up." if state.patience <= 40` shows only when true.
+   */
+  choices() {
+    if (this.status !== "active" || !this.node) return [];
+    const view = this.view();
+    return this.tree.edges
+      .filter((edge) => edge.from === this.node)
+      .map((edge) => {
+        const match = edge.label.match(/^"([^"]+)"(?:\s+~\s*[\w-]+)?(?:\s+if\s+(.+))?$/);
+        return match && { text: match[1], to: edge.to, when: match[2] ?? null };
+      })
+      .filter((choice) => choice && (!choice.when || evaluate(choice.when, view)));
+  }
+
+  /** Takes a choice: moves along its arrow; a script node there answers. */
+  choose(text) {
+    if (this.status !== "active") throw new Error("The encounter has ended.");
+    const choice = this.choices().find((item) => item.text === text);
+    if (!choice) return null;
+    this.node = choice.to;
+    if (this.tree.nodes[choice.to]?.kind === "script") return this.runScript(choice.to, text);
+    return { playerInput: text, dialogue: null, decision: null, status: this.status, outcome: this.outcome, events: [], node: choice.to };
   }
 
   /**
@@ -542,7 +572,7 @@ export class Encounter {
       throw new DecisionProviderError(this.providerId, message);
     }
 
-    const decision = validateDecision(this.lastRawResponse, available, this.character.fallbackAction);
+    const decision = validateDecision(this.lastRawResponse, available, this.character.fallbackAction, this.character.stateKeys);
     // A low-confidence choice, or a judgment below the action's bar, falls back.
     const rule = this.actionsById[decision.action];
     if (decision.judgments && rule?.judgment) {

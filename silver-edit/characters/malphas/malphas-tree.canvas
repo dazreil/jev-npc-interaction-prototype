@@ -1,0 +1,60 @@
+{
+	"nodes": [
+		{
+			"id": "legend",
+			"type": "text",
+			"x": -700,
+			"y": 0,
+			"width": 600,
+			"height": 300,
+			"text": "### The dream\n\nFree talk with Malphas, plus two choice buttons. **Wake up.** only appears once his patience is worn down (keep refusing him). **Rest.** gives in.\n\nQuoted arrow labels are buttons; `if` after the quote shows it only when true."
+		},
+		{
+			"id": "dream",
+			"type": "text",
+			"x": 0,
+			"y": 0,
+			"width": 480,
+			"height": 220,
+			"text": "## dream\nopen\nsay opening\n\nFree talk with [[Malphas]]."
+		},
+		{
+			"id": "yield",
+			"type": "text",
+			"x": 700,
+			"y": -200,
+			"width": 480,
+			"height": 220,
+			"text": "## yield\nscript\naction [[MALPHAS_CLAIM]]\ncue friendly\nsay yield-line\nend [[dream-yielded]]"
+		},
+		{
+			"id": "wake",
+			"type": "text",
+			"x": 700,
+			"y": 200,
+			"width": 480,
+			"height": 220,
+			"text": "## wake\nscript\naction [[MALPHAS_RETREAT]]\ncue irritated\nnarrate wake-line\nend [[dream-resisted]]"
+		}
+	],
+	"edges": [
+		{
+			"id": "e-yield",
+			"fromNode": "dream",
+			"fromSide": "right",
+			"toNode": "yield",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "\"Rest. Just for a moment.\""
+		},
+		{
+			"id": "e-wake",
+			"fromNode": "dream",
+			"fromSide": "right",
+			"toNode": "wake",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "\"Wake up.\" if state.patience <= 40"
+		}
+	]
+}

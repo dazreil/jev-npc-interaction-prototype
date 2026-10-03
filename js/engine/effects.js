@@ -59,9 +59,11 @@ export function parseEffect(effect) {
       if (!rest[0]) throw new SyntaxError(`Missing item id in effect: ${source}`);
       return { kind, key: rest[0], value: rest[1] ?? "held" };
     case "open":
-    case "close":
       if (!rest[0]) throw new SyntaxError(`Missing object id in effect: ${source}`);
       return { kind, key: rest[0] };
+    case "close":
+      // "close" alone closes whatever is open (a talk panel shared by people).
+      return { kind, key: rest[0] ?? "*" };
     case "portrait":
       return { kind, character: rest[0], cue: rest[1] ?? "neutral" };
     case "narrate":
@@ -122,7 +124,7 @@ export function applyEffects(effects, world = {}) {
         events.push(parsed);
         break;
       case "close":
-        next.open = { ...(next.open ?? {}), [parsed.key]: false };
+        next.open = parsed.key === "*" ? {} : { ...(next.open ?? {}), [parsed.key]: false };
         events.push(parsed);
         break;
       case "screen":

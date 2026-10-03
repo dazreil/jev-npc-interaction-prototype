@@ -1,0 +1,234 @@
+{
+	"nodes": [
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 0,
+			"y": -460,
+			"width": 1360,
+			"height": 300,
+			"text": "# World — The Silver Edit\nThis canvas **is the game**. Each labelled group is a screen. Drag cards onto a screen to place them; an arrow from a text card to another screen is a way there.\n\nPlay it: `npm run app:silver`."
+		},
+		{
+			"id": "screen-office",
+			"type": "group",
+			"label": "office",
+			"x": 0,
+			"y": 0,
+			"width": 1280,
+			"height": 720,
+			"color": "6"
+		},
+		{
+			"id": "screen-home",
+			"type": "group",
+			"label": "home",
+			"x": 1480,
+			"y": 0,
+			"width": 1280,
+			"height": 720,
+			"color": "6"
+		},
+		{
+			"id": "screen-dream",
+			"type": "group",
+			"label": "dream",
+			"x": 2960,
+			"y": 0,
+			"width": 1280,
+			"height": 720,
+			"color": "6"
+		},
+		{
+			"id": "office-picture",
+			"type": "file",
+			"file": "screens/office/art/office-empty/office-empty.webp",
+			"x": 0,
+			"y": 0,
+			"width": 1280,
+			"height": 720
+		},
+		{
+			"id": "arthur-sitting",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-at-desk-cut/arthur-at-desk-cut.webp",
+			"x": 482,
+			"y": 260,
+			"width": 323,
+			"height": 250
+		},
+		{
+			"id": "miles-sitting",
+			"type": "file",
+			"file": "characters/miles/art/miles-at-desk-cut/miles-at-desk-cut.webp",
+			"x": 70,
+			"y": 330,
+			"width": 409,
+			"height": 340
+		},
+		{
+			"id": "chloe-sitting",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-at-desk-cut/chloe-at-desk-cut.webp",
+			"x": 840,
+			"y": 320,
+			"width": 349,
+			"height": 360,
+			"focus": [
+				50,
+				0
+			]
+		},
+		{
+			"id": "home-picture",
+			"type": "file",
+			"file": "screens/home/art/home-background/home-background.webp",
+			"x": 1480,
+			"y": 0,
+			"width": 1280,
+			"height": 720
+		},
+		{
+			"id": "dream-picture",
+			"type": "file",
+			"file": "screens/dream/art/dream-background/dream-background.webp",
+			"x": 2960,
+			"y": 0,
+			"width": 1280,
+			"height": 720
+		},
+		{
+			"id": "office-scene",
+			"type": "text",
+			"x": 48,
+			"y": 96,
+			"width": 760,
+			"height": 140,
+			"text": "Rain ticks on the tall mill windows. Outside, the maples burn red, as they have for three years."
+		},
+		{
+			"id": "arthur",
+			"type": "file",
+			"file": "screens/office/arthur-door.md",
+			"x": 482,
+			"y": 260,
+			"width": 323,
+			"height": 250
+		},
+		{
+			"id": "miles",
+			"type": "file",
+			"file": "screens/office/miles-desk.md",
+			"x": 70,
+			"y": 330,
+			"width": 409,
+			"height": 340
+		},
+		{
+			"id": "chloe",
+			"type": "file",
+			"file": "screens/office/chloe-desk.md",
+			"x": 840,
+			"y": 320,
+			"width": 349,
+			"height": 360
+		},
+		{
+			"id": "go-home",
+			"type": "text",
+			"x": 520,
+			"y": 596,
+			"width": 280,
+			"height": 44,
+			"text": "GO HOME FOR THE NIGHT →"
+		},
+		{
+			"id": "home-scene",
+			"type": "text",
+			"x": 1528,
+			"y": 96,
+			"width": 840,
+			"height": 140,
+			"text": "The cottage is cold. Red leaves press against the black window like hands."
+		},
+		{
+			"id": "bed",
+			"type": "file",
+			"file": "screens/home/bed.md",
+			"x": 1920,
+			"y": 300,
+			"width": 400,
+			"height": 240
+		},
+		{
+			"id": "dream-scene",
+			"type": "text",
+			"x": 3008,
+			"y": 96,
+			"width": 840,
+			"height": 140,
+			"text": "Velvet, everywhere, soft as breath. Ribbons of shadow drift past. Someone is waiting."
+		},
+		{
+			"id": "malphas",
+			"type": "file",
+			"file": "screens/dream/malphas-shadow.md",
+			"x": 3460,
+			"y": 180,
+			"width": 280,
+			"height": 400
+		},
+		{
+			"id": "dream-woke",
+			"type": "text",
+			"x": 3120,
+			"y": 240,
+			"width": 960,
+			"height": 280,
+			"text": "if outcome = dream-resisted\nYou wake at 3:12 am. Rain. On the pillow, a single silver hair.\n\nEND OF THE FIRST DAY"
+		},
+		{
+			"id": "dream-lost",
+			"type": "text",
+			"x": 3120,
+			"y": 240,
+			"width": 960,
+			"height": 280,
+			"text": "if outcome = dream-yielded\nYou do not wake.\n\nPress Cmd+R to try again."
+		}
+	],
+	"edges": [
+		{
+			"id": "e-go-home",
+			"fromNode": "go-home",
+			"fromSide": "right",
+			"toNode": "screen-home",
+			"toSide": "left",
+			"toEnd": "arrow"
+		},
+		{
+			"id": "arthur-shape",
+			"fromNode": "arthur",
+			"fromSide": "bottom",
+			"toNode": "arthur-sitting",
+			"toSide": "bottom",
+			"label": "shape"
+		},
+		{
+			"id": "miles-shape",
+			"fromNode": "miles",
+			"fromSide": "bottom",
+			"toNode": "miles-sitting",
+			"toSide": "bottom",
+			"label": "shape"
+		},
+		{
+			"id": "chloe-shape",
+			"fromNode": "chloe",
+			"fromSide": "bottom",
+			"toNode": "chloe-sitting",
+			"toSide": "bottom",
+			"label": "shape"
+		}
+	]
+}

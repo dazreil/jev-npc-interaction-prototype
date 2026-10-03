@@ -12,6 +12,10 @@
 //   arrow to another screen    the source card becomes a button to go there;
 //                              an arrow label `if <condition>` also gates it
 //   arrow object → ui card     where that object's UI opens (if in the frame)
+//   arrow object → image card  the object takes that picture's box and shape:
+//                              only its solid pixels take clicks, and it
+//                              moves with the picture
+//   `focus: [x, y]` on an image card  where the picture sits inside its box
 //
 // Cards outside every screen group are notes for people; they are ignored.
 
@@ -95,7 +99,11 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
       if (node.type === "file") {
         const name = baseName(node.file);
         if (IMAGE_PATTERN.test(name)) {
-          screen.elements.push({ type: "image", id: node.id, node: node.id, at, src: asset(name), fit: "cover" });
+          // `focus: [x, y]` on the card (percent, 50 50 is the middle) slides the
+          // picture inside its box; set with Option-drag in the editor.
+          const image = { type: "image", id: node.id, node: node.id, at, src: asset(name), fit: "cover" };
+          if (Array.isArray(node.focus)) image.focus = node.focus.map(Number);
+          screen.elements.push(image);
           continue;
         }
         const note = notes[noteId(name)];
@@ -111,7 +119,7 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
         } else if (embed && notes[embed[1].trim()]?.type === "ui") {
           screen.elements.push({ type: "ui", id: node.id, node: node.id, ui: embed[1].trim(), at, visible });
         } else {
-          screen.elements.push({ type: "text", id: node.id, node: node.id, at, style: "label", text: plain(body), visible, card: node.id });
+          screen.elements.push({ type: "text", id: node.id, node: node.id, at, style: "card", text: plain(body), visible, card: node.id });
         }
       }
     }
@@ -137,6 +145,16 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
       continue;
     }
 
+    // Object → image card in the same frame: the hotspot is that picture's shape.
+    const picture = object && screen.elements.find((element) => element.type === "image" && element.node === edge.toNode);
+    if (picture && picture.id !== `${fromScreen}-picture`) {
+      object.rect = [...picture.at];
+      object.mask = picture.src;
+      if (picture.focus) object.maskFocus = picture.focus;
+      object.follows = picture.node;
+      continue;
+    }
+
     if (!toScreen || toScreen === fromScreen) continue;
     // A text card with an arrow to another screen is a button that goes there.
     const index = screen.elements.findIndex((element) => element.card === edge.fromNode);
@@ -149,7 +167,7 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
       id: edge.fromNode,
       node: edge.fromNode,
       at: text.at,
-      style: "hotspot",
+      style: "exit",
       label: text.text,
       visible: visible.length ? visible : undefined,
       do: [`screen ${toScreen}`]

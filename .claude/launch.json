@@ -4,7 +4,19 @@
     {
       "name": "workbench",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "workbench"],
+      "runtimeArgs": [
+        "run",
+        "workbench"
+      ],
+      "port": 5174
+    },
+    {
+      "name": "workbench-silver",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "workbench:silver"
+      ],
       "port": 5174
     }
   ]

@@ -1,0 +1,1054 @@
+{
+	"nodes": [
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 0,
+			"y": -320,
+			"width": 1600,
+			"height": 240,
+			"text": "# Chloe\nChloe Miller, social media manager and aspiring gothic novelist in her mid twenties, black bob with blunt bangs, dark lipstick, an oversized cardigan covered in pins\n\nEverything about Chloe, top to bottom. Right-click a recipe card to make its art; it saves into `characters/chloe/art/`. Make them in order: room and actor, then the moods, then the talking loops, then the booth."
+		},
+		{
+			"id": "g-who",
+			"type": "group",
+			"label": "Who they are",
+			"x": -40,
+			"y": -80,
+			"width": 1960,
+			"height": 520,
+			"color": "6"
+		},
+		{
+			"id": "n-character",
+			"type": "file",
+			"file": "characters/chloe/Chloe.md",
+			"x": 0,
+			"y": 0,
+			"width": 560,
+			"height": 400
+		},
+		{
+			"id": "n-profile",
+			"type": "file",
+			"file": "characters/chloe/profiles/chloe-default.md",
+			"x": 640,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-portraits",
+			"type": "file",
+			"file": "characters/chloe/chloe-portraits.md",
+			"x": 1100,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "g-decides",
+			"type": "group",
+			"label": "How they decide, and what they say",
+			"x": -40,
+			"y": 520,
+			"width": 2820,
+			"height": 820,
+			"color": "6"
+		},
+		{
+			"id": "n-tree",
+			"type": "file",
+			"file": "characters/chloe/chloe-tree.canvas",
+			"x": 0,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-lines",
+			"type": "file",
+			"file": "characters/chloe/dialogue/chloe-lines.md",
+			"x": 0,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "g-look",
+			"type": "group",
+			"label": "Look: the room, the actor, moods and blinks",
+			"x": -40,
+			"y": 1920,
+			"width": 4200,
+			"height": 1560,
+			"color": "6"
+		},
+		{
+			"id": "chloe-room",
+			"type": "text",
+			"x": 700,
+			"y": 2000,
+			"width": 560,
+			"height": 340,
+			"text": "## chloe-room\nimage\nstatus: done\nmodel: z-image\nsize: 1024x768\nseed: 11\nprompt: \"a cosy corner of a long office table in an old mill, a laptop covered in horror film stickers, a black notebook, a string of fairy lights, rain on tall windows, red maples outside, nobody in the room\"\n",
+			"color": "4"
+		},
+		{
+			"id": "chloe-actor",
+			"type": "text",
+			"x": 700,
+			"y": 2400,
+			"width": 560,
+			"height": 340,
+			"text": "## chloe-actor\nimage\nstatus: done\nmodel: krea-2\nsize: 1024x768\nseed: 12\nprompt: \"Chloe Miller, social media manager and aspiring gothic novelist in her mid twenties, black bob with blunt bangs, dark lipstick, an oversized cardigan covered in pins, seen waist-up, facing the camera\"\n",
+			"color": "4"
+		},
+		{
+			"id": "chloe-keep",
+			"type": "text",
+			"x": 0,
+			"y": 2800,
+			"width": 560,
+			"height": 360,
+			"text": "## chloe-keep\nstyle\n# Holds Chloe steady in edits: only the named part changes.\ntemplate: \"Keep the exact same person: same face, hair and clothes (Chloe Miller, social media manager and aspiring gothic novelist in her mid twenties, black bob with blunt bangs, dark lipstick, an oversized cardigan covered in pins). Keep the exact same framing, crop, camera position and pose, and the same flat, evenly lit chroma-key green screen background, lighting and camera quality. Only change {prompt}\"\n"
+		},
+		{
+			"id": "chloe-friendly",
+			"type": "text",
+			"x": 1900,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## chloe-friendly\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now a warm, slightly awkward friendly smile with raised eyebrows.\"\n"
+		},
+		{
+			"id": "chloe-irritated",
+			"type": "text",
+			"x": 2660,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## chloe-irritated\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now irritated and impatient: jaw clenched, brows lowered, lips pressed thin.\"\n"
+		},
+		{
+			"id": "chloe-hostile",
+			"type": "text",
+			"x": 3420,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## chloe-hostile\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now hostile: glaring hard at the camera, brows pulled down, mouth open mid-snarl.\"\n"
+		},
+		{
+			"id": "chloe-suspicious",
+			"type": "text",
+			"x": 1900,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## chloe-suspicious\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now suspicious: eyes narrowed, one eyebrow raised, head tilted slightly.\"\n"
+		},
+		{
+			"id": "chloe-afraid",
+			"type": "text",
+			"x": 2660,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## chloe-afraid\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now afraid: eyes wide, eyebrows raised high, mouth slightly open.\"\n"
+		},
+		{
+			"id": "chloe-blink-half",
+			"type": "text",
+			"x": 3420,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## chloe-blink-half\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the eyes, which are now half closed, halfway through a blink. Nothing else changes.\"\n"
+		},
+		{
+			"id": "chloe-blink-closed",
+			"type": "text",
+			"x": 1900,
+			"y": 3520,
+			"width": 560,
+			"height": 300,
+			"text": "## chloe-blink-closed\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the eyes, which are now fully closed in a natural blink. Nothing else changes.\"\n"
+		},
+		{
+			"id": "g-talk",
+			"type": "group",
+			"label": "Talking: a loop per mood, then everything into the room",
+			"x": -40,
+			"y": 3620,
+			"width": 4200,
+			"height": 1500,
+			"color": "6"
+		},
+		{
+			"id": "chloe-talk",
+			"type": "text",
+			"x": 700,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## chloe-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat and unchanged\"\n"
+		},
+		{
+			"id": "chloe-friendly-talk",
+			"type": "text",
+			"x": 1900,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## chloe-friendly-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a friendly way, small natural movements\"\n"
+		},
+		{
+			"id": "chloe-irritated-talk",
+			"type": "text",
+			"x": 2660,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## chloe-irritated-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a irritated way, small natural movements\"\n"
+		},
+		{
+			"id": "chloe-hostile-talk",
+			"type": "text",
+			"x": 3420,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## chloe-hostile-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a hostile way, small natural movements\"\n"
+		},
+		{
+			"id": "chloe-suspicious-talk",
+			"type": "text",
+			"x": 1900,
+			"y": 4100,
+			"width": 560,
+			"height": 340,
+			"text": "## chloe-suspicious-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a suspicious way, small natural movements\"\n"
+		},
+		{
+			"id": "chloe-afraid-talk",
+			"type": "text",
+			"x": 2660,
+			"y": 4100,
+			"width": 560,
+			"height": 340,
+			"text": "## chloe-afraid-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a afraid way, small natural movements\"\n"
+		},
+		{
+			"id": "chloe-booth",
+			"type": "text",
+			"x": 700,
+			"y": 4600,
+			"width": 560,
+			"height": 380,
+			"text": "## chloe-booth\ncomposite\nstatus: idea\n# Free: every Chloe picture into the room, keyed together so moods and blinks line up.\nalign: true\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 3\ncrunch: 4\njpeg: 50\n"
+		},
+		{
+			"id": "style-room",
+			"type": "text",
+			"text": "## fmv-room\nstyle\n# Pre-rendered 1990s CG rooms. Use with model: z-image.\nprefix: A still frame from a 1995 CD-ROM computer game, a pre-rendered 3D CGI background, early 1990s 3D rendering with flat shading, low-polygon models and simple textures\nsuffix: no people, no text or lettering",
+			"x": 0,
+			"y": 2000,
+			"width": 520,
+			"height": 260,
+			"color": "5"
+		},
+		{
+			"id": "style-actor-green",
+			"type": "text",
+			"text": "## fmv-actor-green\nstyle\n# Live actors on a green screen, to key out. Use with model: krea-2.\n# Keep green out of the wardrobe.\nprefix: A 1995 video capture of a live-action actor filmed for a CD-ROM game on a chroma-key stage\nsuffix: standing in front of a solid bright chroma-key green screen, solid pure green #00FF00 background, evenly lit",
+			"x": 0,
+			"y": 2400,
+			"width": 520,
+			"height": 300,
+			"color": "5"
+		},
+		{
+			"id": "talk-loop",
+			"type": "text",
+			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The night guard {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
+			"x": 0,
+			"y": 3700,
+			"width": 560,
+			"height": 320,
+			"color": "5"
+		},
+		{
+			"id": "n-CHLOE_TALK_VESPERA",
+			"type": "file",
+			"file": "characters/chloe/actions/CHLOE_TALK_VESPERA.md",
+			"x": 480,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-chloe-talk-vespera",
+			"type": "file",
+			"file": "characters/chloe/dialogue/chloe-talk-vespera.md",
+			"x": 480,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-CHLOE_ASK_ABOUT_ELENA",
+			"type": "file",
+			"file": "characters/chloe/actions/CHLOE_ASK_ABOUT_ELENA.md",
+			"x": 940,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-chloe-ask-about-elena",
+			"type": "file",
+			"file": "characters/chloe/dialogue/chloe-ask-about-elena.md",
+			"x": 940,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-CHLOE_SHOW_SKETCH",
+			"type": "file",
+			"file": "characters/chloe/actions/CHLOE_SHOW_SKETCH.md",
+			"x": 1400,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-chloe-show-sketch",
+			"type": "file",
+			"file": "characters/chloe/dialogue/chloe-show-sketch.md",
+			"x": 1400,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-CHLOE_REASSURE",
+			"type": "file",
+			"file": "characters/chloe/actions/CHLOE_REASSURE.md",
+			"x": 1860,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-chloe-reassure",
+			"type": "file",
+			"file": "characters/chloe/dialogue/chloe-reassure.md",
+			"x": 1860,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-CHLOE_GET_BACK_TO_IT",
+			"type": "file",
+			"file": "characters/chloe/actions/CHLOE_GET_BACK_TO_IT.md",
+			"x": 2320,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-chloe-get-back-to-it",
+			"type": "file",
+			"file": "characters/chloe/dialogue/chloe-get-back-to-it.md",
+			"x": 2320,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "chloe-portrait",
+			"type": "text",
+			"x": 1460,
+			"y": 4600,
+			"width": 560,
+			"height": 380,
+			"text": "## chloe-portrait\ncomposite\nstatus: done\n# Free: the actor pasted into the room. A still portrait until the talking loops are made.\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 5\ncrunch: 4\njpeg: 50\n",
+			"color": "4"
+		},
+		{
+			"id": "made-chloe-room-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-room/chloe-room.webp",
+			"x": 1340,
+			"y": 2000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-actor-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-actor/chloe-actor.webp",
+			"x": 1340,
+			"y": 2400,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-portrait-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-portrait/chloe-portrait.webp",
+			"x": 2100,
+			"y": 4600,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "g-office",
+			"type": "group",
+			"label": "In the open-plan office (sitting at their desk, cut out)",
+			"x": -40,
+			"y": 4920,
+			"width": 2700,
+			"height": 520,
+			"color": "6"
+		},
+		{
+			"id": "chloe-at-desk",
+			"type": "text",
+			"x": 700,
+			"y": 5000,
+			"width": 560,
+			"height": 460,
+			"text": "## chloe-at-desk\nedit\nstatus: done\nmodel: qwen-edit\nsize: 1024x1024\nseed: 31\nprompt: \"Show the same person, with the same face, hair and clothes, now seated behind a small 1970s Italian modern desk from her boss's retro furniture collection: a compact desk with a glossy cream-white lacquer top with rounded corners on polished chrome legs. On it: a laptop covered in horror film stickers, a black notebook, a small white mushroom-shaped space-age lamp. She sits in a dark brown leather and chrome Italian chair, looking up shyly at the camera. Straight-on front view, the camera square to the desk at seated eye level: the front edge of the desk is perfectly horizontal and parallel to the bottom of the picture, both ends of the desk at the same height, the desk top barely visible. The whole desk and chair fit in the frame with empty space on both sides. No green objects. Flat, evenly lit pure green screen background, no floor, no shadow, no walls.\"\n",
+			"color": "4"
+		},
+		{
+			"id": "chloe-at-desk-cut",
+			"type": "text",
+			"x": 1340,
+			"y": 5000,
+			"width": 520,
+			"height": 260,
+			"text": "## chloe-at-desk-cut\ncutout\nstatus: done\n# Free: keyed off the green screen, to sit in the office scene.\ncrunch: 4\njpeg: 50\n\n# Keeps the chrome legs solid.\nkeyLow: 0.5\nkeyHigh: 0.85\ndespill: strong",
+			"color": "4"
+		},
+		{
+			"id": "g-portrait-layers",
+			"type": "group",
+			"label": "Talk portrait layers: background (cut from the screen around them) and character (cut out)",
+			"x": -40,
+			"y": 6020,
+			"width": 2700,
+			"height": 900,
+			"color": "6"
+		},
+		{
+			"id": "chloe-scene-picture",
+			"type": "file",
+			"file": "screens/office/art/office-empty/office-empty.webp",
+			"x": 0,
+			"y": 6100,
+			"width": 560,
+			"height": 315
+		},
+		{
+			"id": "chloe-backdrop",
+			"type": "text",
+			"x": 700,
+			"y": 6100,
+			"width": 560,
+			"height": 300,
+			"text": "## chloe-backdrop\ncrop\nstatus: done\n# Free: the screen behind Chloe, cut around their click box on World.canvas, with a 10 pixel bleed.\nbox: [840, 320, 349, 360]\nbleed: 10\n",
+			"color": "4"
+		},
+		{
+			"id": "chloe-actor-cut",
+			"type": "text",
+			"x": 700,
+			"y": 6500,
+			"width": 560,
+			"height": 260,
+			"text": "## chloe-actor-cut\ncutout\nstatus: done\n# Free: Chloe keyed off the green screen, for the talk portrait.\ncrunch: 4\njpeg: 50\n",
+			"color": "4"
+		},
+		{
+			"id": "made-chloe-actor-cut-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-actor-cut/chloe-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-backdrop-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-backdrop/chloe-backdrop.webp",
+			"x": 1340,
+			"y": 6100,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-at-desk-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-at-desk/chloe-at-desk.webp",
+			"x": 1340,
+			"y": 5000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "chloe-at-desk-wood",
+			"type": "text",
+			"x": 700,
+			"y": 5960,
+			"width": 560,
+			"height": 320,
+			"text": "## chloe-at-desk-wood\nedit\nstatus: done\nmodel: qwen-edit\nsize: 1024x1024\nseed: 32\n# The desk legs become dark wood.\nprompt: \"Change only the chrome desk legs into dark walnut wood legs, slim and tapered, in exactly the same places. Keep everything else exactly the same: the person, the desk top, everything on the desk, the chair, the framing, and the flat green screen background.\"",
+			"color": "4"
+		},
+		{
+			"id": "made-chloe-at-desk-wood-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-at-desk-wood/chloe-at-desk-wood.webp",
+			"x": 1340,
+			"y": 5960,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-at-desk-cut-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-at-desk-cut/chloe-at-desk-cut.webp",
+			"x": 1940,
+			"y": 5000,
+			"width": 240,
+			"height": 135
+		}
+	],
+	"edges": [
+		{
+			"id": "e-style-room-chloe-room",
+			"fromNode": "style-room",
+			"fromSide": "right",
+			"toNode": "chloe-room",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-style-actor-green-chloe-actor",
+			"fromNode": "style-actor-green",
+			"fromSide": "right",
+			"toNode": "chloe-actor",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-actor-chloe-friendly",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "chloe-friendly",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-chloe-keep-chloe-friendly",
+			"fromNode": "chloe-keep",
+			"fromSide": "right",
+			"toNode": "chloe-friendly",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-actor-chloe-irritated",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "chloe-irritated",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-chloe-keep-chloe-irritated",
+			"fromNode": "chloe-keep",
+			"fromSide": "right",
+			"toNode": "chloe-irritated",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-actor-chloe-hostile",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "chloe-hostile",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-chloe-keep-chloe-hostile",
+			"fromNode": "chloe-keep",
+			"fromSide": "right",
+			"toNode": "chloe-hostile",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-actor-chloe-suspicious",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "chloe-suspicious",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-chloe-keep-chloe-suspicious",
+			"fromNode": "chloe-keep",
+			"fromSide": "right",
+			"toNode": "chloe-suspicious",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-actor-chloe-afraid",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "chloe-afraid",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-chloe-keep-chloe-afraid",
+			"fromNode": "chloe-keep",
+			"fromSide": "right",
+			"toNode": "chloe-afraid",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-actor-chloe-blink-half",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "chloe-blink-half",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-chloe-keep-chloe-blink-half",
+			"fromNode": "chloe-keep",
+			"fromSide": "right",
+			"toNode": "chloe-blink-half",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-actor-chloe-blink-closed",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "chloe-blink-closed",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-chloe-keep-chloe-blink-closed",
+			"fromNode": "chloe-keep",
+			"fromSide": "right",
+			"toNode": "chloe-blink-closed",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-actor-chloe-talk",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "chloe-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-chloe-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "chloe-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-friendly-chloe-friendly-talk",
+			"fromNode": "chloe-friendly",
+			"fromSide": "right",
+			"toNode": "chloe-friendly-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-chloe-friendly-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "chloe-friendly-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-irritated-chloe-irritated-talk",
+			"fromNode": "chloe-irritated",
+			"fromSide": "right",
+			"toNode": "chloe-irritated-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-chloe-irritated-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "chloe-irritated-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-hostile-chloe-hostile-talk",
+			"fromNode": "chloe-hostile",
+			"fromSide": "right",
+			"toNode": "chloe-hostile-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-chloe-hostile-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "chloe-hostile-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-suspicious-chloe-suspicious-talk",
+			"fromNode": "chloe-suspicious",
+			"fromSide": "right",
+			"toNode": "chloe-suspicious-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-chloe-suspicious-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "chloe-suspicious-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-afraid-chloe-afraid-talk",
+			"fromNode": "chloe-afraid",
+			"fromSide": "right",
+			"toNode": "chloe-afraid-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-chloe-afraid-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "chloe-afraid-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-room-chloe-booth",
+			"fromNode": "chloe-room",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "room"
+		},
+		{
+			"id": "e-chloe-actor-chloe-booth",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-friendly-chloe-booth",
+			"fromNode": "chloe-friendly",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-irritated-chloe-booth",
+			"fromNode": "chloe-irritated",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-hostile-chloe-booth",
+			"fromNode": "chloe-hostile",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-suspicious-chloe-booth",
+			"fromNode": "chloe-suspicious",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-afraid-chloe-booth",
+			"fromNode": "chloe-afraid",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-blink-half-chloe-booth",
+			"fromNode": "chloe-blink-half",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-blink-closed-chloe-booth",
+			"fromNode": "chloe-blink-closed",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-talk-chloe-booth",
+			"fromNode": "chloe-talk",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-friendly-talk-chloe-booth",
+			"fromNode": "chloe-friendly-talk",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-irritated-talk-chloe-booth",
+			"fromNode": "chloe-irritated-talk",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-hostile-talk-chloe-booth",
+			"fromNode": "chloe-hostile-talk",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-suspicious-talk-chloe-booth",
+			"fromNode": "chloe-suspicious-talk",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-afraid-talk-chloe-booth",
+			"fromNode": "chloe-afraid-talk",
+			"fromSide": "right",
+			"toNode": "chloe-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-chloe-room-portrait",
+			"fromNode": "chloe-room",
+			"fromSide": "right",
+			"toNode": "chloe-portrait",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "room"
+		},
+		{
+			"id": "e-chloe-actor-portrait",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "chloe-portrait",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "made-chloe-room-1-edge",
+			"fromNode": "chloe-room",
+			"fromSide": "right",
+			"toNode": "made-chloe-room-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-actor-1-edge",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "made-chloe-actor-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-portrait-1-edge",
+			"fromNode": "chloe-portrait",
+			"fromSide": "right",
+			"toNode": "made-chloe-portrait-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-chloe-desk",
+			"fromNode": "chloe-actor",
+			"fromSide": "bottom",
+			"toNode": "chloe-at-desk",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-chloe-desk-cut",
+			"fromNode": "chloe-at-desk-wood",
+			"fromSide": "right",
+			"toNode": "chloe-at-desk-cut",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "cut out"
+		},
+		{
+			"id": "e-chloe-crop",
+			"fromNode": "chloe-scene-picture",
+			"fromSide": "right",
+			"toNode": "chloe-backdrop",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "crop"
+		},
+		{
+			"id": "e-chloe-actor-cut",
+			"fromNode": "chloe-actor",
+			"fromSide": "bottom",
+			"toNode": "chloe-actor-cut",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "cut out"
+		},
+		{
+			"id": "made-chloe-actor-cut-1-edge",
+			"fromNode": "chloe-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-chloe-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-backdrop-1-edge",
+			"fromNode": "chloe-backdrop",
+			"fromSide": "right",
+			"toNode": "made-chloe-backdrop-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-at-desk-1-edge",
+			"fromNode": "chloe-at-desk",
+			"fromSide": "right",
+			"toNode": "made-chloe-at-desk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "chloe-desk-to-wood",
+			"fromNode": "chloe-at-desk",
+			"toNode": "chloe-at-desk-wood"
+		},
+		{
+			"id": "made-chloe-at-desk-wood-1-edge",
+			"fromNode": "chloe-at-desk-wood",
+			"fromSide": "right",
+			"toNode": "made-chloe-at-desk-wood-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-at-desk-cut-1-edge",
+			"fromNode": "chloe-at-desk-cut",
+			"fromSide": "right",
+			"toNode": "made-chloe-at-desk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		}
+	]
+}

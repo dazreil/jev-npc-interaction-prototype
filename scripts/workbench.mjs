@@ -11,11 +11,11 @@ import { fileURLToPath } from "node:url";
 import { readApiKey } from "../lib/env.mjs";
 import { MAX_REQUEST_BYTES, jevStatus, parseJevBody, proxyJevDecision } from "../lib/jev-proxy.mjs";
 import { applyEdits } from "../lib/editor-save.mjs";
-import { VAULT_DIR, compileVault } from "./compile-vault.mjs";
+import { VAULT_DIR, VAULT_URL_PREFIX, compileVault } from "./compile-vault.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = Number(process.env.WORKBENCH_PORT) || 5174;
-const SERVED = ["workbench/", "player/", "js/", "data/", "game/", "assets/fonts/", "assets/encounter/", "assets/vendor/"];
+const SERVED = ["workbench/", "player/", "js/", "data/", VAULT_URL_PREFIX, "assets/fonts/", "assets/encounter/", "assets/vendor/"];
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",

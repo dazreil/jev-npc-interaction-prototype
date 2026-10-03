@@ -1,0 +1,955 @@
+{
+	"nodes": [
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 0,
+			"y": -320,
+			"width": 1600,
+			"height": 240,
+			"text": "# Malphas\nMalphas, a tall predatory warlock in his fifties, black hair swept back, a pale sharp face, a black velvet coat, eyes like a starless sky\n\nEverything about Malphas, top to bottom. Right-click a recipe card to make its art; it saves into `characters/malphas/art/`. Make them in order: room and actor, then the moods, then the talking loops, then the booth."
+		},
+		{
+			"id": "g-who",
+			"type": "group",
+			"label": "Who they are",
+			"x": -40,
+			"y": -80,
+			"width": 1960,
+			"height": 520,
+			"color": "6"
+		},
+		{
+			"id": "n-character",
+			"type": "file",
+			"file": "characters/malphas/Malphas.md",
+			"x": 0,
+			"y": 0,
+			"width": 560,
+			"height": 400
+		},
+		{
+			"id": "n-profile",
+			"type": "file",
+			"file": "characters/malphas/profiles/malphas-default.md",
+			"x": 640,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-portraits",
+			"type": "file",
+			"file": "characters/malphas/malphas-portraits.md",
+			"x": 1100,
+			"y": 0,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "g-decides",
+			"type": "group",
+			"label": "How they decide, and what they say",
+			"x": -40,
+			"y": 520,
+			"width": 3280,
+			"height": 820,
+			"color": "6"
+		},
+		{
+			"id": "n-tree",
+			"type": "file",
+			"file": "characters/malphas/malphas-tree.canvas",
+			"x": 0,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-lines",
+			"type": "file",
+			"file": "characters/malphas/dialogue/malphas-lines.md",
+			"x": 0,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "g-look",
+			"type": "group",
+			"label": "Look: the room, the actor, moods and blinks",
+			"x": -40,
+			"y": 1920,
+			"width": 4200,
+			"height": 1560,
+			"color": "6"
+		},
+		{
+			"id": "malphas-room",
+			"type": "text",
+			"x": 700,
+			"y": 2000,
+			"width": 560,
+			"height": 340,
+			"text": "## malphas-room\nimage\nstatus: done\nmodel: z-image\nsize: 1024x768\nseed: 11\nprompt: \"an endless black velvet void, heavy folds of velvet like curtains with no walls, ribbons of dark silk drifting in the air, one cold silver light from above, nobody in the frame\"\n",
+			"color": "4"
+		},
+		{
+			"id": "malphas-actor",
+			"type": "text",
+			"x": 700,
+			"y": 2400,
+			"width": 560,
+			"height": 340,
+			"text": "## malphas-actor\nimage\nstatus: done\nmodel: krea-2\nsize: 1024x768\nseed: 12\nprompt: \"Malphas, a tall predatory warlock in his fifties, black hair swept back, a pale sharp face, a black velvet coat, eyes like a starless sky, seen waist-up, facing the camera\"\n",
+			"color": "4"
+		},
+		{
+			"id": "malphas-keep",
+			"type": "text",
+			"x": 0,
+			"y": 2800,
+			"width": 560,
+			"height": 360,
+			"text": "## malphas-keep\nstyle\n# Holds Malphas steady in edits: only the named part changes.\ntemplate: \"Keep the exact same person: same face, hair and clothes (Malphas, a tall predatory warlock in his fifties, black hair swept back, a pale sharp face, a black velvet coat, eyes like a starless sky). Keep the exact same framing, crop, camera position and pose, and the same flat, evenly lit chroma-key green screen background, lighting and camera quality. Only change {prompt}\"\n"
+		},
+		{
+			"id": "malphas-friendly",
+			"type": "text",
+			"x": 1900,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## malphas-friendly\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now a warm, slightly awkward friendly smile with raised eyebrows.\"\n"
+		},
+		{
+			"id": "malphas-irritated",
+			"type": "text",
+			"x": 2660,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## malphas-irritated\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now irritated and impatient: jaw clenched, brows lowered, lips pressed thin.\"\n"
+		},
+		{
+			"id": "malphas-hostile",
+			"type": "text",
+			"x": 3420,
+			"y": 2800,
+			"width": 560,
+			"height": 300,
+			"text": "## malphas-hostile\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now hostile: glaring hard at the camera, brows pulled down, mouth open mid-snarl.\"\n"
+		},
+		{
+			"id": "malphas-suspicious",
+			"type": "text",
+			"x": 1900,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## malphas-suspicious\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now suspicious: eyes narrowed, one eyebrow raised, head tilted slightly.\"\n"
+		},
+		{
+			"id": "malphas-afraid",
+			"type": "text",
+			"x": 2660,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## malphas-afraid\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the expression, which is now afraid: eyes wide, eyebrows raised high, mouth slightly open.\"\n"
+		},
+		{
+			"id": "malphas-blink-half",
+			"type": "text",
+			"x": 3420,
+			"y": 3160,
+			"width": 560,
+			"height": 300,
+			"text": "## malphas-blink-half\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the eyes, which are now half closed, halfway through a blink. Nothing else changes.\"\n"
+		},
+		{
+			"id": "malphas-blink-closed",
+			"type": "text",
+			"x": 1900,
+			"y": 3520,
+			"width": 560,
+			"height": 300,
+			"text": "## malphas-blink-closed\nedit\nstatus: idea\nmodel: qwen-edit\nseed: 7\nprompt: \"the eyes, which are now fully closed in a natural blink. Nothing else changes.\"\n"
+		},
+		{
+			"id": "g-talk",
+			"type": "group",
+			"label": "Talking: a loop per mood, then everything into the room",
+			"x": -40,
+			"y": 3620,
+			"width": 4200,
+			"height": 1500,
+			"color": "6"
+		},
+		{
+			"id": "malphas-talk",
+			"type": "text",
+			"x": 700,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## malphas-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat and unchanged\"\n"
+		},
+		{
+			"id": "malphas-friendly-talk",
+			"type": "text",
+			"x": 1900,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## malphas-friendly-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a friendly way, small natural movements\"\n"
+		},
+		{
+			"id": "malphas-irritated-talk",
+			"type": "text",
+			"x": 2660,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## malphas-irritated-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a irritated way, small natural movements\"\n"
+		},
+		{
+			"id": "malphas-hostile-talk",
+			"type": "text",
+			"x": 3420,
+			"y": 3700,
+			"width": 560,
+			"height": 340,
+			"text": "## malphas-hostile-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a hostile way, small natural movements\"\n"
+		},
+		{
+			"id": "malphas-suspicious-talk",
+			"type": "text",
+			"x": 1900,
+			"y": 4100,
+			"width": 560,
+			"height": 340,
+			"text": "## malphas-suspicious-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a suspicious way, small natural movements\"\n"
+		},
+		{
+			"id": "malphas-afraid-talk",
+			"type": "text",
+			"x": 2660,
+			"y": 4100,
+			"width": 560,
+			"height": 340,
+			"text": "## malphas-afraid-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera in a afraid way, small natural movements\"\n"
+		},
+		{
+			"id": "malphas-booth",
+			"type": "text",
+			"x": 700,
+			"y": 4600,
+			"width": 560,
+			"height": 380,
+			"text": "## malphas-booth\ncomposite\nstatus: idea\n# Free: every Malphas picture into the room, keyed together so moods and blinks line up.\nalign: true\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 3\ncrunch: 4\njpeg: 50\n"
+		},
+		{
+			"id": "style-room",
+			"type": "text",
+			"text": "## fmv-room\nstyle\n# Pre-rendered 1990s CG rooms. Use with model: z-image.\nprefix: A still frame from a 1995 CD-ROM computer game, a pre-rendered 3D CGI background, early 1990s 3D rendering with flat shading, low-polygon models and simple textures\nsuffix: no people, no text or lettering",
+			"x": 0,
+			"y": 2000,
+			"width": 520,
+			"height": 260,
+			"color": "5"
+		},
+		{
+			"id": "style-actor-green",
+			"type": "text",
+			"text": "## fmv-actor-green\nstyle\n# Live actors on a green screen, to key out. Use with model: krea-2.\n# Keep green out of the wardrobe.\nprefix: A 1995 video capture of a live-action actor filmed for a CD-ROM game on a chroma-key stage\nsuffix: standing in front of a solid bright chroma-key green screen, solid pure green #00FF00 background, evenly lit",
+			"x": 0,
+			"y": 2400,
+			"width": 520,
+			"height": 300,
+			"color": "5"
+		},
+		{
+			"id": "talk-loop",
+			"type": "text",
+			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The night guard {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
+			"x": 0,
+			"y": 3700,
+			"width": 560,
+			"height": 320,
+			"color": "5"
+		},
+		{
+			"id": "n-MALPHAS_PROMISE_REST",
+			"type": "file",
+			"file": "characters/malphas/actions/MALPHAS_PROMISE_REST.md",
+			"x": 480,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-malphas-promise-rest",
+			"type": "file",
+			"file": "characters/malphas/dialogue/malphas-promise-rest.md",
+			"x": 480,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-MALPHAS_FLATTER",
+			"type": "file",
+			"file": "characters/malphas/actions/MALPHAS_FLATTER.md",
+			"x": 940,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-malphas-flatter",
+			"type": "file",
+			"file": "characters/malphas/dialogue/malphas-flatter.md",
+			"x": 940,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-MALPHAS_REMIND_OF_POWER",
+			"type": "file",
+			"file": "characters/malphas/actions/MALPHAS_REMIND_OF_POWER.md",
+			"x": 1400,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-malphas-remind-of-power",
+			"type": "file",
+			"file": "characters/malphas/dialogue/malphas-remind-of-power.md",
+			"x": 1400,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-MALPHAS_COMMAND",
+			"type": "file",
+			"file": "characters/malphas/actions/MALPHAS_COMMAND.md",
+			"x": 1860,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-malphas-command",
+			"type": "file",
+			"file": "characters/malphas/dialogue/malphas-command.md",
+			"x": 1860,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-MALPHAS_RETREAT",
+			"type": "file",
+			"file": "characters/malphas/actions/MALPHAS_RETREAT.md",
+			"x": 2320,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-malphas-retreat",
+			"type": "file",
+			"file": "characters/malphas/dialogue/malphas-retreat.md",
+			"x": 2320,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-MALPHAS_CLAIM",
+			"type": "file",
+			"file": "characters/malphas/actions/MALPHAS_CLAIM.md",
+			"x": 2780,
+			"y": 600,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "n-malphas-claim",
+			"type": "file",
+			"file": "characters/malphas/dialogue/malphas-claim.md",
+			"x": 2780,
+			"y": 960,
+			"width": 420,
+			"height": 300
+		},
+		{
+			"id": "malphas-portrait",
+			"type": "text",
+			"x": 1460,
+			"y": 4600,
+			"width": 560,
+			"height": 380,
+			"text": "## malphas-portrait\ncomposite\nstatus: done\n# Free: the actor pasted into the room. A still portrait until the talking loops are made.\nshot: waist-up\nheight: 0.92\nx: 0.45\nseed: 5\ncrunch: 4\njpeg: 50\n",
+			"color": "4"
+		},
+		{
+			"id": "made-malphas-room-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-room/malphas-room.webp",
+			"x": 1340,
+			"y": 2000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-actor-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-actor/malphas-actor.webp",
+			"x": 1340,
+			"y": 2400,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-portrait-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-portrait/malphas-portrait.webp",
+			"x": 2100,
+			"y": 4600,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "g-portrait-layers",
+			"type": "group",
+			"label": "Talk portrait layers: background (cut from the screen around them) and character (cut out)",
+			"x": -40,
+			"y": 6020,
+			"width": 2700,
+			"height": 900,
+			"color": "6"
+		},
+		{
+			"id": "malphas-scene-picture",
+			"type": "file",
+			"file": "screens/dream/art/dream-background/dream-background.webp",
+			"x": 0,
+			"y": 6100,
+			"width": 560,
+			"height": 315
+		},
+		{
+			"id": "malphas-backdrop",
+			"type": "text",
+			"x": 700,
+			"y": 6100,
+			"width": 560,
+			"height": 300,
+			"text": "## malphas-backdrop\ncrop\nstatus: done\n# Free: the screen behind Malphas, cut around their click box on World.canvas, with a 10 pixel bleed.\nbox: [500, 180, 280, 400]\nbleed: 10\n",
+			"color": "4"
+		},
+		{
+			"id": "malphas-actor-cut",
+			"type": "text",
+			"x": 700,
+			"y": 6500,
+			"width": 560,
+			"height": 260,
+			"text": "## malphas-actor-cut\ncutout\nstatus: done\n# Free: Malphas keyed off the green screen, for the talk portrait.\ncrunch: 4\njpeg: 50\n",
+			"color": "4"
+		},
+		{
+			"id": "made-malphas-backdrop-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-backdrop/malphas-backdrop.webp",
+			"x": 1340,
+			"y": 6100,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-actor-cut-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-actor-cut/malphas-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		}
+	],
+	"edges": [
+		{
+			"id": "e-style-room-malphas-room",
+			"fromNode": "style-room",
+			"fromSide": "right",
+			"toNode": "malphas-room",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-style-actor-green-malphas-actor",
+			"fromNode": "style-actor-green",
+			"fromSide": "right",
+			"toNode": "malphas-actor",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-actor-malphas-friendly",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "malphas-friendly",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-malphas-keep-malphas-friendly",
+			"fromNode": "malphas-keep",
+			"fromSide": "right",
+			"toNode": "malphas-friendly",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-actor-malphas-irritated",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "malphas-irritated",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-malphas-keep-malphas-irritated",
+			"fromNode": "malphas-keep",
+			"fromSide": "right",
+			"toNode": "malphas-irritated",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-actor-malphas-hostile",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "malphas-hostile",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-malphas-keep-malphas-hostile",
+			"fromNode": "malphas-keep",
+			"fromSide": "right",
+			"toNode": "malphas-hostile",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-actor-malphas-suspicious",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "malphas-suspicious",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-malphas-keep-malphas-suspicious",
+			"fromNode": "malphas-keep",
+			"fromSide": "right",
+			"toNode": "malphas-suspicious",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-actor-malphas-afraid",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "malphas-afraid",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-malphas-keep-malphas-afraid",
+			"fromNode": "malphas-keep",
+			"fromSide": "right",
+			"toNode": "malphas-afraid",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-actor-malphas-blink-half",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "malphas-blink-half",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-malphas-keep-malphas-blink-half",
+			"fromNode": "malphas-keep",
+			"fromSide": "right",
+			"toNode": "malphas-blink-half",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-actor-malphas-blink-closed",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "malphas-blink-closed",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "e-malphas-keep-malphas-blink-closed",
+			"fromNode": "malphas-keep",
+			"fromSide": "right",
+			"toNode": "malphas-blink-closed",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-actor-malphas-talk",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "malphas-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-malphas-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "malphas-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-friendly-malphas-friendly-talk",
+			"fromNode": "malphas-friendly",
+			"fromSide": "right",
+			"toNode": "malphas-friendly-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-malphas-friendly-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "malphas-friendly-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-irritated-malphas-irritated-talk",
+			"fromNode": "malphas-irritated",
+			"fromSide": "right",
+			"toNode": "malphas-irritated-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-malphas-irritated-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "malphas-irritated-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-hostile-malphas-hostile-talk",
+			"fromNode": "malphas-hostile",
+			"fromSide": "right",
+			"toNode": "malphas-hostile-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-malphas-hostile-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "malphas-hostile-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-suspicious-malphas-suspicious-talk",
+			"fromNode": "malphas-suspicious",
+			"fromSide": "right",
+			"toNode": "malphas-suspicious-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-malphas-suspicious-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "malphas-suspicious-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-afraid-malphas-afraid-talk",
+			"fromNode": "malphas-afraid",
+			"fromSide": "right",
+			"toNode": "malphas-afraid-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "start"
+		},
+		{
+			"id": "e-talk-loop-malphas-afraid-talk",
+			"fromNode": "talk-loop",
+			"fromSide": "right",
+			"toNode": "malphas-afraid-talk",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-room-malphas-booth",
+			"fromNode": "malphas-room",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "room"
+		},
+		{
+			"id": "e-malphas-actor-malphas-booth",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-friendly-malphas-booth",
+			"fromNode": "malphas-friendly",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-irritated-malphas-booth",
+			"fromNode": "malphas-irritated",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-hostile-malphas-booth",
+			"fromNode": "malphas-hostile",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-suspicious-malphas-booth",
+			"fromNode": "malphas-suspicious",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-afraid-malphas-booth",
+			"fromNode": "malphas-afraid",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-blink-half-malphas-booth",
+			"fromNode": "malphas-blink-half",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-blink-closed-malphas-booth",
+			"fromNode": "malphas-blink-closed",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-talk-malphas-booth",
+			"fromNode": "malphas-talk",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-friendly-talk-malphas-booth",
+			"fromNode": "malphas-friendly-talk",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-irritated-talk-malphas-booth",
+			"fromNode": "malphas-irritated-talk",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-hostile-talk-malphas-booth",
+			"fromNode": "malphas-hostile-talk",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-suspicious-talk-malphas-booth",
+			"fromNode": "malphas-suspicious-talk",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-afraid-talk-malphas-booth",
+			"fromNode": "malphas-afraid-talk",
+			"fromSide": "right",
+			"toNode": "malphas-booth",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "e-malphas-room-portrait",
+			"fromNode": "malphas-room",
+			"fromSide": "right",
+			"toNode": "malphas-portrait",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "room"
+		},
+		{
+			"id": "e-malphas-actor-portrait",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "malphas-portrait",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "actor"
+		},
+		{
+			"id": "made-malphas-room-1-edge",
+			"fromNode": "malphas-room",
+			"fromSide": "right",
+			"toNode": "made-malphas-room-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-actor-1-edge",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "made-malphas-actor-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-portrait-1-edge",
+			"fromNode": "malphas-portrait",
+			"fromSide": "right",
+			"toNode": "made-malphas-portrait-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-malphas-crop",
+			"fromNode": "malphas-scene-picture",
+			"fromSide": "right",
+			"toNode": "malphas-backdrop",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "crop"
+		},
+		{
+			"id": "e-malphas-actor-cut",
+			"fromNode": "malphas-actor",
+			"fromSide": "bottom",
+			"toNode": "malphas-actor-cut",
+			"toSide": "top",
+			"toEnd": "arrow",
+			"label": "cut out"
+		},
+		{
+			"id": "made-malphas-backdrop-1-edge",
+			"fromNode": "malphas-backdrop",
+			"fromSide": "right",
+			"toNode": "made-malphas-backdrop-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-actor-cut-1-edge",
+			"fromNode": "malphas-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-malphas-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		}
+	]
+}

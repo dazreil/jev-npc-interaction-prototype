@@ -21,6 +21,8 @@
     "vault:compile": "node scripts/compile-vault.mjs",
     "workbench": "node scripts/workbench.mjs",
     "app": "electron desktop/main.mjs",
+    "app:silver": "GAME_VAULT=silver-edit electron desktop/main.mjs",
+    "workbench:silver": "GAME_VAULT=silver-edit node scripts/workbench.mjs",
     "app:smoke": "ENGINE_SMOKE_TEST=1 electron desktop/main.mjs",
     "assets": "node scripts/assets.mjs"
   },

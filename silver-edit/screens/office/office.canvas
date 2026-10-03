@@ -1,0 +1,211 @@
+{
+	"nodes": [
+		{
+			"id": "readme",
+			"type": "text",
+			"x": 0,
+			"y": -320,
+			"width": 1600,
+			"height": 240,
+			"text": "# Office\na cosy old publishing office in a converted Vermont mill, tall rain-streaked windows, red maple leaves outside, stacks of manuscripts, warm lamplight, an autumn afternoon\n\nRight-click a recipe card to make its art; it saves into `screens/office/art/`. Then place it on [[World.canvas]] in the `office` group."
+		},
+		{
+			"id": "g-screen",
+			"type": "group",
+			"label": "The screen",
+			"x": -40,
+			"y": -80,
+			"width": 700,
+			"height": 500,
+			"color": "6"
+		},
+		{
+			"id": "n-screen",
+			"type": "file",
+			"file": "screens/office/office.md",
+			"x": 0,
+			"y": 0,
+			"width": 560,
+			"height": 360
+		},
+		{
+			"id": "g-art",
+			"type": "group",
+			"label": "Art: the background, and a prop cut out of green (left to right: make, cut out)",
+			"x": -40,
+			"y": 520,
+			"width": 3000,
+			"height": 1360,
+			"color": "6"
+		},
+		{
+			"id": "office-background",
+			"type": "text",
+			"x": 700,
+			"y": 600,
+			"width": 560,
+			"height": 340,
+			"text": "## office-background\nimage\nstatus: done\nmodel: z-image\nsize: 1280x720\nseed: 21\nprompt: \"a cosy old publishing office in a converted Vermont mill, tall rain-streaked windows, red maple leaves outside, stacks of manuscripts, warm lamplight, an autumn afternoon, seen straight on from a security camera\"\n",
+			"color": "4"
+		},
+		{
+			"id": "office-prop",
+			"type": "text",
+			"x": 700,
+			"y": 1000,
+			"width": 560,
+			"height": 340,
+			"text": "## office-prop\nimage\nstatus: idea\nmodel: krea-2\nsize: 768x1024\nseed: 22\nprompt: \"(a prop for this scene), seen straight on\"\n"
+		},
+		{
+			"id": "office-prop-cut",
+			"type": "text",
+			"x": 1400,
+			"y": 1000,
+			"width": 520,
+			"height": 260,
+			"text": "## office-prop-cut\ncutout\nstatus: idea\n# Free: keyed off the green screen. mirror: true also makes a mirror image.\ncrunch: 4\njpeg: 50\n"
+		},
+		{
+			"id": "style-room",
+			"type": "text",
+			"text": "## fmv-room\nstyle\n# Pre-rendered 1990s CG rooms. Use with model: z-image.\nprefix: A still frame from a 1995 CD-ROM computer game, a pre-rendered 3D CGI background, early 1990s 3D rendering with flat shading, low-polygon models and simple textures\nsuffix: no people, no text or lettering",
+			"x": 0,
+			"y": 600,
+			"width": 520,
+			"height": 260,
+			"color": "5"
+		},
+		{
+			"id": "krea-prop-green",
+			"type": "text",
+			"text": "## krea-prop-green\nstyle\n# Krea 2 props to cut out: a filmed 1990s look, flat on, on pure green.\ntemplate: \"A prop for a 1995 CD-ROM full-motion-video game, photographed straight on in a flat front view for chroma-key compositing: {prompt}. Isolated on a solid flat pure green #00FF00 background, evenly lit, no shadow on the background, no ground, no people, no text\"\n",
+			"x": 0,
+			"y": 1000,
+			"width": 560,
+			"height": 360,
+			"color": "5"
+		},
+		{
+			"id": "made-office-background-1",
+			"type": "file",
+			"file": "screens/office/art/office-background/office-background.webp",
+			"x": 1340,
+			"y": 600,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "office-open-plan",
+			"type": "text",
+			"x": 700,
+			"y": 1020,
+			"width": 560,
+			"height": 360,
+			"text": "## office-open-plan\nimage\nstatus: done\nmodel: z-image\nsize: 1280x720\nseed: 24\nprompt: \"a wide open-plan publishing office inside an old converted brick mill, seen from the entrance at eye level, warm wooden floorboards, tall arched windows along the back wall with rain on the glass and blood-red maple trees outside, exposed beams, bookshelves and stacks of manuscripts along the walls, warm lamplight, an open empty floor in the middle and front, nobody in the room, an autumn afternoon\"\n",
+			"color": "4"
+		},
+		{
+			"id": "made-office-open-plan-1",
+			"type": "file",
+			"file": "screens/office/art/office-open-plan/office-open-plan.webp",
+			"x": 1340,
+			"y": 1020,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "office-empty",
+			"type": "text",
+			"x": 1340,
+			"y": 1020,
+			"width": 560,
+			"height": 320,
+			"text": "## office-empty\nedit\nstatus: done\nmodel: qwen-edit\nsize: 1280x720\nseed: 31\nprompt: \"Remove every desk, chair, computer and monitor from the room. Keep everything else exactly the same: the brick walls, arched windows, red maples outside, beams, hanging lamps, bookshelves, and the empty wooden floor, with the same framing and lighting.\"\n",
+			"color": "4"
+		},
+		{
+			"id": "made-office-empty-1",
+			"type": "file",
+			"file": "screens/office/art/office-empty/office-empty.webp",
+			"x": 1980,
+			"y": 1020,
+			"width": 240,
+			"height": 135
+		}
+	],
+	"edges": [
+		{
+			"id": "e-style-room-office-background",
+			"fromNode": "style-room",
+			"fromSide": "right",
+			"toNode": "office-background",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-krea-prop-green-office-prop",
+			"fromNode": "krea-prop-green",
+			"fromSide": "right",
+			"toNode": "office-prop",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "e-office-prop-office-prop-cut",
+			"fromNode": "office-prop",
+			"fromSide": "right",
+			"toNode": "office-prop-cut",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "cut out"
+		},
+		{
+			"id": "made-office-background-1-edge",
+			"fromNode": "office-background",
+			"fromSide": "right",
+			"toNode": "made-office-background-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-style-open-plan",
+			"fromNode": "style-room",
+			"fromSide": "right",
+			"toNode": "office-open-plan",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "style"
+		},
+		{
+			"id": "made-office-open-plan-1-edge",
+			"fromNode": "office-open-plan",
+			"fromSide": "right",
+			"toNode": "made-office-open-plan-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-office-empty",
+			"fromNode": "office-open-plan",
+			"fromSide": "right",
+			"toNode": "office-empty",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "edit"
+		},
+		{
+			"id": "made-office-empty-1-edge",
+			"fromNode": "office-empty",
+			"fromSide": "right",
+			"toNode": "made-office-empty-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		}
+	]
+}

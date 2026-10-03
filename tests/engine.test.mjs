@@ -195,6 +195,25 @@ test("a canvas group becomes a screen placed by its picture", () => {
   assert.equal(screens.hall.elements[0].text, "HALL");
 });
 
+test("an arrow from an object to a picture gives the object that picture's box and shape", () => {
+  const canvas = {
+    nodes: [
+      { id: "g", type: "group", label: "office", x: 0, y: 0, width: 1400, height: 900 },
+      { id: "pic", type: "file", file: "office.webp", x: 0, y: 0, width: 1280, height: 720 },
+      { id: "sitting", type: "file", file: "miles-cut.webp", x: 100, y: 200, width: 400, height: 300 },
+      { id: "miles", type: "file", file: "miles-desk.md", x: 0, y: 0, width: 50, height: 50 }
+    ],
+    edges: [{ id: "e", fromNode: "miles", toNode: "sitting" }]
+  };
+  const { screens } = buildWorld(canvas, { notes: { "miles-desk": { type: "object" } }, asset: (name) => (name.endsWith(".webp") ? `/a/${name}` : null) });
+  assert.deepEqual(screens.office.objects[0], { id: "miles-desk", rect: [50, 100, 200, 150], node: "miles", mask: "/a/miles-cut.webp", follows: "sitting" });
+
+  canvas.nodes[2].focus = [50, 0];
+  const slid = buildWorld(canvas, { notes: { "miles-desk": { type: "object" } }, asset: (name) => (name.endsWith(".webp") ? `/a/${name}` : null) }).screens.office;
+  assert.deepEqual(slid.elements.find((element) => element.node === "sitting").focus, [50, 0], "focus on the card slides the picture in its box");
+  assert.deepEqual(slid.objects[0].maskFocus, [50, 0], "the click shape slides with it");
+});
+
 test("a swing opens on its condition; mirror flips; the two do not mix", () => {
   const resolved = resolveUi(
     {
@@ -272,4 +291,26 @@ test("the screen editor saves boxes and order without touching anything else", a
   const next = JSON.parse(editCanvas(canvas, { boxes: [{ node: "a", x: 10.4, y: 20, width: 30, height: 40 }], order: ["b", "a"] }));
   assert.deepEqual(next.nodes.map((node) => node.id), ["p", "b", "a"]);
   assert.deepEqual(next.nodes[2], { id: "a", x: 10, y: 20, width: 30, height: 40 });
+  const slid = JSON.parse(editCanvas(canvas, { focus: [{ node: "b", value: [50.4, 0] }] }));
+  assert.deepEqual(slid.nodes[2].focus, [50, 0], "a picture's slide is kept on its card");
+});
+
+test("the screen editor can change one Properties value, such as an object's panel", async () => {
+  const { editProps } = await import("../lib/editor-save.mjs");
+  const block = ["---", "type: object", "panel:", "  - 40", "  - 20", "  - 560", "  - 320", "dim: \"#000\"", "---", "", "# Body"].join("\n");
+  assert.equal(editProps(block, { panel: [50, 20, 540, 320] }), ["---", "type: object", "panel: [50, 20, 540, 320]", "dim: \"#000\"", "---", "", "# Body"].join("\n"));
+  const flow = "---\ntype: object\npanel: [160, 4, 424, 300] # where it opens\n---\n";
+  assert.equal(editProps(flow, { panel: [150, 4, 424, 300] }), "---\ntype: object\npanel: [150, 4, 424, 300] # where it opens\n---\n");
+});
+
+test("the editor can add a Properties value that is not there yet", async () => {
+  const { editProps } = await import("../lib/editor-save.mjs");
+  assert.equal(editProps("---\ntype: portraits\n---\n# P", { focus: [40, 50], zoom: 1.2 }), "---\ntype: portraits\nfocus: [40, 50]\nzoom: 1.2\n---\n# P");
+});
+
+test("saving a box written as a multi-line list keeps the note valid", async () => {
+  const { editUiNote } = await import("../lib/editor-save.mjs");
+  const note = ["## Elements", "```yaml", "- type: slot", "  name: portrait", "  at:", "    - 20", "    - 20", "    - 182", "    - 228", "  children:", "    - { type: text, at: [0, 0, 10, 10] }", "```"].join("\n");
+  const saved = editUiNote(note, { boxes: [{ index: 0, at: [10, 20, 182, 228] }] });
+  assert.equal(saved, ["## Elements", "```yaml", "- type: slot", "  name: portrait", "  at: [10, 20, 182, 228]", "  children:", "    - { type: text, at: [0, 0, 10, 10] }", "```"].join("\n"));
 });

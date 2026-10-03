@@ -15,6 +15,10 @@ game/.obsidian/workspace*.json
 game/.obsidian/plugins/*
 !game/.obsidian/plugins/game-tools/
 game/.obsidian/cache
+silver-edit/.obsidian/workspace*.json
+silver-edit/.obsidian/plugins/*
+!silver-edit/.obsidian/plugins/game-tools/
+silver-edit/.obsidian/cache
 build/
 
 # FMV LoRA work: generated pictures stay local

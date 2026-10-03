@@ -20,6 +20,9 @@ const SLOT_CSS = `
 .play-log .who { text-transform: uppercase; letter-spacing: 1px; margin-right: 6px; }
 .play-input { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; padding: 0 8px; font: 18px VT323, monospace; outline: none; }
 .play-input::placeholder { opacity: .55; }
+.play-choices { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+.play-choice { font-size: 17px; line-height: 1.15; text-align: left; padding: 5px 9px; background: #00000055; border: 1px solid; cursor: pointer; }
+.play-choice:hover:not(:disabled) { background: #ffffff18; }
 `;
 
 export class PlaySession {
@@ -43,11 +46,31 @@ export class PlaySession {
     this.providerId = providerId;
     this.onChange = onChange;
     this.onLog = onLog;
-    this.game = null;
-    this.chat = [];
+    // One encounter and one chat log per character you talk to; `active` is
+    // the one whose conversation is open (the intercom's Arthur, or whoever
+    // you walked up to).
+    this.encounters = {};
+    this.chats = {};
+    this.pending = {};
+    this.active = null;
+    this.called = new Set();
     this.draft = "";
     this.busy = false;
     this.status = "";
+  }
+
+  /** The encounter with the character whose conversation is open. */
+  get game() {
+    return this.encounters[this.active] ?? null;
+  }
+
+  /** That character's chat log. */
+  get chat() {
+    return (this.chats[this.active] ??= []);
+  }
+
+  set chat(lines) {
+    this.chats[this.active] = lines;
   }
 
   notesOfType(type) {
@@ -66,7 +89,7 @@ export class PlaySession {
     // The greeting waits until the player calls and the line connects; it
     // appears in the log when he says it.
     if (!now) {
-      this.pendingLine = { text, mood, line };
+      this.pending[this.active] = { text, mood, line };
       return;
     }
     this.chat.push({ speaker: "arthur", text });
@@ -83,6 +106,7 @@ export class PlaySession {
    */
   connect(firstCall, object = {}) {
     const run = ++this.callRun;
+    this.inPerson = false;
     this.world.call = { connecting: true, status: "Ringing Tower 04…" };
     this.updateCallStatus();
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -104,14 +128,30 @@ export class PlaySession {
       if (run !== this.callRun) return;
       this.world.call = { connecting: false, live: true, status: "" };
       this.sound?.sfx.playRelay();
-      if (this.pendingLine) {
-        const { text, mood, line } = this.pendingLine;
-        this.pendingLine = null;
-        this.say(text, mood, line);
-      }
+      this.sayPending();
       this.onChange({ focusInput: true });
     });
     return true;
+  }
+
+  /** Says the greeting a character was holding until you reached them. */
+  sayPending() {
+    const pending = this.pending[this.active];
+    if (!pending) return;
+    delete this.pending[this.active];
+    this.say(pending.text, pending.mood, pending.line);
+  }
+
+  /**
+   * Talking to someone in the same room (an object with `ring: false`): no
+   * ringing, no intercom click. They answer at once.
+   */
+  meet() {
+    this.callRun += 1;
+    this.inPerson = true;
+    this.world.call = { connecting: false, live: true, status: "" };
+    this.sayPending();
+    this.onChange({ focusInput: true });
   }
 
   /** "Ringing…", or the voice download while it is still coming in. */
@@ -140,7 +180,7 @@ export class PlaySession {
     }
     this.talkingUntil = 0;
     this.sound.sfx.playPerformanceCue(line);
-    this.sound.sfx.playIntercomKeyUp();
+    if (!this.inPerson) this.sound.sfx.playIntercomKeyUp();
     this.sound.voice
       .deliver(
         { ...line, timing: { ...(line.timing ?? {}), speakingMs: estimate } },
@@ -172,10 +212,22 @@ export class PlaySession {
 
   /** The conversation character's portraits note: idle, talk, mood and blink frames. */
   portrait() {
-    const character = this.notesOfType("character")[0];
+    const character = this.vault.notes[this.active] ?? this.notesOfType("character")[0];
     const note = this.vault.notes[character?.props.portraits];
     if (!note) return null;
+    // Framing inside the portrait box: `focus: [x, y]` in percent (50, 50 is
+    // the middle) and `zoom` (1 fills the box). Set by dragging in the editor.
+    const focus = Array.isArray(note.props.focus) ? note.props.focus : [50, 50];
+    // A portrait in two layers: a background (`## Backdrop`) and the character
+    // in front, each placed on its own (offset / zoom, backdropFocus / backdropZoom).
+    const backdrop = note.blocks.Backdrop?.image ?? null;
     return {
+      focus,
+      zoom: Number(note.props.zoom) || 1,
+      backdrop,
+      backdropFocus: Array.isArray(note.props.backdropFocus) ? note.props.backdropFocus : [50, 50],
+      backdropZoom: Number(note.props.backdropZoom) || 1,
+      offset: Array.isArray(note.props.offset) ? note.props.offset : [0, 0],
       idle: note.blocks.Idle?.frame ?? note.blocks.Cues?.neutral,
       talking: note.blocks.Talking ?? null,
       talkingByMood: note.blocks["Talking by mood"] ?? {},
@@ -278,24 +330,43 @@ export class PlaySession {
    * world with no game, for previewing UI notes.
    */
   start({ profileId = null, play = true } = {}) {
-    this.chat = [];
+    this.encounters = {};
+    this.chats = {};
+    this.pending = {};
+    this.called = new Set();
     this.draft = "";
     this.busy = false;
     if (!play) {
       clearInterval(this.timerId);
-      this.game = null;
+      this.active = null;
       this.world = this.freshWorld(profileId ?? this.notesOfType("profile")[0]?.id);
       return;
     }
-    // The character to talk to: the one the start screen's conversation
-    // object names (the intercom: conversation: [[Arthur]]), else the first.
+    // The first character: the one the start screen's conversation object
+    // names (the intercom: conversation: [[Arthur]]), else the first one.
     const startObjects = this.vault.world?.[this.vault.notes.Game?.props.startScreen]?.objects ?? [];
     const talkTo = startObjects.map((object) => this.vault.notes[object.id]?.props.conversation).find(Boolean);
     const characterNote = this.notesOfType("character").find((note) => note.id === talkTo) ?? this.notesOfType("character")[0];
-    // The encounter's first random call picks the character's profile.
-    const profileIds = this.notesOfType("profile").filter((profile) => profile.props.character === characterNote?.id).map((profile) => profile.id);
+    this.active = characterNote?.id ?? null;
+    this.hush();
+    this.callRun += 1;
+    if (this.active) this.ensureEncounter(this.active, profileId);
+    this.world = this.freshWorld(this.game?.characterProfile.id ?? this.notesOfType("profile")[0]?.id);
+    this.sync();
+    this.startTimers();
+  }
+
+  /**
+   * The encounter with a character, made the first time you reach them. Its
+   * greeting waits until the conversation opens. `profileId` forces a profile.
+   */
+  ensureEncounter(characterId, profileId = null) {
+    if (this.encounters[characterId]) return this.encounters[characterId];
+    const characterNote = this.vault.notes[characterId];
+    const profileIds = this.notesOfType("profile").filter((profile) => profile.props.character === characterId).map((profile) => profile.id);
     const listed = (characterNote?.sections ?? []).find((section) => section.title === "Profiles");
     const order = listed ? [...listed.text.matchAll(/^- \[?\[?([\w-]+)/gm)].map((match) => match[1]) : profileIds;
+    // The encounter's first random call picks the character's profile.
     let forced = profileId ? order.indexOf(profileId) : -1;
     const random = () => {
       if (forced < 0) return Math.random();
@@ -303,27 +374,21 @@ export class PlaySession {
       forced = -1;
       return value;
     };
-    this.game = new Encounter({
+    const encounter = new Encounter({
       vault: this.vault,
-      characterId: characterNote?.id,
-      provider: this.providerFor(this.providerId, characterNote?.id),
+      characterId,
+      provider: this.providerFor(this.providerId, characterId),
       providerId: this.providerId,
       random
     });
-    this.world = this.freshWorld(this.game.characterProfile.id);
-    this.chat = [];
-    this.hush();
-    this.called = false;
-    this.callRun += 1;
-    this.pendingLine = null;
-    this.say(this.game.getOpeningDialogue(), "neutral", {
-      line: this.game.getOpeningDialogue(),
-      tone: "neutral",
-      action: "OPENING",
-      speech: this.game.characterProfile.speech
-    }, { now: false });
-    this.sync();
-    this.startTimers();
+    this.encounters[characterId] = encounter;
+    const opening = encounter.getOpeningDialogue();
+    this.pending[characterId] = {
+      text: opening,
+      mood: "neutral",
+      line: { line: opening, tone: "neutral", action: "OPENING", speech: encounter.characterProfile.speech }
+    };
+    return encounter;
   }
 
   /**
@@ -361,7 +426,9 @@ export class PlaySession {
 
   setProvider(providerId) {
     this.providerId = providerId;
-    this.game?.setProvider(this.providerFor(providerId, this.game.character.id), providerId);
+    for (const [characterId, encounter] of Object.entries(this.encounters)) {
+      encounter.setProvider(this.providerFor(providerId, characterId), providerId);
+    }
   }
 
   /** A character with ## Mock rules in its actions uses the vault Mock offline. */
@@ -373,15 +440,26 @@ export class PlaySession {
 
   /** Copies the encounter's state, flags, counters and items into the world the UI reads. */
   sync() {
+    // Flags, counters and items from every character you have talked to.
+    this.world.talk = {};
+    for (const [characterId, encounter] of Object.entries(this.encounters)) {
+      this.world.flag = { ...this.world.flag, ...encounter.flag };
+      this.world.counter = { ...this.world.counter, ...encounter.counter };
+      this.world.item = { ...this.world.item, ...encounter.item };
+      // talk.<character> is "active", "success" or "failure": conditions can
+      // test who you have spoken to, and how it went.
+      this.world.talk[slug(characterId)] = encounter.status;
+    }
     const game = this.game;
     if (!game) return;
     this.world.state = { ...game.npc.state };
     this.world.profile = this.profileWorld(game.characterProfile.id);
-    this.world.flag = { ...this.world.flag, ...game.flag };
-    this.world.counter = { ...this.world.counter, ...game.counter };
-    this.world.item = { ...this.world.item, ...game.item };
     this.world.memories = game.memories;
-    this.world.outcome = game.status === "active" ? null : game.outcome;
+    this.world.speaker = this.vault.notes[this.active]?.props.name ?? this.active;
+    // An ending ends the game, unless its outcome note says it only ends
+    // this talk (endsGame: false).
+    const ended = game.status !== "active" && this.vault.notes[game.outcome]?.props.endsGame !== false;
+    this.world.outcome = ended ? game.outcome : null;
   }
 
   endingText(outcome) {
@@ -422,6 +500,24 @@ export class PlaySession {
     this.onChange({ focusInput: true });
   }
 
+  /** The player picks a choice button (a quoted arrow in the dialogue tree). */
+  choose(text) {
+    const game = this.game;
+    if (!game || game.status !== "active" || this.busy) return;
+    const result = game.choose(text);
+    if (!result) return;
+    this.chat.push({ speaker: "player", text });
+    if (result.dialogue) this.say(result.dialogue, result.npcPerformance?.portraitCue ?? "neutral", result.npcPerformance ?? null);
+    // A narrated line (a script's `narrate`) is not spoken by the character.
+    if (result.narration) this.chat.push({ speaker: "system", text: result.narration });
+    this.sync();
+    if (game.status !== "active") {
+      this.chat.push({ speaker: "system", text: this.endingText(game.outcome) });
+      this.onLog(`Ending: ${game.outcome}`);
+    }
+    this.onChange({ focusInput: true });
+  }
+
   /** The player uses an item on the character, such as showing the ID card. */
   useItem(itemId) {
     const game = this.game;
@@ -458,8 +554,15 @@ export class PlaySession {
       if (event.kind === "open") {
         this.sound?.sfx.startAmbience();
         const object = this.vault.notes[event.key]?.props ?? {};
-        // An unanswered call does not count: the greeting waits for a real one.
-        if (object.conversation && this.connect(!this.called, object)) this.called = true;
+        if (object.conversation) {
+          this.hush();
+          this.active = object.conversation;
+          this.ensureEncounter(this.active);
+          this.sync();
+          if (object.ring === false) this.meet();
+          // An unanswered call does not count: the greeting waits for a real one.
+          else if (this.connect(!this.called.has(this.active), object)) this.called.add(this.active);
+        }
       }
       if (event.kind === "close") {
         this.callRun += 1;
@@ -489,12 +592,13 @@ export class PlaySession {
   }
 
   /** Adds in-world objects: a hotspot when closed, their UI in place when open. */
-  addObjects(elements, placements, width, height) {
-    for (const { id, rect, panel } of placements) {
+  addObjects(elements, placements, width, height, opened = elements) {
+    for (const { id, rect, panel, mask, maskFocus } of placements) {
       const props = this.vault.notes[id]?.props ?? {};
       if (this.world.open?.[id]) {
-        if (props.dim !== false) elements.push({ type: "rect", at: [0, 0, width, height], fill: props.dim ?? "#000000aa" });
-        elements.push({ type: "ui", id, ui: props.ui, at: panel ?? props.panel ?? [0, 0, width, height] });
+        // Opened objects go in `opened`, drawn above every hotspot and exit.
+        if (props.dim !== false) opened.push({ type: "rect", at: [0, 0, width, height], fill: props.dim ?? "#000000aa" });
+        opened.push({ type: "ui", id, ui: props.ui, at: panel ?? props.panel ?? [0, 0, width, height] });
       } else if (rect) {
         elements.push({
           type: "button",
@@ -504,6 +608,8 @@ export class PlaySession {
           label: props.label ?? props.name ?? id,
           key: props.key,
           visible: props.visible,
+          mask,
+          maskFocus,
           do: props.use ?? [`open ${id}`]
         });
       }
@@ -535,8 +641,9 @@ export class PlaySession {
         if (sameSize) elements.push(...(baseUi.blocks.Elements ?? []));
         else elements.push({ type: "ui", id: screen.props.ui, ui: screen.props.ui, at: [0, 0, width, height] });
       }
-      this.addObjects(elements, built.objects, width, height);
-      elements.push(...built.exits);
+      const opened = [];
+      this.addObjects(elements, built.objects, width, height, opened);
+      elements.push(...built.exits, ...opened);
     } else {
       if (!baseUi) throw new Error(`Screen "${screenId}" is not on the world canvas and has no ui note.`);
       width = Number(baseUi.props.width) || 640;
@@ -614,6 +721,7 @@ export class PlaySession {
       logSlot.textContent = "";
       const list = document.createElement("div");
       list.className = "play-log";
+      if (theme.fonts?.body) list.style.fontFamily = theme.fonts.body;
       list.setAttribute("role", "log");
       list.setAttribute("aria-live", "polite");
       const lines = this.busy ? [...this.chat, { speaker: "system", text: "Arthur is thinking…" }] : this.chat;
@@ -621,7 +729,7 @@ export class PlaySession {
         const row = document.createElement("p");
         const who = document.createElement("span");
         who.className = "who";
-        who.textContent = { arthur: "Arthur", player: "You", system: "▪" }[line.speaker];
+        who.textContent = { arthur: this.world.speaker ?? "Arthur", player: "You", system: "▪" }[line.speaker];
         who.style.color = { arthur: colors.cyan, player: colors.magenta }[line.speaker] ?? colors.muted;
         row.className = line.speaker;
         row.style.color = line.speaker === "system" ? colors.muted : colors.text;
@@ -642,7 +750,34 @@ export class PlaySession {
       image.decoding = "sync";
       // A redraw mid-line keeps the talking timer in charge of the frame.
       image.src = this.talking() ? (portrait.talkingByMood[this.mood] ?? portrait.talking?.frames ?? [])[0] ?? portrait.idle : this.restingFrame();
-      Object.assign(image.style, { position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "cover", imageRendering: "pixelated" });
+      portraitSlot.style.overflow = "hidden";
+      if (portrait.backdrop) {
+        // Background layer, then the character standing in front of it.
+        const backdrop = document.createElement("img");
+        backdrop.className = "play-backdrop";
+        backdrop.alt = "";
+        backdrop.decoding = "sync";
+        backdrop.src = portrait.backdrop;
+        const [bx, by] = portrait.backdropFocus;
+        Object.assign(backdrop.style, {
+          position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "cover",
+          objectPosition: `${bx}% ${by}%`, transform: portrait.backdropZoom !== 1 ? `scale(${portrait.backdropZoom})` : "",
+          transformOrigin: `${bx}% ${by}%`, imageRendering: "pixelated"
+        });
+        portraitSlot.append(backdrop);
+        const [ox, oy] = portrait.offset;
+        Object.assign(image.style, {
+          position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "contain", objectPosition: "50% 100%",
+          transform: `translate(${ox}%, ${oy}%) scale(${portrait.zoom})`, transformOrigin: "50% 100%", imageRendering: "pixelated"
+        });
+      } else {
+        Object.assign(image.style, {
+          position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "cover",
+          objectPosition: `${portrait.focus[0]}% ${portrait.focus[1]}%`,
+          transform: portrait.zoom !== 1 ? `scale(${portrait.zoom})` : "",
+          transformOrigin: `${portrait.focus[0]}% ${portrait.focus[1]}%`, imageRendering: "pixelated"
+        });
+      }
       portraitSlot.append(image);
       // Load every frame now, so the first line, mood or blink does not stutter.
       const frames = [
@@ -661,14 +796,15 @@ export class PlaySession {
       inputSlot.textContent = "";
       const input = document.createElement("input");
       input.className = "play-input";
-      input.setAttribute("aria-label", "Say something to Arthur");
+      if (theme.fonts?.body) input.style.fontFamily = theme.fonts.body;
+      input.setAttribute("aria-label", `Say something to ${this.world.speaker ?? "them"}`);
       input.autocomplete = "off";
       input.value = this.draft;
       input.style.color = colors.text;
       const active = this.game?.status === "active";
       const connecting = Boolean(this.world.call?.connecting);
       input.disabled = this.busy || !active || connecting;
-      input.placeholder = connecting ? "Connecting…" : active ? "Talk to Arthur…" : "Encounter over.";
+      input.placeholder = connecting ? "Connecting…" : active ? `Talk to ${this.world.speaker ?? "them"}…` : "Encounter over.";
       input.addEventListener("input", () => {
         this.draft = input.value;
       });
@@ -680,7 +816,33 @@ export class PlaySession {
       });
       inputSlot.append(input);
     }
+
+    // Choice buttons: the dialogue tree's quoted arrows from where the talk is.
+    const choiceSlot = slots.get("choices");
+    if (choiceSlot) {
+      choiceSlot.textContent = "";
+      const list = document.createElement("div");
+      list.className = "play-choices";
+      for (const choice of this.game?.choices() ?? []) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "play-choice";
+        if (theme.fonts?.body) button.style.fontFamily = theme.fonts.body;
+        button.textContent = choice.text;
+        button.style.color = colors.text;
+        button.style.borderColor = colors.line ?? colors.cyan ?? "currentColor";
+        button.disabled = this.busy || Boolean(this.world.call?.connecting);
+        button.addEventListener("click", () => this.choose(choice.text));
+        list.append(button);
+      }
+      choiceSlot.append(list);
+    }
   }
+}
+
+/** "Arthur Thorne" → "arthur-thorne", for world keys such as talk.<character>. */
+function slug(id) {
+  return String(id).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 /** Clicks the stage button whose `key` matches, unless the player is typing. */
