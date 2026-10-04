@@ -87,15 +87,6 @@
 			"color": "5"
 		},
 		{
-			"id": "made-home-background-1",
-			"type": "file",
-			"file": "screens/home/art/home-background/home-background.webp",
-			"x": 1340,
-			"y": 600,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "home-keys",
 			"type": "text",
 			"x": 700,
@@ -156,11 +147,11 @@
 			"color": "4"
 		},
 		{
-			"id": "made-home-keys-1",
+			"id": "made-home-background-1",
 			"type": "file",
-			"file": "screens/home/art/home-keys/home-keys.webp",
+			"file": "screens/home/art/home-background/home-background.webp",
 			"x": 1340,
-			"y": 1600,
+			"y": 600,
 			"width": 240,
 			"height": 135
 		},
@@ -174,6 +165,15 @@
 			"height": 135
 		},
 		{
+			"id": "made-home-keys-1",
+			"type": "file",
+			"file": "screens/home/art/home-keys/home-keys.webp",
+			"x": 1340,
+			"y": 1600,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-home-mirror-1",
 			"type": "file",
 			"file": "screens/home/art/home-mirror/home-mirror.webp",
@@ -183,20 +183,20 @@
 			"height": 135
 		},
 		{
-			"id": "made-home-keys-cut-1",
-			"type": "file",
-			"file": "screens/home/art/home-keys-cut/home-keys-cut.webp",
-			"x": 2000,
-			"y": 1600,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "made-home-box-cut-1",
 			"type": "file",
 			"file": "screens/home/art/home-box-cut/home-box-cut.webp",
 			"x": 2000,
 			"y": 2060,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-home-keys-cut-1",
+			"type": "file",
+			"file": "screens/home/art/home-keys-cut/home-keys-cut.webp",
+			"x": 2000,
+			"y": 1600,
 			"width": 240,
 			"height": 135
 		},
@@ -239,15 +239,6 @@
 			"label": "cut out"
 		},
 		{
-			"id": "made-home-background-1-edge",
-			"fromNode": "home-background",
-			"fromSide": "right",
-			"toNode": "made-home-background-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "e-style-home-keys",
 			"fromNode": "krea-prop-green",
 			"toNode": "home-keys",
@@ -284,10 +275,10 @@
 			"label": "cut out"
 		},
 		{
-			"id": "made-home-keys-1-edge",
-			"fromNode": "home-keys",
+			"id": "made-home-background-1-edge",
+			"fromNode": "home-background",
 			"fromSide": "right",
-			"toNode": "made-home-keys-1",
+			"toNode": "made-home-background-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"
@@ -302,6 +293,15 @@
 			"label": "made"
 		},
 		{
+			"id": "made-home-keys-1-edge",
+			"fromNode": "home-keys",
+			"fromSide": "right",
+			"toNode": "made-home-keys-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-home-mirror-1-edge",
 			"fromNode": "home-mirror",
 			"fromSide": "right",
@@ -311,19 +311,19 @@
 			"label": "made"
 		},
 		{
-			"id": "made-home-keys-cut-1-edge",
-			"fromNode": "home-keys-cut",
+			"id": "made-home-box-cut-1-edge",
+			"fromNode": "home-box-cut",
 			"fromSide": "right",
-			"toNode": "made-home-keys-cut-1",
+			"toNode": "made-home-box-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"
 		},
 		{
-			"id": "made-home-box-cut-1-edge",
-			"fromNode": "home-box-cut",
+			"id": "made-home-keys-cut-1-edge",
+			"fromNode": "home-keys-cut",
 			"fromSide": "right",
-			"toNode": "made-home-box-cut-1",
+			"toNode": "made-home-keys-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"

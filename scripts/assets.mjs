@@ -20,7 +20,9 @@ import { basename, dirname, extname, isAbsolute, join, relative } from "node:pat
 import { fileURLToPath } from "node:url";
 import { readEnv } from "../lib/env.mjs";
 import { VAULT_DIR } from "./compile-vault.mjs";
-import { animationSettings, applyResult, buildRequest, compositeOverrides, crunchSettings, latestOutput, readRecipes } from "../lib/asset-canvas.mjs";
+import { animationSettings, applyResult, buildRequest, compositeOverrides, crunchSettings, latestOutput, readRecipes, recipePrompt } from "../lib/asset-canvas.mjs";
+import { SERVICES, SERVICE_MODELS, keyFor, makePicture } from "../lib/services.mjs";
+import { readLoras, readModels, resolveLora } from "../lib/library.mjs";
 import { chooseParameters, composite, key, keyFrames, seeded } from "../lib/composite.mjs";
 import { download, runFal } from "../lib/fal.mjs";
 import { crunch, crunchRgba, cropImage, ensureMinSize, extractFrames, finishFrames, makeLimitedAnimation, mediaSize, mirrorImage, toJpeg, toPng, toWebp } from "../lib/limited-animation.mjs";
@@ -74,6 +76,15 @@ async function imageUri(file) {
   }
 }
 
+/** name.webp → name.clean.webp: the same picture without the crunch, for the game's clean mode. */
+const twinOf = (file) => file.replace(/(\.\w+)$/, ".clean$1");
+
+/** Writes the clean twin of a crunched file, or removes a stale one when there is no crunch. */
+async function cleanTwin(file, make) {
+  if (make) return make();
+  await rm(twinOf(file), { force: true });
+}
+
 /**
  * Crunch (if set), then WebP and a JPEG twin. The clean source is never
  * changed. `name` lets one card write several pictures into its folder.
@@ -86,6 +97,7 @@ async function finishImage(recipe, source, name = recipe.name) {
   try {
     const input = settings ? await crunch(source, join(work, "crunched.png"), settings) : source;
     await toWebp(input, out, { width: recipe.fields.width ?? null });
+    await cleanTwin(out, settings && (() => toWebp(source, twinOf(out), { width: recipe.fields.width ?? null })));
     // A JPEG twin of the finished picture, for sharing where WebP is not shown.
     await toJpeg(out, join(outDir(recipe.name), `${name}.jpg`));
   } finally {
@@ -178,6 +190,7 @@ async function runAnimatedComposite(recipe, animation, room, parameters) {
       width: look.width,
       crunch: look.crunch
     });
+    if (look.crunch) await finishFrames(frames, outDir(recipe.name), recipe.name, { fps: timing.fps, pingpong: timing.pingpong, width: look.width, suffix: ".clean" });
     await update(recipe.nodeId, { status: "done", files: [vaultPath(finished.animation), vaultPath(finished.video)] });
     console.log(`[${recipe.name}] composited → ${vaultPath(finished.animation)}, ${vaultPath(finished.video)} + ${finished.frames.length} frames`);
   } finally {
@@ -261,6 +274,7 @@ async function runCompositeSet(recipe, canvas, room, parameters) {
         pasted.push(out);
       }
       const finished = await finishFrames(pasted, outDir(recipe.name), name, { fps: actor.timing.fps, pingpong: actor.timing.pingpong, colors: look.colors, crunch: look.crunch });
+      if (look.crunch) await finishFrames(pasted, outDir(recipe.name), name, { fps: actor.timing.fps, pingpong: actor.timing.pingpong, suffix: ".clean" });
       files.push(vaultPath(finished.animation));
     }
     await update(recipe.nodeId, { status: "done", files });
@@ -335,8 +349,13 @@ async function runCutout(recipe, canvas) {
     const out = join(outDir(recipe.name), `${recipe.name}.webp`);
     await mkdir(outDir(recipe.name), { recursive: true });
     await toWebp(finished, out);
+    await cleanTwin(out, settings && (() => toWebp(source, twinOf(out))));
     const files = [vaultPath(out)];
-    if (recipe.fields.mirror === true) files.push(vaultPath(await mirrorImage(out, join(outDir(recipe.name), `${recipe.name}-mirrored.webp`))));
+    if (recipe.fields.mirror === true) {
+      const mirrored = join(outDir(recipe.name), `${recipe.name}-mirrored.webp`);
+      files.push(vaultPath(await mirrorImage(out, mirrored)));
+      await cleanTwin(mirrored, settings && (() => mirrorImage(twinOf(out), twinOf(mirrored))));
+    }
     await update(recipe.nodeId, { status: "done", files });
     console.log(`  keyed off ${screen.screen} ${screen.hex}; ${box.width}x${box.height}`);
     console.log(`[${recipe.name}] cut out → ${files.join(", ")}`);
@@ -370,6 +389,7 @@ async function runAnimatedCutout(recipe, animation) {
       ? await Promise.all(keyed.map((file, index) => crunchRgba(file, join(work, `crunch-${String(index + 1).padStart(2, "0")}.png`), settings)))
       : keyed;
     const result = await finishFrames(finished, outDir(recipe.name), recipe.name, { fps, pingpong });
+    if (settings) await finishFrames(keyed, outDir(recipe.name), recipe.name, { fps, pingpong, suffix: ".clean" });
     await update(recipe.nodeId, { status: "done", files: [vaultPath(result.animation)] });
     console.log(`  keyed off ${screen.screen} ${screen.hex}; ${box.width}x${box.height}`);
     console.log(`[${recipe.name}] cut out → ${vaultPath(result.animation)} + ${result.frames.length} frames`);
@@ -403,6 +423,8 @@ async function runCrop(recipe, canvas) {
   await mkdir(outDir(recipe.name), { recursive: true });
   const out = join(outDir(recipe.name), `${recipe.name}.webp`);
   await cropImage(picture, out, { x, y, width: w, height: h });
+  // A crunched picture's clean twin is cropped the same way.
+  await cleanTwin(out, existsSync(twinOf(picture)) && (() => cropImage(twinOf(picture), twinOf(out), { x, y, width: w, height: h })));
   await update(recipe.nodeId, { status: "done", files: [vaultPath(out)] });
   console.log(`[${recipe.name}] cropped ${w}x${h} at ${x},${y} → ${vaultPath(out)}`);
 }
@@ -424,7 +446,68 @@ async function runRecipe(recipe, canvas) {
     const file = sourceFile(source);
     images.set(source, DRY_RUN ? `data:… (${file})` : await imageUri(file));
   }
-  const request = buildRequest(recipe, { resolveImage: (source) => images.get(source) });
+  // LoRAs by library name or link (Civitai downloads get your Civitai key).
+  const libraryLoras = readLoras(VAULT);
+  const loraFor = (entry) => resolveLora(entry, libraryLoras, keyFor(ROOT, "civitai"));
+  // A model you added to the library: on fal it is an endpoint with its own
+  // fields; on Replicate it goes through the Replicate adapter.
+  const added = readModels(VAULT).find((model) => model.id === recipe.fields.model);
+  if (added?.service === "fal") {
+    recipe = { ...recipe, fields: { ...recipe.fields, endpoint: added.endpoint, params: { ...(added.params ?? {}), ...(recipe.fields.params ?? {}) } } };
+  }
+  // A model on another service (Replicate, OpenAI, Google): the same prompt
+  // and reference pictures go there, and the picture comes back the same way.
+  const other = added?.service === "replicate" ? added : SERVICE_MODELS[recipe.fields.model];
+  if (other) {
+    const wanted = recipe.kind === "animate" ? "video" : recipe.kind;
+    if (other.kind !== wanted) throw new Error(`${recipe.fields.model} is a ${other.kind} model; this is a ${recipe.kind} card`);
+    const loras = [...new Map([...recipe.styles.flatMap((style) => [].concat(style.fields.lora ?? [])), ...[].concat(recipe.fields.lora ?? [])].map(loraFor).map((lora) => [lora.path, lora])).values()];
+    const prompt = [...new Set(loras.map((lora) => lora.trigger).filter(Boolean)), recipePrompt(recipe)].join(", ");
+    const references = recipe.kind === "animate" ? [images.get(recipe.start)].filter(Boolean) : (recipe.references ?? []).map((source) => images.get(source));
+    if (DRY_RUN) {
+      console.log(`\n[${recipe.name}] would call ${SERVICES[other.service].name} ${other.model} (about $${other.cost})`, { prompt, references: references.length, size: recipe.fields.size });
+      return;
+    }
+    await update(recipe.nodeId, { status: "running" });
+    console.log(`[${recipe.name}] ${SERVICES[other.service].name} ${other.model} …`);
+    const result = await makePicture(ROOT, recipe.fields.model, { prompt, images: references, size: recipe.fields.size, seed: recipe.fields.seed, model: added ?? null, loras });
+    await mkdir(sourceDir(recipe.name), { recursive: true });
+    if (recipe.kind === "animate") {
+      // A clip: kept as the clean original, then made a limited animation.
+      if (!result.url) throw new Error("the service returned no clip");
+      const clip = await download(result.url, sourcePath(recipe.name, "mp4"));
+      const { animation, frames, video } = await finishAnimation(recipe, clip);
+      await update(recipe.nodeId, { status: "done", files: [vaultPath(animation), vaultPath(video)] });
+      console.log(`[${recipe.name}] done → ${vaultPath(animation)} + ${frames.length} frames`);
+      return;
+    }
+    // The file type, so the converter reads it right: from the bytes, or the URL.
+    const bytes = result.bytes;
+    const ext = bytes
+      ? (bytes[0] === 0x89 ? ".png" : bytes[0] === 0xff ? ".jpg" : bytes.subarray(8, 12).toString() === "WEBP" ? ".webp" : ".png")
+      : extname(new URL(result.url).pathname) || ".png";
+    const raw = join(sourceDir(recipe.name), `${recipe.name}.source-download${ext}`);
+    if (result.url) await download(result.url, raw);
+    else await writeFile(raw, bytes);
+    const source = sourcePath(recipe.name, "png");
+    await toPng(raw, source);
+    await rm(raw, { force: true });
+    const file = await finishImage(recipe, source);
+    await update(recipe.nodeId, { status: "done", files: [vaultPath(file)] });
+    console.log(`[${recipe.name}] done → ${vaultPath(file)}`);
+    return;
+  }
+  const request = buildRequest(recipe, { resolveImage: (source) => images.get(source), resolveLora: loraFor });
+  // A library fal model can name its own picture field, and may not take LoRAs.
+  if (added?.service === "fal") {
+    const from = recipe.kind === "edit" ? "image_urls" : recipe.kind === "animate" ? "image_url" : null;
+    if (from && added.imageField && added.imageField !== from && request.input[from] !== undefined) {
+      const value = request.input[from];
+      delete request.input[from];
+      request.input[added.imageField] = Array.isArray(value) && !/s$/.test(added.imageField) ? value[0] : value;
+    }
+    if (!added.loras) delete request.input.loras;
+  }
 
   if (DRY_RUN) {
     console.log(`\n[${recipe.name}] would call ${request.endpoint}`);
@@ -434,6 +517,7 @@ async function runRecipe(recipe, canvas) {
     return;
   }
 
+  if (!KEY) throw new Error("No fal key: add it in the editor's Keys panel (or FAL_KEY in .env)");
   await update(recipe.nodeId, { status: "running" });
   console.log(`[${recipe.name}] ${request.endpoint} …`);
   const output = await runFal(request.endpoint, request.input, {
@@ -492,10 +576,6 @@ async function runPending() {
   }
 }
 
-if (!KEY && !DRY_RUN && !REFINISH) {
-  console.error("FAL_KEY is not set. Add FAL_KEY=your-key to .env, or use --dry-run.");
-  process.exit(1);
-}
 await runPending();
 
 if (WATCH) {

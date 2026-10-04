@@ -381,24 +381,6 @@
 			"color": "4"
 		},
 		{
-			"id": "made-chloe-room-1",
-			"type": "file",
-			"file": "characters/chloe/art/chloe-room/chloe-room.webp",
-			"x": 1340,
-			"y": 2000,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-chloe-actor-1",
-			"type": "file",
-			"file": "characters/chloe/art/chloe-actor/chloe-actor.webp",
-			"x": 1340,
-			"y": 2400,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "made-chloe-portrait-1",
 			"type": "file",
 			"file": "characters/chloe/art/chloe-portrait/chloe-portrait.webp",
@@ -477,24 +459,6 @@
 			"color": "4"
 		},
 		{
-			"id": "made-chloe-backdrop-1",
-			"type": "file",
-			"file": "characters/chloe/art/chloe-backdrop/chloe-backdrop.webp",
-			"x": 1340,
-			"y": 6100,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-chloe-at-desk-1",
-			"type": "file",
-			"file": "characters/chloe/art/chloe-at-desk/chloe-at-desk.webp",
-			"x": 1340,
-			"y": 5000,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "chloe-at-desk-wood",
 			"type": "text",
 			"x": 700,
@@ -503,15 +467,6 @@
 			"height": 320,
 			"text": "## chloe-at-desk-wood\nedit\nstatus: done\nmodel: qwen-edit\nsize: 1024x1024\nseed: 32\n# The desk legs become dark wood.\nprompt: \"Change only the chrome desk legs into dark walnut wood legs, slim and tapered, in exactly the same places. Keep everything else exactly the same: the person, the desk top, everything on the desk, the chair, the framing, and the flat green screen background.\"",
 			"color": "4"
-		},
-		{
-			"id": "made-chloe-at-desk-wood-1",
-			"type": "file",
-			"file": "characters/chloe/art/chloe-at-desk-wood/chloe-at-desk-wood.webp",
-			"x": 1340,
-			"y": 5960,
-			"width": 240,
-			"height": 135
 		},
 		{
 			"id": "chloe-talk-cut",
@@ -538,33 +493,6 @@
 			"file": "characters/chloe/art/chloe-talk/chloe-talk.mp4",
 			"x": 1600,
 			"y": 3700,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-chloe-at-desk-cut-1",
-			"type": "file",
-			"file": "characters/chloe/art/chloe-at-desk-cut/chloe-at-desk-cut.webp",
-			"x": 1940,
-			"y": 5000,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-chloe-actor-cut-1",
-			"type": "file",
-			"file": "characters/chloe/art/chloe-actor-cut/chloe-actor-cut.webp",
-			"x": 1340,
-			"y": 6500,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-chloe-talk-cut-1",
-			"type": "file",
-			"file": "characters/chloe/art/chloe-talk-cut/chloe-talk-cut.webp",
-			"x": 1340,
-			"y": 3280,
 			"width": 240,
 			"height": 135
 		},
@@ -627,11 +555,83 @@
 			"color": "4"
 		},
 		{
+			"id": "made-chloe-actor-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-actor/chloe-actor.webp",
+			"x": 1340,
+			"y": 2400,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-at-desk-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-at-desk/chloe-at-desk.webp",
+			"x": 1340,
+			"y": 5000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-at-desk-wood-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-at-desk-wood/chloe-at-desk-wood.webp",
+			"x": 1340,
+			"y": 5960,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-chloe-excited-face-1",
 			"type": "file",
 			"file": "characters/chloe/art/chloe-excited-face/chloe-excited-face.webp",
 			"x": 1240,
 			"y": 5800,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-room-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-room/chloe-room.webp",
+			"x": 1340,
+			"y": 2000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-uneasy-face-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-uneasy-face/chloe-uneasy-face.webp",
+			"x": 1240,
+			"y": 6220,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-backdrop-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-backdrop/chloe-backdrop.webp",
+			"x": 1340,
+			"y": 6100,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-actor-cut-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-actor-cut/chloe-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-at-desk-cut-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-at-desk-cut/chloe-at-desk-cut.webp",
+			"x": 1940,
+			"y": 5000,
 			"width": 240,
 			"height": 135
 		},
@@ -645,11 +645,11 @@
 			"height": 135
 		},
 		{
-			"id": "made-chloe-uneasy-face-1",
+			"id": "made-chloe-talk-cut-1",
 			"type": "file",
-			"file": "characters/chloe/art/chloe-uneasy-face/chloe-uneasy-face.webp",
-			"x": 1240,
-			"y": 6220,
+			"file": "characters/chloe/art/chloe-talk-cut/chloe-talk-cut.webp",
+			"x": 1340,
+			"y": 3280,
 			"width": 240,
 			"height": 135
 		},
@@ -1070,24 +1070,6 @@
 			"label": "actor"
 		},
 		{
-			"id": "made-chloe-room-1-edge",
-			"fromNode": "chloe-room",
-			"fromSide": "right",
-			"toNode": "made-chloe-room-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-chloe-actor-1-edge",
-			"fromNode": "chloe-actor",
-			"fromSide": "right",
-			"toNode": "made-chloe-actor-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "made-chloe-portrait-1-edge",
 			"fromNode": "chloe-portrait",
 			"fromSide": "right",
@@ -1133,36 +1115,9 @@
 			"label": "cut out"
 		},
 		{
-			"id": "made-chloe-backdrop-1-edge",
-			"fromNode": "chloe-backdrop",
-			"fromSide": "right",
-			"toNode": "made-chloe-backdrop-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-chloe-at-desk-1-edge",
-			"fromNode": "chloe-at-desk",
-			"fromSide": "right",
-			"toNode": "made-chloe-at-desk-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "chloe-desk-to-wood",
 			"fromNode": "chloe-at-desk",
 			"toNode": "chloe-at-desk-wood"
-		},
-		{
-			"id": "made-chloe-at-desk-wood-1-edge",
-			"fromNode": "chloe-at-desk-wood",
-			"fromSide": "right",
-			"toNode": "made-chloe-at-desk-wood-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
 		},
 		{
 			"id": "e-chloe-talk-cut",
@@ -1184,33 +1139,6 @@
 			"fromNode": "chloe-talk",
 			"fromSide": "right",
 			"toNode": "made-chloe-talk-2",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-chloe-at-desk-cut-1-edge",
-			"fromNode": "chloe-at-desk-cut",
-			"fromSide": "right",
-			"toNode": "made-chloe-at-desk-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-chloe-actor-cut-1-edge",
-			"fromNode": "chloe-actor-cut",
-			"fromSide": "right",
-			"toNode": "made-chloe-actor-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-chloe-talk-cut-1-edge",
-			"fromNode": "chloe-talk-cut",
-			"fromSide": "right",
-			"toNode": "made-chloe-talk-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"
@@ -1252,10 +1180,82 @@
 			"label": "cut out"
 		},
 		{
+			"id": "made-chloe-actor-1-edge",
+			"fromNode": "chloe-actor",
+			"fromSide": "right",
+			"toNode": "made-chloe-actor-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-at-desk-1-edge",
+			"fromNode": "chloe-at-desk",
+			"fromSide": "right",
+			"toNode": "made-chloe-at-desk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-at-desk-wood-1-edge",
+			"fromNode": "chloe-at-desk-wood",
+			"fromSide": "right",
+			"toNode": "made-chloe-at-desk-wood-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-chloe-excited-face-1-edge",
 			"fromNode": "chloe-excited-face",
 			"fromSide": "right",
 			"toNode": "made-chloe-excited-face-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-room-1-edge",
+			"fromNode": "chloe-room",
+			"fromSide": "right",
+			"toNode": "made-chloe-room-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-uneasy-face-1-edge",
+			"fromNode": "chloe-uneasy-face",
+			"fromSide": "right",
+			"toNode": "made-chloe-uneasy-face-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-backdrop-1-edge",
+			"fromNode": "chloe-backdrop",
+			"fromSide": "right",
+			"toNode": "made-chloe-backdrop-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-actor-cut-1-edge",
+			"fromNode": "chloe-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-chloe-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-at-desk-cut-1-edge",
+			"fromNode": "chloe-at-desk-cut",
+			"fromSide": "right",
+			"toNode": "made-chloe-at-desk-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"
@@ -1270,10 +1270,10 @@
 			"label": "made"
 		},
 		{
-			"id": "made-chloe-uneasy-face-1-edge",
-			"fromNode": "chloe-uneasy-face",
+			"id": "made-chloe-talk-cut-1-edge",
+			"fromNode": "chloe-talk-cut",
 			"fromSide": "right",
-			"toNode": "made-chloe-uneasy-face-1",
+			"toNode": "made-chloe-talk-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"

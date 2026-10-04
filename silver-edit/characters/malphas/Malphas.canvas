@@ -399,24 +399,6 @@
 			"color": "4"
 		},
 		{
-			"id": "made-malphas-room-1",
-			"type": "file",
-			"file": "characters/malphas/art/malphas-room/malphas-room.webp",
-			"x": 1340,
-			"y": 2000,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-malphas-actor-1",
-			"type": "file",
-			"file": "characters/malphas/art/malphas-actor/malphas-actor.webp",
-			"x": 1340,
-			"y": 2400,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "made-malphas-portrait-1",
 			"type": "file",
 			"file": "characters/malphas/art/malphas-portrait/malphas-portrait.webp",
@@ -485,24 +467,6 @@
 			"color": "4"
 		},
 		{
-			"id": "made-malphas-in-scene-1",
-			"type": "file",
-			"file": "characters/malphas/art/malphas-in-scene/malphas-in-scene.webp",
-			"x": 1340,
-			"y": 7000,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-malphas-backdrop-1",
-			"type": "file",
-			"file": "characters/malphas/art/malphas-backdrop/malphas-backdrop.webp",
-			"x": 1340,
-			"y": 6100,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "malphas-talk-cut",
 			"type": "text",
 			"x": 700,
@@ -527,33 +491,6 @@
 			"file": "characters/malphas/art/malphas-talk/malphas-talk.mp4",
 			"x": 1600,
 			"y": 3700,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-malphas-actor-cut-1",
-			"type": "file",
-			"file": "characters/malphas/art/malphas-actor-cut/malphas-actor-cut.webp",
-			"x": 1340,
-			"y": 6500,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-malphas-in-scene-cut-1",
-			"type": "file",
-			"file": "characters/malphas/art/malphas-in-scene-cut/malphas-in-scene-cut.webp",
-			"x": 2040,
-			"y": 7000,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-malphas-talk-cut-1",
-			"type": "file",
-			"file": "characters/malphas/art/malphas-talk-cut/malphas-talk-cut.webp",
-			"x": 1340,
-			"y": 3280,
 			"width": 240,
 			"height": 135
 		},
@@ -596,6 +533,15 @@
 			"color": "4"
 		},
 		{
+			"id": "made-malphas-actor-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-actor/malphas-actor.webp",
+			"x": 1340,
+			"y": 2400,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-malphas-cold-face-1",
 			"type": "file",
 			"file": "characters/malphas/art/malphas-cold-face/malphas-cold-face.webp",
@@ -605,11 +551,65 @@
 			"height": 135
 		},
 		{
+			"id": "made-malphas-in-scene-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-in-scene/malphas-in-scene.webp",
+			"x": 1340,
+			"y": 7000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-room-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-room/malphas-room.webp",
+			"x": 1340,
+			"y": 2000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-backdrop-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-backdrop/malphas-backdrop.webp",
+			"x": 1340,
+			"y": 6100,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-actor-cut-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-actor-cut/malphas-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-malphas-cold-face-cut-1",
 			"type": "file",
 			"file": "characters/malphas/art/malphas-cold-face-cut/malphas-cold-face-cut.webp",
 			"x": 1900,
 			"y": 5800,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-in-scene-cut-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-in-scene-cut/malphas-in-scene-cut.webp",
+			"x": 2040,
+			"y": 7000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-talk-cut-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-talk-cut/malphas-talk-cut.webp",
+			"x": 1340,
+			"y": 3280,
 			"width": 240,
 			"height": 135
 		}
@@ -1021,24 +1021,6 @@
 			"label": "actor"
 		},
 		{
-			"id": "made-malphas-room-1-edge",
-			"fromNode": "malphas-room",
-			"fromSide": "right",
-			"toNode": "made-malphas-room-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-malphas-actor-1-edge",
-			"fromNode": "malphas-actor",
-			"fromSide": "right",
-			"toNode": "made-malphas-actor-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "made-malphas-portrait-1-edge",
 			"fromNode": "malphas-portrait",
 			"fromSide": "right",
@@ -1078,24 +1060,6 @@
 			"label": "cut out"
 		},
 		{
-			"id": "made-malphas-in-scene-1-edge",
-			"fromNode": "malphas-in-scene",
-			"fromSide": "right",
-			"toNode": "made-malphas-in-scene-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-malphas-backdrop-1-edge",
-			"fromNode": "malphas-backdrop",
-			"fromSide": "right",
-			"toNode": "made-malphas-backdrop-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "e-malphas-talk-cut",
 			"fromNode": "malphas-talk",
 			"toNode": "malphas-talk-cut",
@@ -1120,33 +1084,6 @@
 			"label": "made"
 		},
 		{
-			"id": "made-malphas-actor-cut-1-edge",
-			"fromNode": "malphas-actor-cut",
-			"fromSide": "right",
-			"toNode": "made-malphas-actor-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-malphas-in-scene-cut-1-edge",
-			"fromNode": "malphas-in-scene-cut",
-			"fromSide": "right",
-			"toNode": "made-malphas-in-scene-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-malphas-talk-cut-1-edge",
-			"fromNode": "malphas-talk-cut",
-			"fromSide": "right",
-			"toNode": "made-malphas-talk-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "e-malphas-cold-face-src",
 			"fromNode": "malphas-mood-source",
 			"toNode": "malphas-cold-face",
@@ -1165,6 +1102,15 @@
 			"label": "cut out"
 		},
 		{
+			"id": "made-malphas-actor-1-edge",
+			"fromNode": "malphas-actor",
+			"fromSide": "right",
+			"toNode": "made-malphas-actor-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-malphas-cold-face-1-edge",
 			"fromNode": "malphas-cold-face",
 			"fromSide": "right",
@@ -1174,10 +1120,64 @@
 			"label": "made"
 		},
 		{
+			"id": "made-malphas-in-scene-1-edge",
+			"fromNode": "malphas-in-scene",
+			"fromSide": "right",
+			"toNode": "made-malphas-in-scene-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-room-1-edge",
+			"fromNode": "malphas-room",
+			"fromSide": "right",
+			"toNode": "made-malphas-room-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-backdrop-1-edge",
+			"fromNode": "malphas-backdrop",
+			"fromSide": "right",
+			"toNode": "made-malphas-backdrop-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-actor-cut-1-edge",
+			"fromNode": "malphas-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-malphas-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-malphas-cold-face-cut-1-edge",
 			"fromNode": "malphas-cold-face-cut",
 			"fromSide": "right",
 			"toNode": "made-malphas-cold-face-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-in-scene-cut-1-edge",
+			"fromNode": "malphas-in-scene-cut",
+			"fromSide": "right",
+			"toNode": "made-malphas-in-scene-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-talk-cut-1-edge",
+			"fromNode": "malphas-talk-cut",
+			"fromSide": "right",
+			"toNode": "made-malphas-talk-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"

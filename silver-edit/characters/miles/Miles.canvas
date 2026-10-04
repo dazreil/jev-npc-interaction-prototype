@@ -381,24 +381,6 @@
 			"color": "4"
 		},
 		{
-			"id": "made-miles-room-1",
-			"type": "file",
-			"file": "characters/miles/art/miles-room/miles-room.webp",
-			"x": 1340,
-			"y": 2000,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-miles-actor-1",
-			"type": "file",
-			"file": "characters/miles/art/miles-actor/miles-actor.webp",
-			"x": 1340,
-			"y": 2400,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "made-miles-portrait-1",
 			"type": "file",
 			"file": "characters/miles/art/miles-portrait/miles-portrait.webp",
@@ -477,24 +459,6 @@
 			"color": "4"
 		},
 		{
-			"id": "made-miles-backdrop-1",
-			"type": "file",
-			"file": "characters/miles/art/miles-backdrop/miles-backdrop.webp",
-			"x": 1340,
-			"y": 6100,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-miles-at-desk-1",
-			"type": "file",
-			"file": "characters/miles/art/miles-at-desk/miles-at-desk.webp",
-			"x": 1340,
-			"y": 5000,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "miles-at-desk-wood",
 			"type": "text",
 			"x": 700,
@@ -503,15 +467,6 @@
 			"height": 320,
 			"text": "## miles-at-desk-wood\nedit\nstatus: done\nmodel: qwen-edit\nsize: 1024x1024\nseed: 32\n# The desk legs become dark wood.\nprompt: \"Change only the chrome desk legs into dark walnut wood legs, slim and tapered, in exactly the same places. Keep everything else exactly the same: the person, the desk top, everything on the desk, the chair, the framing, and the flat green screen background.\"",
 			"color": "4"
-		},
-		{
-			"id": "made-miles-at-desk-wood-1",
-			"type": "file",
-			"file": "characters/miles/art/miles-at-desk-wood/miles-at-desk-wood.webp",
-			"x": 1340,
-			"y": 5960,
-			"width": 240,
-			"height": 135
 		},
 		{
 			"id": "miles-talk-cut",
@@ -538,33 +493,6 @@
 			"file": "characters/miles/art/miles-talk/miles-talk.mp4",
 			"x": 1600,
 			"y": 3700,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-miles-at-desk-cut-1",
-			"type": "file",
-			"file": "characters/miles/art/miles-at-desk-cut/miles-at-desk-cut.webp",
-			"x": 1940,
-			"y": 5000,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-miles-actor-cut-1",
-			"type": "file",
-			"file": "characters/miles/art/miles-actor-cut/miles-actor-cut.webp",
-			"x": 1340,
-			"y": 6500,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-miles-talk-cut-1",
-			"type": "file",
-			"file": "characters/miles/art/miles-talk-cut/miles-talk-cut.webp",
-			"x": 1340,
-			"y": 3280,
 			"width": 240,
 			"height": 135
 		},
@@ -627,6 +555,33 @@
 			"color": "4"
 		},
 		{
+			"id": "made-miles-actor-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-actor/miles-actor.webp",
+			"x": 1340,
+			"y": 2400,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-at-desk-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-at-desk/miles-at-desk.webp",
+			"x": 1340,
+			"y": 5000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-at-desk-wood-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-at-desk-wood/miles-at-desk-wood.webp",
+			"x": 1340,
+			"y": 5960,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-miles-irritated-face-1",
 			"type": "file",
 			"file": "characters/miles/art/miles-irritated-face/miles-irritated-face.webp",
@@ -636,11 +591,11 @@
 			"height": 135
 		},
 		{
-			"id": "made-miles-irritated-face-cut-1",
+			"id": "made-miles-room-1",
 			"type": "file",
-			"file": "characters/miles/art/miles-irritated-face-cut/miles-irritated-face-cut.webp",
-			"x": 1900,
-			"y": 6220,
+			"file": "characters/miles/art/miles-room/miles-room.webp",
+			"x": 1340,
+			"y": 2000,
 			"width": 240,
 			"height": 135
 		},
@@ -654,11 +609,56 @@
 			"height": 135
 		},
 		{
+			"id": "made-miles-backdrop-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-backdrop/miles-backdrop.webp",
+			"x": 1340,
+			"y": 6100,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-actor-cut-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-actor-cut/miles-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-at-desk-cut-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-at-desk-cut/miles-at-desk-cut.webp",
+			"x": 1940,
+			"y": 5000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-irritated-face-cut-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-irritated-face-cut/miles-irritated-face-cut.webp",
+			"x": 1900,
+			"y": 6220,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-miles-smitten-face-cut-1",
 			"type": "file",
 			"file": "characters/miles/art/miles-smitten-face-cut/miles-smitten-face-cut.webp",
 			"x": 1900,
 			"y": 5800,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-talk-cut-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-talk-cut/miles-talk-cut.webp",
+			"x": 1340,
+			"y": 3280,
 			"width": 240,
 			"height": 135
 		}
@@ -1070,24 +1070,6 @@
 			"label": "actor"
 		},
 		{
-			"id": "made-miles-room-1-edge",
-			"fromNode": "miles-room",
-			"fromSide": "right",
-			"toNode": "made-miles-room-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-miles-actor-1-edge",
-			"fromNode": "miles-actor",
-			"fromSide": "right",
-			"toNode": "made-miles-actor-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "made-miles-portrait-1-edge",
 			"fromNode": "miles-portrait",
 			"fromSide": "right",
@@ -1133,36 +1115,9 @@
 			"label": "cut out"
 		},
 		{
-			"id": "made-miles-backdrop-1-edge",
-			"fromNode": "miles-backdrop",
-			"fromSide": "right",
-			"toNode": "made-miles-backdrop-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-miles-at-desk-1-edge",
-			"fromNode": "miles-at-desk",
-			"fromSide": "right",
-			"toNode": "made-miles-at-desk-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "miles-desk-to-wood",
 			"fromNode": "miles-at-desk",
 			"toNode": "miles-at-desk-wood"
-		},
-		{
-			"id": "made-miles-at-desk-wood-1-edge",
-			"fromNode": "miles-at-desk-wood",
-			"fromSide": "right",
-			"toNode": "made-miles-at-desk-wood-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
 		},
 		{
 			"id": "e-miles-talk-cut",
@@ -1184,33 +1139,6 @@
 			"fromNode": "miles-talk",
 			"fromSide": "right",
 			"toNode": "made-miles-talk-2",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-miles-at-desk-cut-1-edge",
-			"fromNode": "miles-at-desk-cut",
-			"fromSide": "right",
-			"toNode": "made-miles-at-desk-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-miles-actor-cut-1-edge",
-			"fromNode": "miles-actor-cut",
-			"fromSide": "right",
-			"toNode": "made-miles-actor-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-miles-talk-cut-1-edge",
-			"fromNode": "miles-talk-cut",
-			"fromSide": "right",
-			"toNode": "made-miles-talk-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"
@@ -1252,6 +1180,33 @@
 			"label": "cut out"
 		},
 		{
+			"id": "made-miles-actor-1-edge",
+			"fromNode": "miles-actor",
+			"fromSide": "right",
+			"toNode": "made-miles-actor-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-at-desk-1-edge",
+			"fromNode": "miles-at-desk",
+			"fromSide": "right",
+			"toNode": "made-miles-at-desk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-at-desk-wood-1-edge",
+			"fromNode": "miles-at-desk-wood",
+			"fromSide": "right",
+			"toNode": "made-miles-at-desk-wood-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-miles-irritated-face-1-edge",
 			"fromNode": "miles-irritated-face",
 			"fromSide": "right",
@@ -1261,10 +1216,10 @@
 			"label": "made"
 		},
 		{
-			"id": "made-miles-irritated-face-cut-1-edge",
-			"fromNode": "miles-irritated-face-cut",
+			"id": "made-miles-room-1-edge",
+			"fromNode": "miles-room",
 			"fromSide": "right",
-			"toNode": "made-miles-irritated-face-cut-1",
+			"toNode": "made-miles-room-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"
@@ -1279,10 +1234,55 @@
 			"label": "made"
 		},
 		{
+			"id": "made-miles-backdrop-1-edge",
+			"fromNode": "miles-backdrop",
+			"fromSide": "right",
+			"toNode": "made-miles-backdrop-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-actor-cut-1-edge",
+			"fromNode": "miles-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-miles-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-at-desk-cut-1-edge",
+			"fromNode": "miles-at-desk-cut",
+			"fromSide": "right",
+			"toNode": "made-miles-at-desk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-irritated-face-cut-1-edge",
+			"fromNode": "miles-irritated-face-cut",
+			"fromSide": "right",
+			"toNode": "made-miles-irritated-face-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-miles-smitten-face-cut-1-edge",
 			"fromNode": "miles-smitten-face-cut",
 			"fromSide": "right",
 			"toNode": "made-miles-smitten-face-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-talk-cut-1-edge",
+			"fromNode": "miles-talk-cut",
+			"fromSide": "right",
+			"toNode": "made-miles-talk-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"

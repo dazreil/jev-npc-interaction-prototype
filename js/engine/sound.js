@@ -38,6 +38,26 @@ export function createSound({ onProgress = () => {} } = {}) {
     return ok;
   });
 
+  // Music: each screen's loop (rendered from a Strudel pattern by
+  // scripts/music.mjs), straight to the speakers, not through the intercom
+  // filter. A new track fades in as the old one fades out.
+  const MUSIC_VOLUME = 0.5;
+  const FADE = 1.5;
+  const buffers = new Map();
+  let music = null; // { url, source, gain }
+  const loadBuffer = (context, url) => {
+    if (!buffers.has(url)) buffers.set(url, fetch(url).then((response) => response.arrayBuffer()).then((data) => context.decodeAudioData(data)));
+    return buffers.get(url);
+  };
+  const fadeOut = (track, context) => {
+    if (!track?.gain) return;
+    const now = context.currentTime;
+    track.gain.gain.cancelScheduledValues(now);
+    track.gain.gain.setValueAtTime(track.gain.gain.value, now);
+    track.gain.gain.linearRampToValueAtTime(0, now + FADE);
+    track.source.stop(now + FADE + 0.05);
+  };
+
   // A line recorded ahead of time (a character's own voice, made by
   // scripts/voices.mjs) plays as an audio file instead of the live voice.
   let clip = null;
@@ -77,6 +97,32 @@ export function createSound({ onProgress = () => {} } = {}) {
       return true;
     },
     stopRecorded: stopClip,
+    /** Plays a looping track (a URL), fading from the one playing; null fades to silence. */
+    playMusic(url) {
+      if ((music?.url ?? null) === (url ?? null)) return;
+      const context = sharedContext();
+      if (!context) return;
+      fadeOut(music, context);
+      if (!url) {
+        music = null;
+        return;
+      }
+      const track = { url };
+      music = track;
+      loadBuffer(context, url).then((buffer) => {
+        if (music !== track) return;
+        track.source = context.createBufferSource();
+        track.source.buffer = buffer;
+        track.source.loop = true;
+        track.gain = context.createGain();
+        track.gain.gain.value = 0;
+        track.source.connect(track.gain).connect(context.destination);
+        track.source.start();
+        track.gain.gain.linearRampToValueAtTime(this.muted ? 0 : MUSIC_VOLUME, context.currentTime + FADE);
+      }).catch(() => {
+        if (music === track) music = null;
+      });
+    },
     /** Resolves when the voice is ready (true: neural voice; false: fallback). */
     whenReady,
     get ready() {
@@ -99,6 +145,7 @@ export function createSound({ onProgress = () => {} } = {}) {
       sfx.setMuted(this.muted);
       voice.setMuted(this.muted);
       if (this.muted) stopClip();
+      if (music?.gain) music.gain.gain.setTargetAtTime(this.muted ? 0 : MUSIC_VOLUME, music.gain.context.currentTime, 0.2);
       if (this.muted) sfx.stopAmbience();
       else sfx.startAmbience();
     }

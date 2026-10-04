@@ -5,6 +5,7 @@ width: 640
 height: 360
 objective: Sleep
 ui: "[[home-hud]]"
+music: "[[home.ogg]]"
 ---
 
 # The cottage

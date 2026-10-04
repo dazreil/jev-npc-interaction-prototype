@@ -1,6 +1,6 @@
 {
 	"id": "chloe-first-day",
-	"title": "Chloe \u00b7 first day",
+	"title": "Chloe · first day",
 	"with": "Chloe",
 	"events": [
 		{
@@ -12,7 +12,7 @@
 			"id": "line-02",
 			"type": "line",
 			"mood": "excited",
-			"text": "Hi! Sorry. Hi. You're Elena! I'm Chloe: socials, the newsletter, and one very haunted unfinished novel."
+			"text": "Hi, please to meet you Elena! I'm Chloe, \nin charge of the socials, the newsletter and customer service. If I seem a bit distracted, it because i have 200 uread emails this morning, its usually 12  "
 		},
 		{
 			"id": "line-03",

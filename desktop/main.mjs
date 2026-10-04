@@ -18,6 +18,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SERVED = ["player/", "js/", "data/", VAULT_URL_PREFIX, "assets/fonts/", "assets/encounter/", "assets/vendor/"];
 const MIME = {
   ".mp3": "audio/mpeg",
+  ".ogg": "audio/ogg",
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -33,7 +34,8 @@ const MIME = {
   ".onnx": "application/octet-stream"
 };
 const START_URL = "app://game/player/index.html";
-const API_KEY = readApiKey(ROOT);
+// Read on each use, so a key saved in the Library (Keys) works without a restart.
+const apiKey = () => readApiKey(ROOT);
 const SMOKE_TEST = process.env.ENGINE_SMOKE_TEST === "1";
 
 protocol.registerSchemesAsPrivileged([
@@ -49,7 +51,7 @@ const json = (value, status = 200) =>
 async function handle(request) {
   const path = normalize(decodeURIComponent(new URL(request.url).pathname)).replace(/^[/\\]+/, "");
   if (path === "vault.json") return json(vault);
-  if (path === "api/jev/status") return json(jevStatus(API_KEY));
+  if (path === "api/jev/status") return json(jevStatus(apiKey()));
   if (path === "api/jev/decision" && request.method === "POST") {
     const text = await request.text();
     if (text.length > MAX_REQUEST_BYTES) return json({ error: "Request body is too large." }, 413);
@@ -59,7 +61,7 @@ async function handle(request) {
     } catch (error) {
       return json({ error: error.message }, 400);
     }
-    const result = await proxyJevDecision(body, API_KEY);
+    const result = await proxyJevDecision(body, apiKey());
     return json(result.body, result.status);
   }
   if (process.env.ENGINE_DEBUG) console.log(`[app] ${request.url} -> ${path}`);
@@ -108,8 +110,15 @@ async function createWindow() {
     show: !SMOKE_TEST,
     webPreferences: { preload: join(ROOT, "desktop", "preload.cjs"), contextIsolation: true, sandbox: true }
   });
-  // The game never leaves its own pages or opens other windows.
-  mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  // The game never leaves its own pages or opens other windows. The one
+  // exception: the Keys panel's "get a key" pages open in your own browser.
+  const { LIBRARY_LINKS, SERVICES } = await import("../lib/services.mjs");
+  const keyPages = new Set([...Object.values(SERVICES).map((service) => service.site), ...Object.values(LIBRARY_LINKS)]);
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    // …and a music pattern opened in Strudel (strudel.cc, the code in the link).
+    if (keyPages.has(url) || url.startsWith("https://strudel.cc/#")) shell.openExternal(url);
+    return { action: "deny" };
+  });
   mainWindow.webContents.on("will-navigate", (event, url) => {
     if (!url.startsWith("app://game/")) event.preventDefault();
   });
@@ -150,6 +159,19 @@ app.whenReady().then(async () => {
       return result;
     } catch (error) {
       return { saved: [], conflicts: [], error: error.message };
+    }
+  });
+  // The Characters workspace (lib/studio.mjs): new character, run a card, import a picture.
+  ipcMain.handle("studio", async (_event, action, request) => {
+    try {
+      const studio = await import("../lib/studio.mjs");
+      const work = studio.ACTIONS[action];
+      if (!work) throw new Error(`Unknown studio action ${action}`);
+      const result = await work(VAULT_DIR, request ?? {});
+      if (["new", "run", "import", "saveLibrary"].includes(action)) vault = await compileVault();
+      return { ok: true, ...result };
+    } catch (error) {
+      return { ok: false, error: error.message };
     }
   });
   buildMenu();

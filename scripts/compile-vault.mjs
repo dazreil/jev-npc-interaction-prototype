@@ -5,11 +5,15 @@
 // become URLs. Token links such as [[address]] stay as written.
 //
 //   node scripts/compile-vault.mjs          writes build/vault.json
+import { existsSync } from "node:fs";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import { checkScene } from "../js/engine/story.js";
+import { MODELS, latestOutput, readRecipes } from "../lib/asset-canvas.mjs";
+import { SERVICE_MODELS } from "../lib/services.mjs";
+import { readLoras, readModels } from "../lib/library.mjs";
 import { buildWorld } from "../js/engine/canvas-world.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -246,9 +250,17 @@ export async function compileVault(vaultDir = VAULT_DIR) {
   // single animation frames, or the .jpg twins of .webp files.
   const pictures = files
     .map((file) => relative(vaultDir, file).split(sep).join("/"))
-    .filter((path) => /\.(webp|png|jpe?g|gif|svg)$/i.test(path) && !/(^|\/)(_source|_old|\.)/.test(path) && !/-\d{2}\.webp$/i.test(path))
+    .filter((path) => /\.(webp|png|jpe?g|gif|svg)$/i.test(path) && !/(^|\/)(_source|_old|\.)/.test(path) && !/-\d{2}\.webp$/i.test(path) && !/\.clean\.\w+$/i.test(path))
     .filter((path) => !/\.jpe?g$/i.test(path) || !files.some((file) => file.endsWith(path.replace(/\.jpe?g$/i, ".webp").split("/").join(sep))))
     .map((path) => ({ name: path.split("/").pop(), path, url: assets.get(path.split("/").pop().toLowerCase()) }));
+  // Clean twins (name.clean.webp, made by the asset runner without the crunch):
+  // picture URL → its clean twin's URL, for the game's clean picture mode.
+  const clean = {};
+  for (const [name, url] of assets) {
+    const base = name.replace(/\.clean(\.\w+)$/, "$1");
+    if (base !== name && assets.has(base)) clean[assets.get(base)] = url;
+  }
+
   // Recorded voices (scripts/voices.mjs): for each character, line → audio URL.
   const voices = {};
   for (const file of files.filter((path) => path.endsWith("-voice.json"))) {
@@ -284,7 +296,73 @@ export async function compileVault(vaultDir = VAULT_DIR) {
       errors.push(`${where}: ${error.message}`);
     }
   }
-  return { builtAt: new Date().toISOString(), notes, world: world?.screens ?? null, worldPath, trees, pictures, voices, story, errors };
+  // Art cards for the Characters workspace: every recipe on each character's,
+  // screen's and item's own canvas, with its latest result as a URL.
+  const art = {};
+  // Style cards: the library's (on Assets.canvas) and each art canvas's own copies.
+  const styles = { library: [], byCanvas: {} };
+  const styleCards = (canvas) => (canvas.nodes ?? [])
+    .map((node) => ({ node, recipe: readRecipes({ nodes: [node], edges: [] })[0] }))
+    .filter(({ recipe }) => recipe?.kind === "style")
+    .map(({ node, recipe }) => ({ node: node.id, name: recipe.name, text: node.text, note: String(node.text).split("\n").filter((line) => line.startsWith("#") && !line.startsWith("##")).map((line) => line.replace(/^#\s*/, "")).join(" "), ...recipe.fields }));
+  for (const file of files.filter((path) => path.endsWith(".canvas") && !path.endsWith("-tree.canvas"))) {
+    const where = relative(vaultDir, file).split(sep).join("/");
+    if (where === "Assets.canvas") {
+      try {
+        styles.library = styleCards(JSON.parse(await readFile(file, "utf8")));
+      } catch (error) {
+        errors.push(`${where}: ${error.message}`);
+      }
+      continue;
+    }
+    if (!/^(characters|screens|items)\//.test(where)) continue;
+    try {
+      const canvas = JSON.parse(await readFile(file, "utf8"));
+      const position = new Map((canvas.nodes ?? []).map((node) => [node.id, [node.y, node.x]]));
+      styles.byCanvas[where] = styleCards(canvas);
+      art[where] = readRecipes(canvas)
+        .filter((recipe) => recipe.kind !== "style")
+        .sort((a, b) => position.get(a.nodeId)[0] - position.get(b.nodeId)[0] || position.get(a.nodeId)[1] - position.get(b.nodeId)[1])
+        .map((recipe) => {
+          const output = latestOutput(canvas, recipe);
+          const { status, prompt, model, ...fields } = recipe.fields;
+          return {
+            node: recipe.nodeId,
+            name: recipe.name,
+            kind: recipe.kind,
+            status: recipe.status || "idea",
+            model: model ?? null,
+            prompt: prompt ?? "",
+            fields,
+            error: recipe.error ?? null,
+            from: [...recipe.references, recipe.start, ...recipe.actors].filter(Boolean).map((source) => source.recipe ?? source.file.split("/").pop()),
+            styles: recipe.styles.map((style) => ({ name: style.name, node: style.nodeId })),
+            loras: [].concat(fields.lora ?? []).map(String),
+            x: (canvas.nodes ?? []).find((node) => node.id === recipe.nodeId)?.x ?? 0,
+            y: (canvas.nodes ?? []).find((node) => node.id === recipe.nodeId)?.y ?? 0,
+            output: output ? assets.get(output.split("/").pop().toLowerCase()) ?? null : null
+          };
+        });
+    } catch (error) {
+      errors.push(`${where}: ${error.message}`);
+    }
+  }
+  const models = [
+    ...Object.entries(MODELS).map(([id, model]) => ({ id, service: "fal", ...model })),
+    ...Object.entries(SERVICE_MODELS).map(([id, model]) => ({ id, ...model })),
+    // Models you added (library/models.json), marked so the app can edit them.
+    ...readModels(vaultDir).map((model) => ({ ...model, added: true }))
+  ];
+  const loras = readLoras(vaultDir);
+  // Music (scripts/music.mjs): each rendered loop, with the Strudel pattern it
+  // comes from, for the editor's music list and its Open in Strudel link.
+  const music = [];
+  for (const file of files.filter((path) => /\.(ogg|mp3)$/i.test(path) && relative(vaultDir, path).split(sep)[0] === "music")) {
+    const name = file.split(sep).pop();
+    const pattern = file.replace(/\.(ogg|mp3)$/i, ".strudel");
+    music.push({ name, url: assets.get(name.toLowerCase()), code: existsSync(pattern) ? await readFile(pattern, "utf8") : null });
+  }
+  return { builtAt: new Date().toISOString(), notes, world: world?.screens ?? null, music, worldPath, trees, pictures, voices, story, clean, art, models, loras, styles, errors };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

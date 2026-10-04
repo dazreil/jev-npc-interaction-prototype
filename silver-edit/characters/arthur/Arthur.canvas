@@ -381,15 +381,6 @@
 			"color": "4"
 		},
 		{
-			"id": "made-arthur-room-1",
-			"type": "file",
-			"file": "characters/arthur/art/arthur-room/arthur-room.webp",
-			"x": 1340,
-			"y": 2000,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "made-arthur-portrait-1",
 			"type": "file",
 			"file": "characters/arthur/art/arthur-portrait/arthur-portrait.webp",
@@ -478,33 +469,6 @@
 			"color": "4"
 		},
 		{
-			"id": "made-arthur-backdrop-1",
-			"type": "file",
-			"file": "characters/arthur/art/arthur-backdrop/arthur-backdrop.webp",
-			"x": 1340,
-			"y": 6100,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-arthur-actor-1",
-			"type": "file",
-			"file": "characters/arthur/art/arthur-actor/arthur-actor.webp",
-			"x": 1340,
-			"y": 2400,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-arthur-at-desk-1",
-			"type": "file",
-			"file": "characters/arthur/art/arthur-at-desk/arthur-at-desk.webp",
-			"x": 1340,
-			"y": 5000,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "arthur-talk-cut",
 			"type": "text",
 			"x": 700,
@@ -529,33 +493,6 @@
 			"file": "characters/arthur/art/arthur-talk/arthur-talk.mp4",
 			"x": 1600,
 			"y": 3700,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-arthur-at-desk-cut-1",
-			"type": "file",
-			"file": "characters/arthur/art/arthur-at-desk-cut/arthur-at-desk-cut.webp",
-			"x": 1940,
-			"y": 5000,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-arthur-actor-cut-1",
-			"type": "file",
-			"file": "characters/arthur/art/arthur-actor-cut/arthur-actor-cut.webp",
-			"x": 1340,
-			"y": 6500,
-			"width": 240,
-			"height": 135
-		},
-		{
-			"id": "made-arthur-talk-cut-1",
-			"type": "file",
-			"file": "characters/arthur/art/arthur-talk-cut/arthur-talk-cut.webp",
-			"x": 1340,
-			"y": 3280,
 			"width": 240,
 			"height": 135
 		},
@@ -618,20 +555,20 @@
 			"color": "4"
 		},
 		{
-			"id": "made-arthur-warm-face-1",
+			"id": "made-arthur-actor-1",
 			"type": "file",
-			"file": "characters/arthur/art/arthur-warm-face/arthur-warm-face.webp",
-			"x": 1240,
-			"y": 5800,
+			"file": "characters/arthur/art/arthur-actor/arthur-actor.webp",
+			"x": 1340,
+			"y": 2400,
 			"width": 240,
 			"height": 135
 		},
 		{
-			"id": "made-arthur-warm-face-cut-1",
+			"id": "made-arthur-at-desk-1",
 			"type": "file",
-			"file": "characters/arthur/art/arthur-warm-face-cut/arthur-warm-face-cut.webp",
-			"x": 1900,
-			"y": 5800,
+			"file": "characters/arthur/art/arthur-at-desk/arthur-at-desk.webp",
+			"x": 1340,
+			"y": 5000,
 			"width": 240,
 			"height": 135
 		},
@@ -645,11 +582,74 @@
 			"height": 135
 		},
 		{
+			"id": "made-arthur-room-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-room/arthur-room.webp",
+			"x": 1340,
+			"y": 2000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-warm-face-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-warm-face/arthur-warm-face.webp",
+			"x": 1240,
+			"y": 5800,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-backdrop-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-backdrop/arthur-backdrop.webp",
+			"x": 1340,
+			"y": 6100,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-actor-cut-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-actor-cut/arthur-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-at-desk-cut-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-at-desk-cut/arthur-at-desk-cut.webp",
+			"x": 1940,
+			"y": 5000,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-arthur-irritated-face-cut-1",
 			"type": "file",
 			"file": "characters/arthur/art/arthur-irritated-face-cut/arthur-irritated-face-cut.webp",
 			"x": 1900,
 			"y": 6220,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-talk-cut-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-talk-cut/arthur-talk-cut.webp",
+			"x": 1340,
+			"y": 3280,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-warm-face-cut-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-warm-face-cut/arthur-warm-face-cut.webp",
+			"x": 1900,
+			"y": 5800,
 			"width": 240,
 			"height": 135
 		}
@@ -1061,15 +1061,6 @@
 			"label": "actor"
 		},
 		{
-			"id": "made-arthur-room-1-edge",
-			"fromNode": "arthur-room",
-			"fromSide": "right",
-			"toNode": "made-arthur-room-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "made-arthur-portrait-1-edge",
 			"fromNode": "arthur-portrait",
 			"fromSide": "right",
@@ -1124,33 +1115,6 @@
 			"label": "cut out"
 		},
 		{
-			"id": "made-arthur-backdrop-1-edge",
-			"fromNode": "arthur-backdrop",
-			"fromSide": "right",
-			"toNode": "made-arthur-backdrop-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-arthur-actor-1-edge",
-			"fromNode": "arthur-actor",
-			"fromSide": "right",
-			"toNode": "made-arthur-actor-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-arthur-at-desk-1-edge",
-			"fromNode": "arthur-at-desk",
-			"fromSide": "right",
-			"toNode": "made-arthur-at-desk-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "e-arthur-talk-cut",
 			"fromNode": "arthur-talk",
 			"toNode": "arthur-talk-cut",
@@ -1170,33 +1134,6 @@
 			"fromNode": "arthur-talk",
 			"fromSide": "right",
 			"toNode": "made-arthur-talk-2",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-arthur-at-desk-cut-1-edge",
-			"fromNode": "arthur-at-desk-cut",
-			"fromSide": "right",
-			"toNode": "made-arthur-at-desk-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-arthur-actor-cut-1-edge",
-			"fromNode": "arthur-actor-cut",
-			"fromSide": "right",
-			"toNode": "made-arthur-actor-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
-			"id": "made-arthur-talk-cut-1-edge",
-			"fromNode": "arthur-talk-cut",
-			"fromSide": "right",
-			"toNode": "made-arthur-talk-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"
@@ -1238,19 +1175,19 @@
 			"label": "cut out"
 		},
 		{
-			"id": "made-arthur-warm-face-1-edge",
-			"fromNode": "arthur-warm-face",
+			"id": "made-arthur-actor-1-edge",
+			"fromNode": "arthur-actor",
 			"fromSide": "right",
-			"toNode": "made-arthur-warm-face-1",
+			"toNode": "made-arthur-actor-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"
 		},
 		{
-			"id": "made-arthur-warm-face-cut-1-edge",
-			"fromNode": "arthur-warm-face-cut",
+			"id": "made-arthur-at-desk-1-edge",
+			"fromNode": "arthur-at-desk",
 			"fromSide": "right",
-			"toNode": "made-arthur-warm-face-cut-1",
+			"toNode": "made-arthur-at-desk-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"
@@ -1265,10 +1202,73 @@
 			"label": "made"
 		},
 		{
+			"id": "made-arthur-room-1-edge",
+			"fromNode": "arthur-room",
+			"fromSide": "right",
+			"toNode": "made-arthur-room-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-warm-face-1-edge",
+			"fromNode": "arthur-warm-face",
+			"fromSide": "right",
+			"toNode": "made-arthur-warm-face-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-backdrop-1-edge",
+			"fromNode": "arthur-backdrop",
+			"fromSide": "right",
+			"toNode": "made-arthur-backdrop-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-actor-cut-1-edge",
+			"fromNode": "arthur-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-arthur-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-at-desk-cut-1-edge",
+			"fromNode": "arthur-at-desk-cut",
+			"fromSide": "right",
+			"toNode": "made-arthur-at-desk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-arthur-irritated-face-cut-1-edge",
 			"fromNode": "arthur-irritated-face-cut",
 			"fromSide": "right",
 			"toNode": "made-arthur-irritated-face-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-talk-cut-1-edge",
+			"fromNode": "arthur-talk-cut",
+			"fromSide": "right",
+			"toNode": "made-arthur-talk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-warm-face-cut-1-edge",
+			"fromNode": "arthur-warm-face-cut",
+			"fromSide": "right",
+			"toNode": "made-arthur-warm-face-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"

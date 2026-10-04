@@ -5,6 +5,7 @@ width: 640
 height: 360
 objective: Resist Malphas
 ui: "[[dream-hud]]"
+music: "[[dream.ogg]]"
 ---
 
 # The velvet void

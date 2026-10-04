@@ -841,6 +841,8 @@ export class PlaySession {
         themeId = note.props.theme;
       } else {
         ({ note, definition, themeId } = this.composeScreen());
+        // The screen's music (its note's `music:`), fading in when the screen changes.
+        this.sound?.playMusic?.(this.vault.notes[this.world.screen]?.props.music ?? null);
       }
       const theme = this.theme(themeId);
       const resolved = resolveUi(definition, { theme, world: this.world, uis: this.uiDefinitions() });

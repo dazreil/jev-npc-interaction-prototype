@@ -1,0 +1,17 @@
+{
+	"dream": {
+		"hash": "d8e2dc161386",
+		"loop": 8,
+		"seconds": 32
+	},
+	"home": {
+		"hash": "56bcc09edd53",
+		"loop": 8,
+		"seconds": 44.444
+	},
+	"office": {
+		"hash": "d042eb880468",
+		"loop": 8,
+		"seconds": 40
+	}
+}

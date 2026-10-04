@@ -18,6 +18,7 @@ const PORT = Number(process.env.WORKBENCH_PORT) || 5174;
 const SERVED = ["workbench/", "player/", "js/", "data/", VAULT_URL_PREFIX, "assets/fonts/", "assets/encounter/", "assets/vendor/"];
 const MIME = {
   ".mp3": "audio/mpeg",
+  ".ogg": "audio/ogg",
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -34,14 +35,15 @@ const MIME = {
   ".json": "application/json; charset=utf-8"
 };
 
-const API_KEY = readApiKey(ROOT);
+// Read on each use, so a key saved in the Library (Keys) works without a restart.
+const apiKey = () => readApiKey(ROOT);
 
-async function readBody(request) {
+async function readBody(request, limit = MAX_REQUEST_BYTES) {
   let size = 0;
   const chunks = [];
   for await (const chunk of request) {
     size += chunk.length;
-    if (size > MAX_REQUEST_BYTES) throw new Error("Request body is too large.");
+    if (size > limit) throw new Error("Request body is too large.");
     chunks.push(chunk);
   }
   return Buffer.concat(chunks).toString("utf8");
@@ -76,7 +78,7 @@ createServer(async (request, response) => {
     return;
   }
   if (request.method === "GET" && pathname === "/api/jev/status") {
-    sendJson(response, 200, jevStatus(API_KEY));
+    sendJson(response, 200, jevStatus(apiKey()));
     return;
   }
   if (request.method === "POST" && pathname === "/api/jev/decision") {
@@ -87,19 +89,33 @@ createServer(async (request, response) => {
       sendJson(response, 400, { error: error.message });
       return;
     }
-    const result = await proxyJevDecision(body, API_KEY);
+    const result = await proxyJevDecision(body, apiKey());
     sendJson(response, result.status, result.body);
     return;
   }
   // The screen editor on /player/ saves here (local dev only, like the app).
   if (request.method === "POST" && pathname === "/api/editor/save") {
     try {
-      const result = await applyEdits(VAULT_DIR, JSON.parse(await readBody(request)));
+      const result = await applyEdits(VAULT_DIR, JSON.parse(await readBody(request, 8 * 1024 * 1024)));
       // Rebuild now, so the page can load what was just saved (a new screen).
       if (result.saved?.length) vault = await compileVault();
       sendJson(response, 200, result);
     } catch (error) {
       sendJson(response, 400, { saved: [], conflicts: [], error: error.message });
+    }
+    return;
+  }
+  // The Characters workspace (lib/studio.mjs), local dev only, like the app.
+  const studioAction = request.method === "POST" && pathname.match(/^\/api\/studio\/(new|run|import|keys|setKey|testKey|voices|saveLibrary)$/)?.[1];
+  if (studioAction) {
+    try {
+      const studio = await import("../lib/studio.mjs");
+      const work = studio.ACTIONS[studioAction];
+      const result = await work(VAULT_DIR, JSON.parse((await readBody(request, 64 * 1024 * 1024)) || "{}"));
+      if (["new", "run", "import", "saveLibrary"].includes(studioAction)) vault = await compileVault();
+      sendJson(response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(response, 200, { ok: false, error: error.message });
     }
     return;
   }

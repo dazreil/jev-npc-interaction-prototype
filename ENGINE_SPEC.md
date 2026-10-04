@@ -717,6 +717,47 @@ A character with `voice:` in their note (a Kokoro voice on fal, such as `am_mich
 - Lines that change at play time (with the player's name) and narrated lines are not recorded; they use the live voice.
 - Change a line, the voice or the speed, run it again: only those lines are recorded again, and recordings no line uses are deleted.
 
+### 7.3d The Characters workspace
+
+Cmd+E → **Characters ✎** makes and edits characters in the game, without Obsidian (`player/characters-editor.js`; the app does the file work in `lib/studio.mjs`).
+
+- **New character:** a name and a description; the character template makes their notes, starter actions, lines, portraits note and every art card.
+- **Details:** name, role, how they talk (the note's `## Style`), their moods and starting values (`## State`), when each tone shows (`## Tones`, with a condition check), and their recorded voice and speed.
+- **Art:** every art card on their canvas, in canvas order, as a tile: its result, status, what it is made from, its model (from the model list, with prices) and prompt (saved on change). **Make** asks first, with the price, before calling fal; cut-outs, crops and composites are free; **Redo finish** is free. **Import picture** puts a picture made by hand or elsewhere in as an image or edit card's result (its clean original, then the card's finish), so the cards that build on it work as usual; **Import a picture as a new card** makes a new image card for it.
+
+### 7.3e Keys and services
+
+Cmd+E → **Library ⚙** (`player/library-panel.js`) has four tabs: **Keys**, **Models**, **LoRAs** and **Styles**. **Keys** sets a key for each service: Jev (TypeSafe, `TYPESAFE_API_KEY`; how characters decide what to do; read on each use, so a new key works without a restart), fal, Replicate, OpenAI, Google, ElevenLabs, and Civitai (added to the link of LoRAs that need a login). The app writes keys into the project's `.env` (`FAL_KEY`, `REPLICATE_API_TOKEN`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `ELEVENLABS_API_KEY`); the page only ever learns whether a key is set. **Test** makes a free call that checks the key (fal has none; for Jev it sends an empty request, which TypeSafe refuses for a wrong key and answers "incomplete" for a good one, with no work done). Each service's "get a key" page opens in your browser.
+
+`lib/services.mjs` holds the other services' models (with estimated prices) and one adapter each:
+
+| Model id | Service | Kind |
+| --- | --- | --- |
+| `flux-schnell`, `flux-1.1-pro` | Replicate | image |
+| `flux-kontext-pro` | Replicate | edit |
+| `gpt-image-2`, `gpt-image-2.5-flare` | OpenAI | image |
+| `gpt-image-2-edit`, `gpt-image-2.5-sunburst` | OpenAI | edit |
+| `nano-banana-2` | Google | image |
+| `nano-banana-2-edit`, `nano-banana-2-lite-edit`, `nano-banana-pro-edit` | Google | edit |
+
+A card whose `model:` is one of these goes to that service with the same prompt (styles included) and reference pictures; the picture comes back as the card's clean original and gets the card's finish, like a fal one. Video stays on fal. In the Characters workspace, a service's models can be picked once its key is set.
+
+**Models you add** (Library → Models; saved in the game folder as `library/models.json`, `lib/library.mjs`): any model hosted on fal (its endpoint) or Replicate (`owner/name`, or `owner/name:version`) that makes pictures, edits, video or voices: its id (what cards use as `model:`), its cost, the name of its picture input if it is not the usual one, whether it takes LoRAs, and extra inputs (JSON) sent with every call. A fal voice model also names its text and voice inputs; a character picks it as their voice service.
+
+**LoRAs** (Library → LoRAs; `library/loras.json`): an id, a Civitai version link or a Hugging Face `.safetensors` link (changed to the link of the file itself; nothing is downloaded: fal or Replicate fetch the LoRA from that link when a card runs), trigger words, a strength and a note on the model family it was made for. A card's or a style's `lora:` list takes library ids or links, each with an optional `@strength`; each LoRA is used once (the card's entry wins over a style's), its trigger words lead the prompt, and Civitai file links get your Civitai key (Civitai refuses some files to anyone not logged in, including fal's and Replicate's servers). Models that take LoRAs: `flux-lora`, `flux-2-lora`, and models you added with LoRAs on.
+
+**Styles** (Library → Styles): the style cards on `Assets.canvas`: words before the prompt, after it, or a template around it (`{prompt}`), and LoRAs. In the Characters workspace (Art), each card shows the styles as chips: click one to turn it on (the first time, the style card is copied onto that canvas and linked to the card) or off. Each card also shows its own LoRAs, with their strength.
+
+**Voices:** `voiceService: elevenlabs` in a character note makes `voice:` an ElevenLabs voice id (with accents), and `voiceModel:` picks `eleven_multilingual_v2` ($0.10 per 1,000 characters) or `eleven_flash_v2_5` ($0.05). The Details tab lists the voices in your ElevenLabs account.
+
+### 7.3f Music
+
+Each screen can have a looping track: its note's `music:` (a link to an `.ogg` in `music/`; Cmd+E → Screen settings → Music). The game fades from one track to the next when the screen changes; music plays clean (not through the intercom filter), and **M** mutes it with everything else.
+
+Tracks are made with [Strudel](https://strudel.cc): `music/<name>.strudel` is the pattern, and `npm run music:silver` (`scripts/music.mjs`) renders it into a seamless loop, `music/<name>.ogg` (free; only changed patterns are rendered again; `--all`, `--track <name>`). A pattern sets its loop length with `// @loop 8` (cycles); two loops are rendered and the second kept, so the reverb and echo from the end carry into the start. Screen settings has **Open its pattern in Strudel ↗**, which opens the pattern on strudel.cc, ready to hear and change.
+
+Strudel and the renderer (`strudel-render`, run with npx, in headless Chrome) are AGPL, and are only used on your computer to make the files: the game plays the audio files and contains no Strudel code. The Silver Edit's tracks use only Strudel's built-in synthesizers; any samples added later should be CC0 (no rights reserved).
+
 ### 7.3c Moods and faces
 
 A line's tone is its portrait cue, so a character's own moods (warm, uneasy, cold…) can each have a face: a `## Cues` block in their portraits note maps a mood to a picture. With `restOnMood: true` in the portraits note, the character rests on the face of their current mood between lines (otherwise on the idle frame). `lib/emotions.json` (133 expressions in plain words, from VNCCS, MIT) gives mood prompts for the character template; edit recipes keep the likeness with a "keep" style that points at the reference picture instead of describing the face.

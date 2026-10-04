@@ -1,0 +1,15 @@
+// The velvet void. Slow, low and a little wrong; a heartbeat under it.
+// Built-in synths only (no samples). Open in Strudel to change it.
+// @loop 8
+setcps(0.25)
+stack(
+  // the drone, breathing
+  note("<c2 c2 db2 c2>").s("sawtooth").lpf(sine.range(220, 620).slow(8)).gain(0.2).room(0.9).size(0.95),
+  // velvet chords
+  note("<[c3,eb3,g3] [ab2,c3,eb3] [f2,ab2,c3] [g2,b2,d3]>")
+    .s("sawtooth").lpf(700).attack(1.2).release(3).gain(0.09).room(0.9).size(0.9),
+  // a heartbeat: lub-dub, then nothing
+  note("c1 c1 ~ ~ ~ ~ ~ ~").s("sine").decay(0.22).sustain(0).lpf(180).gain(0.45),
+  // something whispering at the edge of hearing
+  s("pink").bpf(sine.range(700, 2300).slow(5)).gain(0.035).pan(sine.slow(3))
+)

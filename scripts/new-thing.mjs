@@ -51,7 +51,7 @@ const recipe = (name, kind, fields, prompt) =>
 // Moods from the emotion library (lib/emotions.json, from VNCCS, MIT): the
 // expression in plain words, so an edit changes the face and nothing else.
 const EMOTIONS = Object.fromEntries(Object.values(JSON.parse(readFileSync(new URL("../lib/emotions.json", import.meta.url), "utf8")).groups).flat().map((item) => [item.name, item.prompt]));
-const expression = (name) => `the expression: ${EMOTIONS[name].replace(/^The character /, "they ")}`;
+const expression = (name) => `the expression: ${EMOTIONS[name].replace(/^The character /, "the person ")}`;
 const MOODS = {
   friendly: expression("smile"),
   irritated: expression("annoyed"),

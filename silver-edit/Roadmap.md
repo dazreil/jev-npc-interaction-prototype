@@ -25,7 +25,7 @@ Chapter One is Elena's **first day**, played start to end in about 10–15 minut
 | 1.4 | Talking portraits: a talking loop for Arthur, Miles, Chloe and Malphas (neutral mood first). | ~$0.52 | **Done** |
 | 1.4b | Scenes for the first day, made in the story editor (Cmd+E → Story): Arthur, Miles, Chloe and the dream each open with a short scripted beat and a choice, then free talk with the AI. | free | **Done** |
 | 1.5 | Moods: friendly / irritated pictures for the three office people, so their face follows the talk. | ~$0.22 | **Done** (still faces; mood talking loops later) |
-| 1.6 | Sound: office room tone (rain on windows), cottage (wind, the Volvo ticking), dream music. | free (library sounds) | |
+| 1.6 | Sound: office room tone (rain on windows), cottage (wind, the Volvo ticking), dream music. | free (library sounds) | Music **done** (Strudel, free); room sound effects later |
 | 1.7 | Title screen and an end card for each ending. | ~$0.05 | |
 | 1.8 | Playtest Chapter One with the Mock and with Jev; fix what testers miss. | free | |
 

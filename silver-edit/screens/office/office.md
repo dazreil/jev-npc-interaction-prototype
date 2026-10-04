@@ -5,6 +5,7 @@ width: 640
 height: 360
 objective: Meet the team
 ui: "[[office-hud]]"
+music: "[[office.ogg]]"
 ---
 
 # Vellum & Vine

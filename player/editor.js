@@ -9,6 +9,8 @@
 import { evaluate } from "/js/engine/conditions.js";
 import { ELEMENT_PROPS, pictureShape, setEditorPreview } from "/js/engine/ui.js";
 import { createStoryEditor } from "/player/story-editor.js";
+import { createCharactersEditor } from "/player/characters-editor.js";
+import { createLibraryPanel } from "/player/library-panel.js";
 
 const PANEL_WIDTH = 320;
 const round = (value) => Math.round(value);
@@ -54,6 +56,10 @@ export function createEditor({ session, stage, render, host, reloadVault }) {
     },
     onClose: () => on && refresh()
   });
+
+  // The Characters workspace (details and art), also opened from this panel.
+  const people = createCharactersEditor({ session, host, reloadVault, onClose: () => on && refresh() });
+  const keysPanel = createLibraryPanel({ session, host, reloadVault, onClose: () => on && refresh() });
 
   const screenId = () => session.world.screen;
   const built = () => session.vault.world?.[screenId()];
@@ -872,7 +878,24 @@ export function createEditor({ session, stage, render, host, reloadVault }) {
         // In the note it is a link; the game reads it by name.
         setProp("ui", value ? `[[${value}]]` : null);
       }), { options: [["", "(none)"], ...overlays.map((id) => [id, id])] }),
-      el("p", { className: "editor-hint", textContent: "The overlay is a UI note drawn over the whole screen, such as a frame with the title and objective." })
+      el("p", { className: "editor-hint", textContent: "The overlay is a UI note drawn over the whole screen, such as a frame with the title and objective." }),
+      field("Music", props.music ? (session.vault.music ?? []).find((track) => track.url === props.music)?.name ?? "" : "", (value) => changeSettings("Change the music", [props], () => {
+        const track = (session.vault.music ?? []).find((item) => item.name === value);
+        if (track) props.music = track.url;
+        else delete props.music;
+        setProp("music", track ? `[[${track.name}]]` : null);
+      }), { options: [["", "(none)"], ...(session.vault.music ?? []).map((track) => [track.name, track.name.replace(/\.\w+$/, "")])] }),
+      ...(() => {
+        const track = (session.vault.music ?? []).find((item) => item.url === props.music);
+        if (!track?.code) return [];
+        // strudel.cc reads the code from the link (base64 after #), so the pattern opens ready to play and change.
+        const bytes = new TextEncoder().encode(track.code);
+        const link = `https://strudel.cc/#${encodeURIComponent(btoa(String.fromCharCode(...bytes)))}`;
+        return [
+          el("a", { href: link, target: "_blank", rel: "noopener", textContent: "Open its pattern in Strudel ↗" }),
+          el("p", { className: "editor-hint", textContent: `Change it there, paste it back into music/${track.name.replace(/\.\w+$/, ".strudel")}, then run npm run music:silver to render the loop again (free).` })
+        ];
+      })()
     ];
   }
 
@@ -1171,7 +1194,7 @@ export function createEditor({ session, stage, render, host, reloadVault }) {
     });
 
     panel.replaceChildren(
-      el("div", { className: "editor-tabs" }, [el("h2", { textContent: "Edit screen" }), button("Story ✎", () => story.show(), { title: "Scenes: lines, choices and free talk" })]),
+      el("div", { className: "editor-tabs" }, [el("h2", { textContent: "Edit screen" }), el("span", { className: "editor-tab-buttons" }, [button("Story ✎", () => story.show(), { title: "Scenes: lines, choices and free talk" }), button("Characters ✎", () => people.show(), { title: "Make and edit characters, and their art" }), button("Library ⚙", () => keysPanel.show(), { title: "Keys, models, LoRAs and styles" })])]),
       crumbs,
       fields,
       el("h3", { textContent: "Add" }),
@@ -1378,7 +1401,7 @@ export function createEditor({ session, stage, render, host, reloadVault }) {
   }
 
   window.addEventListener("keydown", (event) => {
-    if (!on || story.open || event.target.closest?.("input, textarea, select")) return;
+    if (!on || story.open || people.open || keysPanel.open || event.target.closest?.("input, textarea, select")) return;
     const meta = event.metaKey || event.ctrlKey;
     if (meta && event.key.toLowerCase() === "s") { event.preventDefault(); save(); return; }
     if (meta && event.key.toLowerCase() === "z") { event.preventDefault(); (event.shiftKey ? doRedo : doUndo)(); return; }
@@ -1419,7 +1442,7 @@ export function createEditor({ session, stage, render, host, reloadVault }) {
 
   return {
     get on() { return on; },
-    get dirty() { return BooleaneditCount(); },
+    get dirty() { return Boolean(editCount()); },
     panelWidth: () => (on ? PANEL_WIDTH : 0),
     toggle,
     /** The vault was rebuilt on disk while editing with unsaved changes. */
