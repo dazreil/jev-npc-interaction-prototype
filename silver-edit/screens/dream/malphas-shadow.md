@@ -14,6 +14,7 @@ panel:
 dim: "#05020acc"
 visible:
   - not outcome
+scene: "dream-night-one"
 ---
 
 # Malphas

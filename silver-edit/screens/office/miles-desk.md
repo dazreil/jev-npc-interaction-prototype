@@ -11,6 +11,7 @@ panel:
   - 20
   - 560
   - 320
+scene: "miles-first-day"
 ---
 
 # Miles's desk

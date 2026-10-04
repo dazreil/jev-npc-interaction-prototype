@@ -111,7 +111,7 @@
 			"y": 2800,
 			"width": 560,
 			"height": 360,
-			"text": "## chloe-keep\nstyle\n# Holds Chloe steady in edits: only the named part changes.\ntemplate: \"Keep the exact same person: same face, hair and clothes (Chloe Miller, social media manager and aspiring gothic novelist in her mid twenties, black bob with blunt bangs, dark lipstick, an oversized cardigan covered in pins). Keep the exact same framing, crop, camera position and pose, and the same flat, evenly lit chroma-key green screen background, lighting and camera quality. Only change {prompt}\"\n"
+			"text": "## chloe-keep\nstyle\n# Holds Chloe steady in edits: only the named part changes.\ntemplate: \"Keep the person in the reference image exactly as they are: the same identity, hair, clothes, framing, camera position and pose, and the same flat, evenly lit chroma-key green screen background. Change only {prompt}\"\n"
 		},
 		{
 			"id": "chloe-friendly",
@@ -193,7 +193,8 @@
 			"y": 3700,
 			"width": 560,
 			"height": 340,
-			"text": "## chloe-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat and unchanged\"\n"
+			"text": "## chloe-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera, softly and a little shy, with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat and unchanged\"",
+			"color": "4"
 		},
 		{
 			"id": "chloe-friendly-talk",
@@ -272,7 +273,7 @@
 		{
 			"id": "talk-loop",
 			"type": "text",
-			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The night guard {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
+			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The person {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
 			"x": 0,
 			"y": 3700,
 			"width": 560,
@@ -476,15 +477,6 @@
 			"color": "4"
 		},
 		{
-			"id": "made-chloe-actor-cut-1",
-			"type": "file",
-			"file": "characters/chloe/art/chloe-actor-cut/chloe-actor-cut.webp",
-			"x": 1340,
-			"y": 6500,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "made-chloe-backdrop-1",
 			"type": "file",
 			"file": "characters/chloe/art/chloe-backdrop/chloe-backdrop.webp",
@@ -522,11 +514,151 @@
 			"height": 135
 		},
 		{
+			"id": "chloe-talk-cut",
+			"type": "text",
+			"x": 700,
+			"y": 3280,
+			"width": 560,
+			"height": 320,
+			"text": "## chloe-talk-cut\ncutout\nstatus: done\n# Free: every frame of the talking loop keyed off the green screen, for the talk portrait. Frame 01 is also the idle frame, so talking and resting line up.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "made-chloe-talk-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-talk/chloe-talk.webp",
+			"x": 1340,
+			"y": 3700,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-talk-2",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-talk/chloe-talk.mp4",
+			"x": 1600,
+			"y": 3700,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-chloe-at-desk-cut-1",
 			"type": "file",
 			"file": "characters/chloe/art/chloe-at-desk-cut/chloe-at-desk-cut.webp",
 			"x": 1940,
 			"y": 5000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-actor-cut-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-actor-cut/chloe-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-talk-cut-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-talk-cut/chloe-talk-cut.webp",
+			"x": 1340,
+			"y": 3280,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "chloe-mood-source",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-talk/chloe-talk-08.webp",
+			"x": 0,
+			"y": 5800,
+			"width": 400,
+			"height": 300
+		},
+		{
+			"id": "chloe-moods-note",
+			"type": "text",
+			"x": 0,
+			"y": 5600,
+			"width": 560,
+			"height": 160,
+			"text": "### Mood faces\nEach starts from the resting talk frame (frame 8), so it lines up with the talking loop. Expressions from the VNCCS emotion library (lib/emotions.json)."
+		},
+		{
+			"id": "chloe-excited-face",
+			"type": "text",
+			"x": 600,
+			"y": 5800,
+			"width": 560,
+			"height": 360,
+			"text": "## chloe-excited-face\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\n# The excited face (VNCCS: delighted-surprise).\nprompt: \"the expression: they looks happily surprised, with bright wide eyes and an open smiling mouth.\"",
+			"color": "4"
+		},
+		{
+			"id": "chloe-excited-face-cut",
+			"type": "text",
+			"x": 1300,
+			"y": 5800,
+			"width": 520,
+			"height": 260,
+			"text": "## chloe-excited-face-cut\ncutout\nstatus: done\n# Free: keyed off the green screen; the excited face in the talk portrait.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "chloe-uneasy-face",
+			"type": "text",
+			"x": 600,
+			"y": 6220,
+			"width": 560,
+			"height": 360,
+			"text": "## chloe-uneasy-face\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\n# The uneasy face (our own wording; was VNCCS: awkward-face).\nprompt: \"the expression: they look uneasy, eyes glancing to one side, brows drawn slightly together, and lips pressed into a tight closed mouth.\"",
+			"color": "4"
+		},
+		{
+			"id": "chloe-uneasy-face-cut",
+			"type": "text",
+			"x": 1300,
+			"y": 6220,
+			"width": 520,
+			"height": 260,
+			"text": "## chloe-uneasy-face-cut\ncutout\nstatus: done\n# Free: keyed off the green screen; the uneasy face in the talk portrait.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "made-chloe-excited-face-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-excited-face/chloe-excited-face.webp",
+			"x": 1240,
+			"y": 5800,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-excited-face-cut-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-excited-face-cut/chloe-excited-face-cut.webp",
+			"x": 1900,
+			"y": 5800,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-uneasy-face-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-uneasy-face/chloe-uneasy-face.webp",
+			"x": 1240,
+			"y": 6220,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-chloe-uneasy-face-cut-1",
+			"type": "file",
+			"file": "characters/chloe/art/chloe-uneasy-face-cut/chloe-uneasy-face-cut.webp",
+			"x": 1900,
+			"y": 6220,
 			"width": 240,
 			"height": 135
 		}
@@ -1001,15 +1133,6 @@
 			"label": "cut out"
 		},
 		{
-			"id": "made-chloe-actor-cut-1-edge",
-			"fromNode": "chloe-actor-cut",
-			"fromSide": "right",
-			"toNode": "made-chloe-actor-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "made-chloe-backdrop-1-edge",
 			"fromNode": "chloe-backdrop",
 			"fromSide": "right",
@@ -1042,10 +1165,124 @@
 			"label": "made"
 		},
 		{
+			"id": "e-chloe-talk-cut",
+			"fromNode": "chloe-talk",
+			"toNode": "chloe-talk-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "made-chloe-talk-1-edge",
+			"fromNode": "chloe-talk",
+			"fromSide": "right",
+			"toNode": "made-chloe-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-talk-2-edge",
+			"fromNode": "chloe-talk",
+			"fromSide": "right",
+			"toNode": "made-chloe-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-chloe-at-desk-cut-1-edge",
 			"fromNode": "chloe-at-desk-cut",
 			"fromSide": "right",
 			"toNode": "made-chloe-at-desk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-actor-cut-1-edge",
+			"fromNode": "chloe-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-chloe-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-talk-cut-1-edge",
+			"fromNode": "chloe-talk-cut",
+			"fromSide": "right",
+			"toNode": "made-chloe-talk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-chloe-excited-face-src",
+			"fromNode": "chloe-mood-source",
+			"toNode": "chloe-excited-face",
+			"label": "edit"
+		},
+		{
+			"id": "e-chloe-excited-face-keep",
+			"fromNode": "chloe-keep",
+			"toNode": "chloe-excited-face",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-excited-face-cut",
+			"fromNode": "chloe-excited-face",
+			"toNode": "chloe-excited-face-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "e-chloe-uneasy-face-src",
+			"fromNode": "chloe-mood-source",
+			"toNode": "chloe-uneasy-face",
+			"label": "edit"
+		},
+		{
+			"id": "e-chloe-uneasy-face-keep",
+			"fromNode": "chloe-keep",
+			"toNode": "chloe-uneasy-face",
+			"label": "style"
+		},
+		{
+			"id": "e-chloe-uneasy-face-cut",
+			"fromNode": "chloe-uneasy-face",
+			"toNode": "chloe-uneasy-face-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "made-chloe-excited-face-1-edge",
+			"fromNode": "chloe-excited-face",
+			"fromSide": "right",
+			"toNode": "made-chloe-excited-face-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-excited-face-cut-1-edge",
+			"fromNode": "chloe-excited-face-cut",
+			"fromSide": "right",
+			"toNode": "made-chloe-excited-face-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-uneasy-face-1-edge",
+			"fromNode": "chloe-uneasy-face",
+			"fromSide": "right",
+			"toNode": "made-chloe-uneasy-face-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-chloe-uneasy-face-cut-1-edge",
+			"fromNode": "chloe-uneasy-face-cut",
+			"fromSide": "right",
+			"toNode": "made-chloe-uneasy-face-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"

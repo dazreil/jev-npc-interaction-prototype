@@ -6,5 +6,9 @@ action: "[[MILES_BACK_OFF]]"
 # MILES_BACK_OFF — lines
 
 ## neutral
-- Message received, loud and clear. Colleagues. Excellent colleagues.
-- Fair. I'll dial it down to a respectful seven.
+- Message received. Colleagues. Excellent, professional colleagues.
+- Fair. Dialling it down to a respectful seven.
+- Got it. I'll go back to flirting with the font library.
+
+## irritated
+- Okay. Okay. I'm going.

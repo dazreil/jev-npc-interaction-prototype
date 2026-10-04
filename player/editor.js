@@ -8,6 +8,7 @@
 
 import { evaluate } from "/js/engine/conditions.js";
 import { ELEMENT_PROPS, pictureShape, setEditorPreview } from "/js/engine/ui.js";
+import { createStoryEditor } from "/player/story-editor.js";
 
 const PANEL_WIDTH = 320;
 const round = (value) => Math.round(value);
@@ -39,6 +40,20 @@ export function createEditor({ session, stage, render, host, reloadVault }) {
   panel.className = "editor-panel";
   panel.hidden = true; // until Cmd+E
   document.body.append(overlay, panel);
+
+  // The story editor (scenes), opened from this panel; Play from here leaves both editors.
+  const story = createStoryEditor({
+    session,
+    host,
+    reloadVault,
+    onPlay: (sceneId, blockId) => {
+      toggle(false);
+      if (on) return;
+      session.playSceneFrom(sceneId, blockId);
+      render();
+    },
+    onClose: () => on && refresh()
+  });
 
   const screenId = () => session.world.screen;
   const built = () => session.vault.world?.[screenId()];
@@ -738,6 +753,11 @@ export function createEditor({ session, stage, render, host, reloadVault }) {
         else delete ref.visible;
         setCard(ref.node, { if: condition });
       }), { hint: "always, or a condition such as flag.gate-open" }));
+      rows.push(typedField(SINGLES.shade, ref.shade, (value) => changeSettings("Change the shade", [ref], () => {
+        if (value === undefined) delete ref.shade;
+        else ref.shade = value;
+        setCard(ref.node, { shade: value ?? null });
+      })));
     }
 
     if (target.kind === "text") {
@@ -1151,7 +1171,7 @@ export function createEditor({ session, stage, render, host, reloadVault }) {
     });
 
     panel.replaceChildren(
-      el("h2", { textContent: "Edit screen" }),
+      el("div", { className: "editor-tabs" }, [el("h2", { textContent: "Edit screen" }), button("Story ✎", () => story.show(), { title: "Scenes: lines, choices and free talk" })]),
       crumbs,
       fields,
       el("h3", { textContent: "Add" }),
@@ -1358,7 +1378,7 @@ export function createEditor({ session, stage, render, host, reloadVault }) {
   }
 
   window.addEventListener("keydown", (event) => {
-    if (!on || event.target.closest?.("input, textarea, select")) return;
+    if (!on || story.open || event.target.closest?.("input, textarea, select")) return;
     const meta = event.metaKey || event.ctrlKey;
     if (meta && event.key.toLowerCase() === "s") { event.preventDefault(); save(); return; }
     if (meta && event.key.toLowerCase() === "z") { event.preventDefault(); (event.shiftKey ? doRedo : doUndo)(); return; }

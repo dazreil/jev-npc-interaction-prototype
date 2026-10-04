@@ -38,10 +38,45 @@ export function createSound({ onProgress = () => {} } = {}) {
     return ok;
   });
 
+  // A line recorded ahead of time (a character's own voice, made by
+  // scripts/voices.mjs) plays as an audio file instead of the live voice.
+  let clip = null;
+  const stopClip = () => {
+    if (!clip) return;
+    const playing = clip;
+    clip = null;
+    playing.pause();
+    playing.onended?.();
+  };
+
   return {
     sfx,
     voice,
     muted: false,
+    /**
+     * Plays a recorded line. Returns false (play nothing) when muted or when
+     * audio files cannot play here, so the caller falls back to the live voice.
+     */
+    playRecorded(url, { onStart = () => {}, onEnd = () => {} } = {}) {
+      if (this.muted || typeof Audio === "undefined") return false;
+      stopClip();
+      voice.cancel();
+      const audio = new Audio(url);
+      clip = audio;
+      let ended = false;
+      const finish = () => {
+        if (ended) return;
+        ended = true;
+        if (clip === audio) clip = null;
+        onEnd();
+      };
+      audio.onplaying = () => onStart();
+      audio.onended = finish;
+      audio.onerror = finish;
+      audio.play().catch(finish);
+      return true;
+    },
+    stopRecorded: stopClip,
     /** Resolves when the voice is ready (true: neural voice; false: fallback). */
     whenReady,
     get ready() {
@@ -63,6 +98,7 @@ export function createSound({ onProgress = () => {} } = {}) {
       this.muted = Boolean(muted);
       sfx.setMuted(this.muted);
       voice.setMuted(this.muted);
+      if (this.muted) stopClip();
       if (this.muted) sfx.stopAmbience();
       else sfx.startAmbience();
     }

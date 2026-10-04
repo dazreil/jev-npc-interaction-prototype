@@ -18,6 +18,7 @@
     "evaluate:phase15": "npm run check && npm run check:release",
     "vault:check": "node scripts/check-vault.mjs",
     "vault:watch": "node scripts/check-vault.mjs --watch",
+    "voices:silver": "GAME_VAULT=silver-edit node scripts/voices.mjs",
     "vault:watch:silver": "GAME_VAULT=silver-edit node scripts/check-vault.mjs --watch",
     "new": "node scripts/new-thing.mjs",
     "vault:compile": "node scripts/compile-vault.mjs",

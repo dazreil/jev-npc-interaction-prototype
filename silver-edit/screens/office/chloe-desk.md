@@ -11,6 +11,7 @@ panel:
   - 20
   - 560
   - 320
+scene: "chloe-first-day"
 ---
 
 # Chloe's desk

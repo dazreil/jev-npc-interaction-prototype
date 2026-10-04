@@ -7,7 +7,7 @@ const STATE_MIN = 0;
 const STATE_MAX = 100;
 const EVENT_KINDS = new Set([
   "say", "narrate", "sound", "music", "portrait", "animate", "show", "hide",
-  "screen", "start-dialogue", "end", "wait", "send", "append"
+  "screen", "start-dialogue", "end", "wait", "send", "append", "scene"
 ]);
 
 function unquote(text) {

@@ -17,6 +17,7 @@ import { VAULT_DIR, VAULT_URL_PREFIX, compileVault } from "../scripts/compile-va
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SERVED = ["player/", "js/", "data/", VAULT_URL_PREFIX, "assets/fonts/", "assets/encounter/", "assets/vendor/"];
 const MIME = {
+  ".mp3": "audio/mpeg",
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",

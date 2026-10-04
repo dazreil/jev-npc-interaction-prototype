@@ -47,4 +47,14 @@ The frame drawn over the screen: where Elena is, and what to do.
     - 20
   style: label
   text: It has been a long day. Sleep.
+  visible: [not var.look]
+# what Elena thinks of the thing she last clicked (set by its `var look`)
+- type: text
+  at: [18, 328, 604, 28]
+  font: $body
+  size: 15
+  color: $paper
+  italic: true
+  text: "{var.look}"
+  visible: [var.look]
 ```

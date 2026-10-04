@@ -111,7 +111,7 @@
 			"y": 2800,
 			"width": 560,
 			"height": 360,
-			"text": "## malphas-keep\nstyle\n# Holds Malphas steady in edits: only the named part changes.\ntemplate: \"Keep the exact same person: same face, hair and clothes (Malphas, a tall predatory warlock in his fifties, black hair swept back, a pale sharp face, a black velvet coat, eyes like a starless sky). Keep the exact same framing, crop, camera position and pose, and the same flat, evenly lit chroma-key green screen background, lighting and camera quality. Only change {prompt}\"\n"
+			"text": "## malphas-keep\nstyle\n# Holds Malphas steady in edits: only the named part changes.\ntemplate: \"Keep the person in the reference image exactly as they are: the same identity, hair, clothes, framing, camera position and pose, and the same flat, evenly lit chroma-key green screen background. Change only {prompt}\"\n"
 		},
 		{
 			"id": "malphas-friendly",
@@ -193,7 +193,8 @@
 			"y": 3700,
 			"width": 560,
 			"height": 340,
-			"text": "## malphas-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat and unchanged\"\n"
+			"text": "## malphas-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera, slow and smooth, with small, natural mouth movements and a faint smile, his head very still, locked-off static camera, the green screen background stays flat and unchanged\"",
+			"color": "4"
 		},
 		{
 			"id": "malphas-friendly-talk",
@@ -272,7 +273,7 @@
 		{
 			"id": "talk-loop",
 			"type": "text",
-			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The night guard {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
+			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The person {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
 			"x": 0,
 			"y": 3700,
 			"width": 560,
@@ -437,7 +438,7 @@
 		{
 			"id": "malphas-scene-picture",
 			"type": "file",
-			"file": "screens/dream/art/dream-background/dream-background.webp",
+			"file": "screens/dream/art/dream-velvet/dream-velvet.webp",
 			"x": 0,
 			"y": 6100,
 			"width": 560,
@@ -450,7 +451,7 @@
 			"y": 6100,
 			"width": 560,
 			"height": 300,
-			"text": "## malphas-backdrop\ncrop\nstatus: done\n# Free: the screen behind Malphas, cut around their click box on World.canvas, with a 10 pixel bleed.\nbox: [500, 180, 280, 400]\nbleed: 10\n",
+			"text": "## malphas-backdrop\ncrop\nstatus: done\n# Free: the screen behind Malphas, cut around their click box on World.canvas, with a 10 pixel bleed.\nbox: [500, 220, 280, 400]\nbleed: 10\n",
 			"color": "4"
 		},
 		{
@@ -464,6 +465,35 @@
 			"color": "4"
 		},
 		{
+			"id": "malphas-in-scene",
+			"type": "text",
+			"x": 700,
+			"y": 7000,
+			"width": 560,
+			"height": 460,
+			"text": "## malphas-in-scene\nedit\nstatus: done\nmodel: qwen-edit\nsize: 768x1024\nseed: 41\n# Malphas standing in the dream, whole body, to cut out and stand under the light.\nprompt: \"Show the same man, with the same face, long black hair and black velvet coat, now seen full length from head to shoes, standing still and upright, one pale hand held out toward the camera, palm up, in a slow inviting gesture, a faint knowing smile. Straight-on front view at eye level, the whole body in the frame with empty space above the head and below the shoes. Black trousers and black shoes. No green on his clothes. Flat, evenly lit pure green screen background, no floor, no shadow, no walls.\"",
+			"color": "4"
+		},
+		{
+			"id": "malphas-in-scene-cut",
+			"type": "text",
+			"x": 1400,
+			"y": 7000,
+			"width": 560,
+			"height": 360,
+			"text": "## malphas-in-scene-cut\ncutout\nstatus: done\n# Free: keyed off the green screen. On World.canvas in the dream, with an arrow from the malphas-shadow card: his click shape.\nkeyLow: 0.5\nkeyHigh: 0.85\ndespill: strong\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "made-malphas-in-scene-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-in-scene/malphas-in-scene.webp",
+			"x": 1340,
+			"y": 7000,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-malphas-backdrop-1",
 			"type": "file",
 			"file": "characters/malphas/art/malphas-backdrop/malphas-backdrop.webp",
@@ -473,11 +503,113 @@
 			"height": 135
 		},
 		{
+			"id": "malphas-talk-cut",
+			"type": "text",
+			"x": 700,
+			"y": 3280,
+			"width": 560,
+			"height": 320,
+			"text": "## malphas-talk-cut\ncutout\nstatus: done\n# Free: every frame of the talking loop keyed off the green screen, for the talk portrait. Frame 01 is also the idle frame, so talking and resting line up.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "made-malphas-talk-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-talk/malphas-talk.webp",
+			"x": 1340,
+			"y": 3700,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-talk-2",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-talk/malphas-talk.mp4",
+			"x": 1600,
+			"y": 3700,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-malphas-actor-cut-1",
 			"type": "file",
 			"file": "characters/malphas/art/malphas-actor-cut/malphas-actor-cut.webp",
 			"x": 1340,
 			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-in-scene-cut-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-in-scene-cut/malphas-in-scene-cut.webp",
+			"x": 2040,
+			"y": 7000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-talk-cut-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-talk-cut/malphas-talk-cut.webp",
+			"x": 1340,
+			"y": 3280,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "malphas-mood-source",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-talk/malphas-talk-05.webp",
+			"x": 0,
+			"y": 5800,
+			"width": 400,
+			"height": 300
+		},
+		{
+			"id": "malphas-moods-note",
+			"type": "text",
+			"x": 0,
+			"y": 5600,
+			"width": 560,
+			"height": 160,
+			"text": "### Mood faces\nEach starts from the resting talk frame (frame 5), so it lines up with the talking loop. Expressions from the VNCCS emotion library (lib/emotions.json)."
+		},
+		{
+			"id": "malphas-cold-face",
+			"type": "text",
+			"x": 600,
+			"y": 5800,
+			"width": 560,
+			"height": 360,
+			"text": "## malphas-cold-face\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\n# The cold face (VNCCS: cold-anger).\nprompt: \"the expression: they shows cold controlled anger, with narrowed eyes, a fixed stare, and a firm closed mouth.\"",
+			"color": "4"
+		},
+		{
+			"id": "malphas-cold-face-cut",
+			"type": "text",
+			"x": 1300,
+			"y": 5800,
+			"width": 520,
+			"height": 260,
+			"text": "## malphas-cold-face-cut\ncutout\nstatus: done\n# Free: keyed off the green screen; the cold face in the talk portrait.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "made-malphas-cold-face-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-cold-face/malphas-cold-face.webp",
+			"x": 1240,
+			"y": 5800,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-malphas-cold-face-cut-1",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-cold-face-cut/malphas-cold-face-cut.webp",
+			"x": 1900,
+			"y": 5800,
 			"width": 240,
 			"height": 135
 		}
@@ -934,6 +1066,27 @@
 			"label": "cut out"
 		},
 		{
+			"id": "e-malphas-actor-in-scene",
+			"fromNode": "malphas-actor",
+			"toNode": "malphas-in-scene",
+			"label": "edit"
+		},
+		{
+			"id": "e-malphas-in-scene-cut",
+			"fromNode": "malphas-in-scene",
+			"toNode": "malphas-in-scene-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "made-malphas-in-scene-1-edge",
+			"fromNode": "malphas-in-scene",
+			"fromSide": "right",
+			"toNode": "made-malphas-in-scene-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-malphas-backdrop-1-edge",
 			"fromNode": "malphas-backdrop",
 			"fromSide": "right",
@@ -943,10 +1096,88 @@
 			"label": "made"
 		},
 		{
+			"id": "e-malphas-talk-cut",
+			"fromNode": "malphas-talk",
+			"toNode": "malphas-talk-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "made-malphas-talk-1-edge",
+			"fromNode": "malphas-talk",
+			"fromSide": "right",
+			"toNode": "made-malphas-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-talk-2-edge",
+			"fromNode": "malphas-talk",
+			"fromSide": "right",
+			"toNode": "made-malphas-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-malphas-actor-cut-1-edge",
 			"fromNode": "malphas-actor-cut",
 			"fromSide": "right",
 			"toNode": "made-malphas-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-in-scene-cut-1-edge",
+			"fromNode": "malphas-in-scene-cut",
+			"fromSide": "right",
+			"toNode": "made-malphas-in-scene-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-talk-cut-1-edge",
+			"fromNode": "malphas-talk-cut",
+			"fromSide": "right",
+			"toNode": "made-malphas-talk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-malphas-cold-face-src",
+			"fromNode": "malphas-mood-source",
+			"toNode": "malphas-cold-face",
+			"label": "edit"
+		},
+		{
+			"id": "e-malphas-cold-face-keep",
+			"fromNode": "malphas-keep",
+			"toNode": "malphas-cold-face",
+			"label": "style"
+		},
+		{
+			"id": "e-malphas-cold-face-cut",
+			"fromNode": "malphas-cold-face",
+			"toNode": "malphas-cold-face-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "made-malphas-cold-face-1-edge",
+			"fromNode": "malphas-cold-face",
+			"fromSide": "right",
+			"toNode": "made-malphas-cold-face-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-malphas-cold-face-cut-1-edge",
+			"fromNode": "malphas-cold-face-cut",
+			"fromSide": "right",
+			"toNode": "made-malphas-cold-face-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"

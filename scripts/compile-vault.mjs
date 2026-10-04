@@ -9,6 +9,7 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
+import { checkScene } from "../js/engine/story.js";
 import { buildWorld } from "../js/engine/canvas-world.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -248,7 +249,42 @@ export async function compileVault(vaultDir = VAULT_DIR) {
     .filter((path) => /\.(webp|png|jpe?g|gif|svg)$/i.test(path) && !/(^|\/)(_source|_old|\.)/.test(path) && !/-\d{2}\.webp$/i.test(path))
     .filter((path) => !/\.jpe?g$/i.test(path) || !files.some((file) => file.endsWith(path.replace(/\.jpe?g$/i, ".webp").split("/").join(sep))))
     .map((path) => ({ name: path.split("/").pop(), path, url: assets.get(path.split("/").pop().toLowerCase()) }));
-  return { builtAt: new Date().toISOString(), notes, world: world?.screens ?? null, worldPath, trees, pictures, errors };
+  // Recorded voices (scripts/voices.mjs): for each character, line → audio URL.
+  const voices = {};
+  for (const file of files.filter((path) => path.endsWith("-voice.json"))) {
+    try {
+      const manifest = JSON.parse(await readFile(file, "utf8"));
+      const lines = (voices[manifest.character] ??= {});
+      for (const [text, name] of Object.entries(manifest.lines ?? {})) {
+        const url = assets.get(String(name).toLowerCase());
+        if (url) lines[text] = url;
+      }
+    } catch (error) {
+      errors.push(`${relative(vaultDir, file)}: ${error.message}`);
+    }
+  }
+  // Scenes from the story editor: story/<id>.json, checked against the characters.
+  const story = {};
+  const sceneFiles = files.filter((path) => path.endsWith(".json") && relative(vaultDir, path).split(sep)[0] === "story");
+  const characters = Object.keys(notes).filter((id) => notes[id].type === "character");
+  const moods = Object.fromEntries(characters.map((id) => [id, [...new Set([
+    ...[].concat(notes[id].blocks.Tones ?? []).map((row) => row?.tone).filter(Boolean),
+    ...Object.keys(notes[id].blocks?.Cues ?? {})
+  ])]]));
+  const outcomes = Object.keys(notes).filter((id) => notes[id].type === "outcome");
+  for (const file of sceneFiles) {
+    const where = relative(vaultDir, file).split(sep).join("/");
+    try {
+      const scene = JSON.parse(await readFile(file, "utf8"));
+      scene.id ??= file.split(sep).pop().replace(/\.json$/, "");
+      scene.path = where;
+      story[scene.id] = scene;
+      errors.push(...checkScene(scene, { characters, moods, outcomes }));
+    } catch (error) {
+      errors.push(`${where}: ${error.message}`);
+    }
+  }
+  return { builtAt: new Date().toISOString(), notes, world: world?.screens ?? null, worldPath, trees, pictures, voices, story, errors };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

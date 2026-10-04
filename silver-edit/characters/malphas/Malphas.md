@@ -14,6 +14,8 @@ fallbackAction: "[[MALPHAS_PROMISE_REST]]"
 tree: "[[malphas-tree.canvas]]"
 lines: "[[malphas-lines]]"
 portraits: "[[malphas-portraits]]"
+voice: "am_onyx"
+voiceSpeed: 0.88
 ---
 
 # Malphas

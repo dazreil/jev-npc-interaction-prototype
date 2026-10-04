@@ -1,0 +1,100 @@
+{
+	"id": "dream-night-one",
+	"title": "Dream \u00b7 night one",
+	"with": "Malphas",
+	"events": [
+		{
+			"id": "narrate-01",
+			"type": "narrate",
+			"text": "The light finds you before you find it. Someone is standing in it."
+		},
+		{
+			"id": "line-02",
+			"type": "line",
+			"mood": "neutral",
+			"text": "There you are, little witch. You took your time. Come into the light, where I can see how tired you are."
+		},
+		{
+			"id": "line-03",
+			"type": "line",
+			"mood": "neutral",
+			"text": "Three years of October. Do you know how long that is, to wait?"
+		},
+		{
+			"id": "choice-14",
+			"type": "choice",
+			"options": [
+				{
+					"id": "option-07",
+					"text": "Get out of my head.",
+					"events": [
+						{
+							"id": "set-04",
+							"type": "set",
+							"effect": "state patience -15"
+						},
+						{
+							"id": "set-05",
+							"type": "set",
+							"effect": "state temptation -8"
+						},
+						{
+							"id": "line-06",
+							"type": "line",
+							"mood": "cold",
+							"text": "Your head. Your bed. Your dreams. You keep calling them yours."
+						}
+					]
+				},
+				{
+					"id": "option-10",
+					"text": "I'm not coming back.",
+					"events": [
+						{
+							"id": "set-08",
+							"type": "set",
+							"effect": "state patience -10"
+						},
+						{
+							"id": "line-09",
+							"type": "line",
+							"mood": "neutral",
+							"text": "You say that every night. And every night you come a little closer."
+						}
+					]
+				},
+				{
+					"id": "option-13",
+					"text": "I'm so tired.",
+					"events": [
+						{
+							"id": "set-11",
+							"type": "set",
+							"effect": "state temptation +10"
+						},
+						{
+							"id": "line-12",
+							"type": "line",
+							"mood": "neutral",
+							"text": "I know. I know you are. Come here."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "narrate-15",
+			"type": "narrate",
+			"text": "His hand is still held out. The velvet waits."
+		},
+		{
+			"id": "talk-16",
+			"type": "talk"
+		},
+		{
+			"id": "end-17",
+			"type": "end",
+			"then": "close"
+		}
+	]
+}

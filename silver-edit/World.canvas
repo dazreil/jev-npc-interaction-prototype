@@ -7,7 +7,7 @@
 			"y": -460,
 			"width": 1360,
 			"height": 300,
-			"text": "# World — The Silver Edit\nThis canvas **is the game**. Each labelled group is a screen. Drag cards onto a screen to place them; an arrow from a text card to another screen is a way there.\n\nPlay it: `npm run app:silver`."
+			"text": "# World \u2014 The Silver Edit\nThis canvas **is the game**. Each labelled group is a screen. Drag cards onto a screen to place them; an arrow from a text card to another screen is a way there.\n\nPlay it: `npm run app:silver`."
 		},
 		{
 			"id": "screen-office",
@@ -91,11 +91,21 @@
 		{
 			"id": "dream-picture",
 			"type": "file",
-			"file": "screens/dream/art/dream-background/dream-background.webp",
+			"file": "screens/dream/art/dream-velvet/dream-velvet.webp",
 			"x": 2960,
 			"y": 0,
 			"width": 1280,
 			"height": 720
+		},
+		{
+			"id": "malphas-standing",
+			"type": "file",
+			"file": "characters/malphas/art/malphas-in-scene-cut/malphas-in-scene-cut.webp",
+			"x": 3534,
+			"y": 240,
+			"width": 132,
+			"height": 420,
+			"if": "not outcome"
 		},
 		{
 			"id": "office-scene",
@@ -140,7 +150,7 @@
 			"y": 596,
 			"width": 280,
 			"height": 44,
-			"text": "GO HOME FOR THE NIGHT →"
+			"text": "GO HOME FOR THE NIGHT \u2192"
 		},
 		{
 			"id": "home-scene",
@@ -195,6 +205,63 @@
 			"width": 960,
 			"height": 280,
 			"text": "if outcome = dream-yielded\nYou do not wake.\n\nPress Cmd+R to try again."
+		},
+		{
+			"id": "elena-keys-picture",
+			"type": "file",
+			"file": "screens/home/art/home-keys-cut/home-keys-cut.webp",
+			"x": 1730,
+			"y": 548,
+			"width": 96,
+			"height": 54,
+			"shade": 0.55
+		},
+		{
+			"id": "elena-keys",
+			"type": "file",
+			"file": "screens/home/elena-keys.md",
+			"x": 1730,
+			"y": 548,
+			"width": 96,
+			"height": 54
+		},
+		{
+			"id": "coven-box-picture",
+			"type": "file",
+			"file": "screens/home/art/home-box-cut/home-box-cut.webp",
+			"x": 2605,
+			"y": 560,
+			"width": 150,
+			"height": 120,
+			"shade": 0.55
+		},
+		{
+			"id": "coven-box",
+			"type": "file",
+			"file": "screens/home/coven-box.md",
+			"x": 2605,
+			"y": 560,
+			"width": 150,
+			"height": 120
+		},
+		{
+			"id": "elena-mirror-picture",
+			"type": "file",
+			"file": "screens/home/art/home-mirror-cut/home-mirror-cut.webp",
+			"x": 2455,
+			"y": 160,
+			"width": 110,
+			"height": 137,
+			"shade": 0.55
+		},
+		{
+			"id": "elena-mirror",
+			"type": "file",
+			"file": "screens/home/elena-mirror.md",
+			"x": 2455,
+			"y": 160,
+			"width": 110,
+			"height": 137
 		}
 	],
 	"edges": [
@@ -227,6 +294,38 @@
 			"fromNode": "chloe",
 			"fromSide": "bottom",
 			"toNode": "chloe-sitting",
+			"toSide": "bottom",
+			"label": "shape"
+		},
+		{
+			"id": "elena-keys-shape",
+			"fromNode": "elena-keys",
+			"fromSide": "bottom",
+			"toNode": "elena-keys-picture",
+			"toSide": "bottom",
+			"label": "shape"
+		},
+		{
+			"id": "coven-box-shape",
+			"fromNode": "coven-box",
+			"fromSide": "bottom",
+			"toNode": "coven-box-picture",
+			"toSide": "bottom",
+			"label": "shape"
+		},
+		{
+			"id": "elena-mirror-shape",
+			"fromNode": "elena-mirror",
+			"fromSide": "bottom",
+			"toNode": "elena-mirror-picture",
+			"toSide": "bottom",
+			"label": "shape"
+		},
+		{
+			"id": "malphas-shape",
+			"fromNode": "malphas",
+			"fromSide": "bottom",
+			"toNode": "malphas-standing",
 			"toSide": "bottom",
 			"label": "shape"
 		}

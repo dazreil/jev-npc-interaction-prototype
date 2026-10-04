@@ -71,19 +71,87 @@ test("a play session talks to several people, each with their own chat, face to 
   session.runEffects(["open arthur-door"]);
   assert.equal(session.active, "Arthur");
   assert.equal(session.world.call.live, true, "no ringing in the same room");
-  assert.match(session.chat[0].text, /Harrow manuscript/, "he greets her at once");
+  // His first-day scene plays: through its lines and its choice, to free talk.
+  assert.equal(session.scene?.scene.id, "arthur-first-day");
+  for (let guard = 0; guard < 10 && session.sceneStep?.type !== "talk"; guard += 1) {
+    if (session.sceneStep.type === "choice") session.chooseInScene(0);
+    else session.continueScene();
+  }
+  assert.ok(session.chats.Arthur.some((line) => /Harrow manuscript/.test(line.text)), "the scene's lines are in the talk");
+  assert.equal(session.game.npc.state.trust, 28, "the first option raised his trust by 8");
+  const before = session.chats.Arthur.length;
   session.draft = "How is the Harrow manuscript coming along?";
   await session.send();
-  assert.equal(session.chats.Arthur.length, 3);
+  assert.equal(session.chats.Arthur.length, before + 2, "free talk: her line and his answer");
 
   session.runEffects(["close"]);
   assert.deepEqual(session.world.open, {}, "close alone closes whatever is open");
   session.runEffects(["open miles-desk"]);
   assert.equal(session.active, "Miles");
   assert.equal(session.world.speaker, "Miles Parker");
-  assert.match(session.chat[0].text, /new senior editor/);
-  assert.equal(session.chats.Arthur.length, 3, "Arthur's talk is kept");
+  assert.equal(session.scene?.scene.id, "miles-first-day");
+  assert.equal(session.chats.Arthur.length, before + 2, "Arthur's talk is kept");
   assert.equal(session.world.talk.arthur, "active");
+  session.paused = true;
+  clearInterval(session.timerId);
+});
+
+test("a scene plays in the game: Continue, choices that change a mood, free talk, then it closes", async () => {
+  const scened = structuredClone(vault);
+  scened.story = {
+    "chloe-sketch": {
+      id: "chloe-sketch",
+      with: "Chloe",
+      events: [
+        { id: "a", type: "line", mood: "uneasy", text: "Can I show you something weird?" },
+        { id: "b", type: "choice", options: [{ id: "b1", text: "Show me.", events: [{ id: "b1a", type: "set", effect: "state unease +30" }, { id: "b1b", type: "line", text: "Okay. Don't laugh." }] }] },
+        { id: "c", type: "talk", until: "flag.saw-sketch" },
+        { id: "d", type: "narrate", text: "She puts the notebook away." },
+        { id: "e", type: "end" }
+      ]
+    }
+  };
+  scened.notes["chloe-desk"] = structuredClone(scened.notes["chloe-desk"]);
+  scened.notes["chloe-desk"].props.scene = "chloe-sketch";
+  const session = new PlaySession({ vault: scened, providers: { mock: vaultMock } });
+  session.start();
+  session.runEffects(["open chloe-desk"]);
+  assert.equal(session.active, "Chloe");
+  assert.deepEqual(session.chats.Chloe.map((line) => line.text), ["Can I show you something weird?"], "the scene replaces her greeting");
+  assert.equal(session.sceneHolds, true, "typing waits while a line shows");
+  const unease = session.game.npc.state.unease;
+  session.continueScene();
+  assert.equal(session.sceneStep.type, "choice");
+  session.chooseInScene(0);
+  assert.equal(session.game.npc.state.unease, unease + 30, "the choice's set block changed her mood");
+  assert.equal(session.chats.Chloe.at(-1).text, "Okay. Don't laugh.");
+  session.continueScene();
+  assert.equal(session.sceneStep.type, "talk");
+  assert.equal(session.sceneHolds, false, "free talk: she can type");
+  session.game.flag["saw-sketch"] = true;
+  session.draft = "That is a beautiful drawing.";
+  await session.send();
+  assert.equal(session.chats.Chloe.at(-1).text, "She puts the notebook away.", "the talk's condition held, so the scene went on");
+  session.continueScene();
+  assert.equal(session.scene, null);
+  assert.deepEqual(session.world.open, {}, "the end closed the talk");
+  session.runEffects(["open chloe-desk"]);
+  assert.equal(session.scene, null, "a scene plays once; after that she talks freely");
+  session.paused = true;
+  clearInterval(session.timerId);
+});
+
+test("between lines, a character rests on the face of their mood (restOnMood), and any mood is its own cue", async () => {
+  const { getPortraitCue } = await import("../js/performance.js");
+  assert.equal(getPortraitCue("SCENE", "uneasy"), "uneasy", "a character's own mood becomes the cue");
+  assert.equal(getPortraitCue("SCENE", "friendly"), "friendly");
+  const session = new PlaySession({ vault, providers: { mock: vaultMock } });
+  session.start();
+  session.active = "Chloe";
+  session.mood = "excited";
+  assert.match(session.restingFrame(), /chloe-excited-face-cut\.webp$/);
+  session.mood = "angry";
+  assert.match(session.restingFrame(), /chloe-talk-cut-08\.webp$/, "a mood with no face rests on the idle frame");
   session.paused = true;
   clearInterval(session.timerId);
 });

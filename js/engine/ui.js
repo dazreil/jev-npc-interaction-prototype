@@ -10,6 +10,9 @@
 
 import { evaluate, interpolate, readPath } from "./conditions.js";
 
+// Fields the world canvas keeps on its parts for the screen editor (where an
+// exit goes, a card's own text and condition); the game does not use them.
+const EDITOR_ONLY = ["raw", "condition", "target", "edgeCondition"];
 const COMMON = ["type", "id", "at", "style", "visible", "opacity", "rotate", "children", "note", "layer", "mirror", "swing", "shade", "walk", "clip", "node"];
 const PAINT = ["fill", "stroke", "strokeWidth", "radius", "glow", "pattern", "blur"];
 const TEXT = ["text", "size", "color", "font", "align", "valign", "bold", "italic", "letterSpacing", "uppercase", "padding"];
@@ -69,7 +72,7 @@ function resolveElement(raw, context, parentBox, path) {
   const allowed = ELEMENT_PROPS[element.type];
   if (!allowed) throw new TypeError(`${label}: unknown element type "${element.type}"`);
   for (const key of Object.keys(element)) {
-    if (!COMMON.includes(key) && !allowed.includes(key)) warnings.push(`${label}: "${key}" does nothing on a ${element.type}`);
+    if (!COMMON.includes(key) && !allowed.includes(key) && !EDITOR_ONLY.includes(key)) warnings.push(`${label}: "${key}" does nothing on a ${element.type}`);
   }
   if (!evaluate(element.visible, world)) return null;
 

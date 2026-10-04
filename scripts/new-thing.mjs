@@ -7,7 +7,7 @@
 //   npm run new -- item "Torch" "a heavy black police torch"
 //
 // Add --vault <folder> to write somewhere other than game/.
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -48,12 +48,16 @@ const recipe = (name, kind, fields, prompt) =>
 
 // ------------------------------------------------------------------ character
 
+// Moods from the emotion library (lib/emotions.json, from VNCCS, MIT): the
+// expression in plain words, so an edit changes the face and nothing else.
+const EMOTIONS = Object.fromEntries(Object.values(JSON.parse(readFileSync(new URL("../lib/emotions.json", import.meta.url), "utf8")).groups).flat().map((item) => [item.name, item.prompt]));
+const expression = (name) => `the expression: ${EMOTIONS[name].replace(/^The character /, "they ")}`;
 const MOODS = {
-  friendly: "the expression, which is now a warm, slightly awkward friendly smile with raised eyebrows.",
-  irritated: "the expression, which is now irritated and impatient: jaw clenched, brows lowered, lips pressed thin.",
-  hostile: "the expression, which is now hostile: glaring hard at the camera, brows pulled down, mouth open mid-snarl.",
-  suspicious: "the expression, which is now suspicious: eyes narrowed, one eyebrow raised, head tilted slightly.",
-  afraid: "the expression, which is now afraid: eyes wide, eyebrows raised high, mouth slightly open.",
+  friendly: expression("smile"),
+  irritated: expression("annoyed"),
+  hostile: expression("angry"),
+  suspicious: expression("skeptical"),
+  afraid: expression("shocked"),
   "blink-half": "the eyes, which are now half closed, halfway through a blink. Nothing else changes.",
   "blink-closed": "the eyes, which are now fully closed in a natural blink. Nothing else changes."
 };
@@ -320,7 +324,7 @@ ${name} has had enough and stops talking.
       `the place where ${name} works, seen through a camera: (describe it). ${description}`)),
     text(`${slug}-actor`, 700, look + 400, recipe(`${slug}-actor`, "image", { model: "krea-2", size: "1024x768", seed: 12 },
       `${description}, seen waist-up, facing the camera`)),
-    text(`${slug}-keep`, 0, look + 800, `## ${slug}-keep\nstyle\n# Holds ${name} steady in edits: only the named part changes.\ntemplate: ${quote(`Keep the exact same person: same face, hair and clothes (${description}). Keep the exact same framing, crop, camera position and pose, and the same flat, evenly lit chroma-key green screen background, lighting and camera quality. Only change {prompt}`)}\n`, 560, 360),
+    text(`${slug}-keep`, 0, look + 800, `## ${slug}-keep\nstyle\n# Holds ${name} steady in edits: only the named part changes. It points at the picture instead of describing the face, which keeps the likeness (advice from VNCCS).\ntemplate: ${quote("Keep the person in the reference image exactly as they are: the same identity, hair, clothes, framing, camera position and pose, and the same flat, evenly lit chroma-key green screen background. Change only {prompt}")}\n`, 560, 360),
     ...Object.entries(MOODS).map(([mood, prompt], index) =>
       text(`${slug}-${mood}`, 1900 + (index % 3) * 760, look + 800 + Math.floor(index / 3) * 360, recipe(`${slug}-${mood}`, "edit", { model: "qwen-edit", seed: 7 }, prompt), 560, 300)),
     group("g-talk", "Talking: a loop per mood, then everything into the room", -40, talk - 80, 4200, 1500),

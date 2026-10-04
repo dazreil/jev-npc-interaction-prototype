@@ -6,7 +6,7 @@ character: "[[Miles]]"
 # Miles Parker — other lines
 
 ## opening
-- Well, well. The new senior editor. I'm Miles. I make the books pretty; you make them make sense?
+- Oh, thank God, a new face. I'm Miles. I make the books pretty; you make them make sense. Deal?
 
 ## name-acknowledgement
-- [[playerName]]. Gorgeous name. Very literary.
+- [[playerName]]. That's a name with a backstory. I'll get it out of you.

@@ -1,0 +1,84 @@
+{
+	"id": "miles-first-day",
+	"title": "Miles \u00b7 first day",
+	"with": "Miles",
+	"events": [
+		{
+			"id": "narrate-01",
+			"type": "narrate",
+			"text": "Miles has three monitors, two of them switched off, and a record player turning without a record on it."
+		},
+		{
+			"id": "line-02",
+			"type": "line",
+			"mood": "neutral",
+			"text": "Oh, thank God, a new face. I'm Miles. I make the books pretty; you make them make sense. Deal?"
+		},
+		{
+			"id": "choice-12",
+			"type": "choice",
+			"options": [
+				{
+					"id": "option-05",
+					"text": "Deal. I'm Elena.",
+					"events": [
+						{
+							"id": "set-03",
+							"type": "set",
+							"effect": "state interest +5"
+						},
+						{
+							"id": "line-04",
+							"type": "line",
+							"mood": "smitten",
+							"text": "Elena. That's a name with a backstory. I'll get it out of you."
+						}
+					]
+				},
+				{
+					"id": "option-08",
+					"text": "Why is the record player on with no record?",
+					"events": [
+						{
+							"id": "set-06",
+							"type": "set",
+							"effect": "state charm +3"
+						},
+						{
+							"id": "line-07",
+							"type": "line",
+							"mood": "neutral",
+							"text": "Atmosphere. Records are for people with time. I have deadlines."
+						}
+					]
+				},
+				{
+					"id": "option-11",
+					"text": "Not today, Miles.",
+					"events": [
+						{
+							"id": "set-09",
+							"type": "set",
+							"effect": "state interest -10"
+						},
+						{
+							"id": "line-10",
+							"type": "line",
+							"mood": "neutral",
+							"text": "Message received. Dialling it down to a respectful seven."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "talk-13",
+			"type": "talk"
+		},
+		{
+			"id": "end-14",
+			"type": "end",
+			"then": "close"
+		}
+	]
+}

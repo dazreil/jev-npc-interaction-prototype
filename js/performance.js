@@ -75,7 +75,9 @@ function defaultWait(durationMs) {
 }
 
 export function getPortraitCue(action, tone) {
-  return ACTION_PORTRAIT_CUES[action] ?? TONE_PORTRAIT_CUES[tone] ?? "neutral";
+  // A tone with no fixed cue is its own cue (a character's own moods, such
+  // as warm or uneasy); their portraits note can give it a face.
+  return ACTION_PORTRAIT_CUES[action] ?? TONE_PORTRAIT_CUES[tone] ?? (tone || "neutral");
 }
 
 export function createNpcPerformance({

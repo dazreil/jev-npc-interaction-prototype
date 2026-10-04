@@ -1,0 +1,109 @@
+{
+	"id": "chloe-first-day",
+	"title": "Chloe \u00b7 first day",
+	"with": "Chloe",
+	"events": [
+		{
+			"id": "narrate-01",
+			"type": "narrate",
+			"text": "Chloe's desk is a small museum of horror: a Hollow Bride poster, a candle shaped like a skull, and a black notebook she closes the moment you look at it."
+		},
+		{
+			"id": "line-02",
+			"type": "line",
+			"mood": "excited",
+			"text": "Hi! Sorry. Hi. You're Elena! I'm Chloe: socials, the newsletter, and one very haunted unfinished novel."
+		},
+		{
+			"id": "line-03",
+			"type": "line",
+			"mood": "neutral",
+			"text": "Do you like horror films?"
+		},
+		{
+			"id": "choice-14",
+			"type": "choice",
+			"options": [
+				{
+					"id": "option-07",
+					"text": "Love them. The older the better.",
+					"events": [
+						{
+							"id": "set-04",
+							"type": "set",
+							"effect": "state excitement +15"
+						},
+						{
+							"id": "set-05",
+							"type": "set",
+							"effect": "state trust +5"
+						},
+						{
+							"id": "line-06",
+							"type": "line",
+							"mood": "excited",
+							"text": "Okay, you're my favourite person in the building. Don't tell Miles."
+						}
+					]
+				},
+				{
+					"id": "option-10",
+					"text": "I've seen enough real horror, thanks.",
+					"events": [
+						{
+							"id": "set-08",
+							"type": "set",
+							"effect": "state unease +10"
+						},
+						{
+							"id": "line-09",
+							"type": "line",
+							"mood": "uneasy",
+							"text": "That's... okay. That's a very cool and very scary thing to say."
+						}
+					]
+				},
+				{
+					"id": "option-13",
+					"text": "What's in the notebook?",
+					"events": [
+						{
+							"id": "set-11",
+							"type": "set",
+							"effect": "state excitement +5"
+						},
+						{
+							"id": "line-12",
+							"type": "line",
+							"mood": "uneasy",
+							"text": "Nothing! Notes. Novel notes. Mostly."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "talk-15",
+			"type": "talk",
+			"until": "flag.saw-sketch"
+		},
+		{
+			"id": "if-17",
+			"type": "if",
+			"if": "flag.saw-sketch",
+			"then": [
+				{
+					"id": "narrate-16",
+					"type": "narrate",
+					"text": "She tucks the notebook under her arm, as if it might wander off."
+				}
+			],
+			"else": []
+		},
+		{
+			"id": "end-18",
+			"type": "end",
+			"then": "talk"
+		}
+	]
+}

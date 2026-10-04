@@ -11,6 +11,7 @@
 //     text card                 text, or an image layer if it embeds a picture
 //   `if <condition>` first line  the card shows only when the condition holds
 //   `if: <condition>` on an image card  the same, for a picture
+//   `shade: 0..1` on an image card       darkens it to sit in a dark room
 //   arrow to another screen    the source card becomes a button to go there;
 //                              an arrow label `if <condition>` also gates it
 //   arrow object → ui card     where that object's UI opens (if in the frame)
@@ -108,6 +109,8 @@ export function buildWorld(canvas, { notes = {}, asset = () => null, width = 640
           if (Array.isArray(node.focus)) image.focus = node.focus.map(Number);
           // `if: <condition>` on an image card: the picture shows only while it holds.
           if (node.if) image.visible = [String(node.if)];
+          // `shade: 0..1` darkens it (1 is as drawn), so a prop sits in a dark room.
+          if (node.shade !== undefined) image.shade = Number(node.shade);
           screen.elements.push(image);
           continue;
         }

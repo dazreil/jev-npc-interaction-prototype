@@ -7,6 +7,7 @@ conversation: "[[Arthur]]"
 ring: false
 ui: "[[talk-panel]]"
 panel: [40, 20, 560, 320]
+scene: "arthur-first-day"
 ---
 
 # Arthur's office

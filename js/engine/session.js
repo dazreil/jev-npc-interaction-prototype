@@ -12,6 +12,7 @@ import { Encounter } from "./encounter.js";
 import { chooseNpcAction as chooseVaultMock } from "../providers/mock-vault.js";
 import { applyEffects, parseEffect } from "./effects.js";
 import { mountUi, resolveUi } from "./ui.js";
+import { SceneRunner } from "./story.js";
 
 const STATE_KEYS = ["trust", "suspicion", "irritation", "fear"];
 const SLOT_CSS = `
@@ -57,6 +58,10 @@ export class PlaySession {
     this.draft = "";
     this.busy = false;
     this.status = "";
+    // The scene playing (the story editor's timelines), and those played once.
+    this.scene = null;
+    this.sceneStep = null;
+    this.scenesPlayed = new Set();
   }
 
   /** The encounter with the character whose conversation is open. */
@@ -181,6 +186,18 @@ export class PlaySession {
     this.talkingUntil = 0;
     this.sound.sfx.playPerformanceCue(line);
     if (!this.inPerson) this.sound.sfx.playIntercomKeyUp();
+    // The character's own recorded voice for this exact line, when there is one.
+    const recorded = this.vault.voices?.[this.active]?.[String(line.line ?? "").trim()];
+    const ends = { onStart: () => {
+      if (this.voiceEngine !== "recorded") this.onLog("Voice: recorded");
+      this.voiceEngine = "recorded";
+      if (run !== this.lineRun) return;
+      this.talkingUntil = Infinity;
+      this.startTalking();
+    }, onEnd: () => {
+      if (run === this.lineRun) this.talkingUntil = Date.now();
+    } };
+    if (recorded && this.sound.playRecorded?.(recorded, ends)) return;
     this.sound.voice
       .deliver(
         { ...line, timing: { ...(line.timing ?? {}), speakingMs: estimate } },
@@ -208,6 +225,7 @@ export class PlaySession {
     this.lineRun += 1;
     this.talkingUntil = Date.now();
     this.sound?.voice.cancel();
+    this.sound?.stopRecorded?.();
   }
 
   /** The conversation character's portraits note: idle, talk, mood and blink frames. */
@@ -232,13 +250,20 @@ export class PlaySession {
       talking: note.blocks.Talking ?? null,
       talkingByMood: note.blocks["Talking by mood"] ?? {},
       cues: note.blocks.Cues ?? {},
+      restOnMood: note.props.restOnMood === true,
       blink: note.blocks.Blink ?? null
     };
   }
 
-  /** The frame he holds between lines: always his neutral idle frame. */
+  /**
+   * The frame held between lines: the neutral idle frame, or, when the
+   * portraits note sets `restOnMood: true`, the face of the current mood
+   * (its `## Cues` frame) if it has one.
+   */
   restingFrame() {
-    return this.portrait()?.idle;
+    const portrait = this.portrait();
+    if (portrait?.restOnMood && portrait.cues?.[this.mood]) return portrait.cues[this.mood];
+    return portrait?.idle;
   }
 
   talking() {
@@ -330,6 +355,9 @@ export class PlaySession {
    * world with no game, for previewing UI notes.
    */
   start({ profileId = null, play = true } = {}) {
+    this.scene = null;
+    this.sceneStep = null;
+    this.scenesPlayed = new Set();
     this.encounters = {};
     this.chats = {};
     this.pending = {};
@@ -480,10 +508,12 @@ export class PlaySession {
       this.say(result.dialogue, result.npcPerformance?.portraitCue ?? "neutral", result.npcPerformance ?? null);
       if (result.decision) this.onLog(`Arthur chose ${result.decision.action}`);
       this.sync();
-      if (game.status !== "active") {
+      if (game.status !== "active" && !this.scene) {
         this.chat.push({ speaker: "system", text: this.endingText(game.outcome) });
         this.onLog(`Ending: ${game.outcome}`);
       }
+      // In a scene's free talk: once its condition holds (or the talk ends), the scene goes on.
+      if (this.scene?.waiting?.type === "talk" && (this.scene.talkDone() || game.status !== "active")) this.showSceneStep(this.scene.step());
       this.status = "";
     } catch (error) {
       this.chat.pop();
@@ -515,6 +545,8 @@ export class PlaySession {
       this.chat.push({ speaker: "system", text: this.endingText(game.outcome) });
       this.onLog(`Ending: ${game.outcome}`);
     }
+    // In a scene's free talk, a choice that ends the talk lets the scene go on.
+    if (this.scene?.waiting?.type === "talk" && (this.scene.talkDone() || game.status !== "active")) this.showSceneStep(this.scene.step());
     this.onChange({ focusInput: true });
   }
 
@@ -559,12 +591,21 @@ export class PlaySession {
           this.active = object.conversation;
           this.ensureEncounter(this.active);
           this.sync();
-          if (object.ring === false) this.meet();
+          if (object.scene && this.vault.story?.[object.scene] && !this.scenesPlayed.has(object.scene)) {
+            // A scene plays the first time: no ringing, and it replaces the greeting.
+            this.callRun += 1;
+            this.inPerson = object.ring === false;
+            this.world.call = { connecting: false, live: true, status: "" };
+            this.startScene(object.scene);
+          } else if (object.ring === false) this.meet();
           // An unanswered call does not count: the greeting waits for a real one.
           else if (this.connect(!this.called.has(this.active), object)) this.called.add(this.active);
         }
       }
+      if (event.kind === "scene") this.startScene(event.value);
       if (event.kind === "close") {
+        this.scene = null;
+        this.sceneStep = null;
         this.callRun += 1;
         this.world.call = { connecting: false, live: false, status: "" };
         this.hush();
@@ -574,6 +615,122 @@ export class PlaySession {
       else this.onLog(`${event.kind}: ${event.value ?? ""}`);
     }
     this.onChange({ focusInput: events.some((event) => event.kind === "open") });
+  }
+
+  // ------------------------------------------------------------ scenes
+
+  /** Plays a scene from the story editor (from a block, for Play from here). */
+  startScene(sceneId, fromBlock = null) {
+    const scene = this.vault.story?.[sceneId];
+    if (!scene) {
+      this.onLog(`No scene ${sceneId}`);
+      return false;
+    }
+    if (scene.with) {
+      this.hush();
+      this.active = scene.with;
+      this.ensureEncounter(scene.with);
+      delete this.pending[scene.with];
+    }
+    this.scenesPlayed.add(sceneId);
+    this.scene = new SceneRunner(scene, { view: () => this.sceneView(), apply: (effect, who) => this.sceneApply(effect, who) });
+    this.onLog(`Scene ${sceneId}`);
+    this.sync();
+    this.showSceneStep(this.scene.start(fromBlock));
+    return true;
+  }
+
+  /**
+   * Play from here (the story editor): goes to the screen of the object you
+   * talk to that character through, opens its talk, and plays the scene from
+   * a block. Works for a scene already played, or one not saved yet.
+   */
+  playSceneFrom(sceneId, blockId = null) {
+    const scene = this.vault.story?.[sceneId];
+    if (!scene) return false;
+    const objects = this.notesOfType("object");
+    const object = objects.find((note) => note.props.scene === sceneId) ?? objects.find((note) => scene.with && note.props.conversation === scene.with);
+    if (object) {
+      const screen = Object.entries(this.vault.world ?? {}).find(([, built]) => built.objects.some((item) => item.id === object.id))?.[0];
+      if (screen) this.world.screen = screen;
+      this.world.open = { [object.id]: true };
+      this.inPerson = object.props.ring === false;
+    }
+    this.callRun += 1;
+    this.world.call = { connecting: false, live: true, status: "" };
+    return this.startScene(sceneId, blockId);
+  }
+
+  /** What a scene's conditions read: the world, with the talking character's state. */
+  sceneView() {
+    const game = this.game;
+    if (!game) return this.world;
+    const view = game.view();
+    return { ...this.world, ...view, flag: { ...this.world.flag, ...game.flag }, counter: { ...this.world.counter, ...game.counter }, item: { ...this.world.item, ...game.item } };
+  }
+
+  /** A `set` block: character and story effects go to that character; the rest to the world. */
+  sceneApply(effect, who) {
+    const kind = parseEffect(effect).kind;
+    const encounter = (who && this.ensureEncounter(who)) || this.game;
+    if (encounter && ["state", "flag", "counter", "item", "var", "memory"].includes(kind)) encounter.applyWorldEffects([effect]);
+    else this.runEffects([effect], "scene");
+    this.sync();
+  }
+
+  /** Shows what the scene returned, and waits for the player where it needs to. */
+  showSceneStep(step) {
+    const fromTalk = this.sceneStep?.type === "talk";
+    this.sceneStep = step;
+    if (step.type === "line") {
+      if (step.who === "player") this.chat.push({ speaker: "player", text: step.text });
+      else if (step.who === this.active) this.say(step.text, step.mood, { line: step.text, tone: step.mood, action: "SCENE", speech: this.game?.characterProfile?.speech });
+      else this.chat.push({ speaker: "arthur", name: this.vault.notes[step.who]?.props.name ?? step.who, text: step.text });
+    } else if (step.type === "narrate") {
+      this.chat.push({ speaker: "system", text: step.text });
+    } else if (step.type === "end") {
+      this.scene = null;
+      this.sceneStep = null;
+      const game = this.game;
+      if (step.outcome && game) {
+        game.outcome = step.outcome;
+        game.setStatusFromOutcome();
+        this.sync();
+        this.chat.push({ speaker: "system", text: this.endingText(step.outcome) });
+        this.onLog(`Ending: ${step.outcome}`);
+      }
+      if (step.then !== "talk") {
+        // Straight after free talk, its last lines are still unread: wait for Continue.
+        if (fromTalk) this.sceneStep = { type: "closing" };
+        else this.runEffects(["close"], "scene end");
+      }
+    }
+    this.onChange({ focusInput: step.type === "talk" });
+  }
+
+  /** The player goes on from a line (the Continue button, or Enter). */
+  continueScene() {
+    if (this.sceneStep?.type === "closing") {
+      this.sceneStep = null;
+      this.runEffects(["close"], "scene end");
+      return;
+    }
+    if (!this.scene || !["line", "narrate"].includes(this.sceneStep?.type)) return;
+    this.hush();
+    this.showSceneStep(this.scene.step());
+  }
+
+  /** The player picks one of a scene's choice buttons. */
+  chooseInScene(index) {
+    if (this.scene?.waiting?.type !== "choice") return;
+    const { text, next } = this.scene.choose(index);
+    this.chat.push({ speaker: "player", text });
+    this.showSceneStep(next);
+  }
+
+  /** True while a scene shows a line or a choice (not its free talk). */
+  get sceneHolds() {
+    return Boolean(this.sceneStep && (this.scene || this.sceneStep.type === "closing") && this.sceneStep.type !== "talk");
   }
 
   theme(themeId) {
@@ -725,12 +882,14 @@ export class PlaySession {
       if (theme.fonts?.body) list.style.fontFamily = theme.fonts.body;
       list.setAttribute("role", "log");
       list.setAttribute("aria-live", "polite");
-      const lines = this.busy ? [...this.chat, { speaker: "system", text: "Arthur is thinking…" }] : this.chat;
+      // Whoever she is talking to is the one thinking (their short name).
+      const thinker = String(this.vault.notes[this.active]?.props.name ?? this.active ?? "They").split(" ")[0];
+      const lines = this.busy ? [...this.chat, { speaker: "system", text: `${thinker} is thinking…` }] : this.chat;
       for (const line of lines) {
         const row = document.createElement("p");
         const who = document.createElement("span");
         who.className = "who";
-        who.textContent = { arthur: this.world.speaker ?? "Arthur", player: "You", system: "▪" }[line.speaker];
+        who.textContent = line.name ?? { arthur: this.world.speaker ?? "Arthur", player: "You", system: "▪" }[line.speaker];
         who.style.color = { arthur: colors.cyan, player: colors.magenta }[line.speaker] ?? colors.muted;
         row.className = line.speaker;
         row.style.color = line.speaker === "system" ? colors.muted : colors.text;
@@ -804,8 +963,8 @@ export class PlaySession {
       input.style.color = colors.text;
       const active = this.game?.status === "active";
       const connecting = Boolean(this.world.call?.connecting);
-      input.disabled = this.busy || !active || connecting;
-      input.placeholder = connecting ? "Connecting…" : active ? `Talk to ${this.world.speaker ?? "them"}…` : "Encounter over.";
+      input.disabled = this.busy || !active || connecting || this.sceneHolds;
+      input.placeholder = connecting ? "Connecting…" : this.sceneHolds ? "" : active ? `Talk to ${this.world.speaker ?? "them"}…` : "Encounter over.";
       input.addEventListener("input", () => {
         this.draft = input.value;
       });
@@ -824,7 +983,14 @@ export class PlaySession {
       choiceSlot.textContent = "";
       const list = document.createElement("div");
       list.className = "play-choices";
-      for (const choice of this.game?.choices() ?? []) {
+      // In a scene: its choices, or Continue after a line; in its free talk, the tree's.
+      const step = this.sceneStep;
+      const sceneButtons = !step || (!this.scene && step.type !== "closing") ? null
+        : step.type === "choice" ? step.options.map((option) => ({ text: option.text, run: () => this.chooseInScene(option.index) }))
+        : ["line", "narrate", "closing"].includes(step.type) ? [{ text: "Continue ▸", run: () => this.continueScene(), main: true }]
+        : null;
+      const buttons = sceneButtons ?? (this.game?.choices() ?? []).map((choice) => ({ text: choice.text, run: () => this.choose(choice.text) }));
+      for (const choice of buttons) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "play-choice";
@@ -833,8 +999,10 @@ export class PlaySession {
         button.style.color = colors.text;
         button.style.borderColor = colors.line ?? colors.cyan ?? "currentColor";
         button.disabled = this.busy || Boolean(this.world.call?.connecting);
-        button.addEventListener("click", () => this.choose(choice.text));
+        button.addEventListener("click", choice.run);
         list.append(button);
+        // Enter or Space goes on, so a scene reads without the mouse.
+        if (choice.main) setTimeout(() => button.isConnected && !document.activeElement?.closest?.("input, textarea, select") && button.focus(), 0);
       }
       choiceSlot.append(list);
     }

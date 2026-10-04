@@ -6,11 +6,14 @@ action: "[[ARTHUR_DISMISS]]"
 # ARTHUR_DISMISS — lines
 
 ## neutral
-- That'll be all. The manuscript won't edit itself.
-- Back to it, Ms. Vance.
+- That will be all. The manuscript won't edit itself.
+- Back to it. Friday, Ms. Vance.
+- Mind the door on your way out. It sticks. Everything here does.
 
 ## warm
-- Go on. And… thank you, Elena.
+- Go on. And... thank you, Elena.
+- Go home early. First days are long enough without me in them.
 
 ## irritated
 - We're done here.
+- Close the door behind you.

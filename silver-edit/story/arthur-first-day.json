@@ -1,0 +1,126 @@
+{
+	"id": "arthur-first-day",
+	"title": "Arthur \u00b7 first day",
+	"with": "Arthur",
+	"events": [
+		{
+			"id": "narrate-01",
+			"type": "narrate",
+			"text": "Arthur Thorne's office is glass on three sides. He doesn't look up when you knock."
+		},
+		{
+			"id": "line-02",
+			"type": "line",
+			"mood": "neutral",
+			"text": "Ms. Vance. You found us; most people drive past twice."
+		},
+		{
+			"id": "line-03",
+			"type": "line",
+			"mood": "neutral",
+			"text": "The Harrow manuscript is on your desk. I trust you'll find it... salvageable."
+		},
+		{
+			"id": "choice-15",
+			"type": "choice",
+			"options": [
+				{
+					"id": "option-07",
+					"text": "I read it on the drive up. The second act loses the sister.",
+					"events": [
+						{
+							"id": "set-04",
+							"type": "set",
+							"effect": "state trust +8"
+						},
+						{
+							"id": "line-05",
+							"type": "line",
+							"mood": "warm",
+							"text": "You read the middle. Hardly anyone reads the middle."
+						},
+						{
+							"id": "line-06",
+							"type": "line",
+							"mood": "neutral",
+							"text": "Good. Then you already know where the work is."
+						}
+					]
+				},
+				{
+					"id": "option-11",
+					"text": "Salvageable is a strong word for a book you bought.",
+					"events": [
+						{
+							"id": "set-08",
+							"type": "set",
+							"effect": "state trust +4"
+						},
+						{
+							"id": "set-09",
+							"type": "set",
+							"effect": "state irritation +5"
+						},
+						{
+							"id": "line-10",
+							"type": "line",
+							"mood": "irritated",
+							"text": "It is. I bought it anyway. That's most of this job."
+						}
+					]
+				},
+				{
+					"id": "option-14",
+					"text": "Thank you for taking a chance on me.",
+					"events": [
+						{
+							"id": "set-12",
+							"type": "set",
+							"effect": "state warmth +6"
+						},
+						{
+							"id": "line-13",
+							"type": "line",
+							"mood": "neutral",
+							"text": "Don't thank me yet. Thank me in a year, if we're both still here."
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "line-16",
+			"type": "line",
+			"mood": "neutral",
+			"text": "Notes by Friday. In the margins."
+		},
+		{
+			"id": "talk-17",
+			"type": "talk"
+		},
+		{
+			"id": "if-20",
+			"type": "if",
+			"if": "flag.arthur-opened-up",
+			"then": [
+				{
+					"id": "narrate-18",
+					"type": "narrate",
+					"text": "He looks at the empty chair by the window, just for a moment, before he goes back to work."
+				}
+			],
+			"else": [
+				{
+					"id": "narrate-19",
+					"type": "narrate",
+					"text": "He is reading again before you reach the door."
+				}
+			]
+		},
+		{
+			"id": "end-21",
+			"type": "end",
+			"then": "close"
+		}
+	]
+}

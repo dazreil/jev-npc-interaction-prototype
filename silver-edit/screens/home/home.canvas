@@ -94,6 +94,120 @@
 			"y": 600,
 			"width": 240,
 			"height": 135
+		},
+		{
+			"id": "home-keys",
+			"type": "text",
+			"x": 700,
+			"y": 1600,
+			"width": 560,
+			"height": 400,
+			"text": "## home-keys\nimage\nstatus: done\nmodel: krea-2\nsize: 1024x768\nseed: 31\nprompt: \"a worn Volvo car key ring with two old keys and a small leather fob, lying flat, seen from slightly above, in dim warm lamplight at night\"",
+			"color": "4"
+		},
+		{
+			"id": "home-keys-cut",
+			"type": "text",
+			"x": 1400,
+			"y": 1600,
+			"width": 520,
+			"height": 300,
+			"text": "## home-keys-cut\ncutout\nstatus: done\n# Free: keyed off the green screen.\nkeyLow: 0.5\nkeyHigh: 0.85\ndespill: strong\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "home-box",
+			"type": "text",
+			"x": 700,
+			"y": 2060,
+			"width": 560,
+			"height": 400,
+			"text": "## home-box\nimage\nstatus: done\nmodel: krea-2\nsize: 1024x768\nseed: 32\nprompt: \"a closed cardboard moving box, taped shut, with the word KITCHEN crossed out in marker, a white candle stub and the corner of an old leather-bound book poking out under the flap, seen straight on, in dim warm lamplight at night\"",
+			"color": "4"
+		},
+		{
+			"id": "home-box-cut",
+			"type": "text",
+			"x": 1400,
+			"y": 2060,
+			"width": 520,
+			"height": 300,
+			"text": "## home-box-cut\ncutout\nstatus: done\n# Free: keyed off the green screen.\nkeyLow: 0.5\nkeyHigh: 0.85\ndespill: strong\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "home-mirror",
+			"type": "text",
+			"x": 700,
+			"y": 2520,
+			"width": 560,
+			"height": 400,
+			"text": "## home-mirror\nimage\nstatus: done\nmodel: krea-2\nsize: 768x1024\nseed: 33\nprompt: \"a small oval wall mirror in a plain dark wooden frame, its glass dim and grey, reflecting nothing in particular, seen straight on, in dim warm lamplight at night\"",
+			"color": "4"
+		},
+		{
+			"id": "home-mirror-cut",
+			"type": "text",
+			"x": 1400,
+			"y": 2520,
+			"width": 520,
+			"height": 300,
+			"text": "## home-mirror-cut\ncutout\nstatus: done\n# Free: keyed off the green screen.\nkeyLow: 0.5\nkeyHigh: 0.85\ndespill: strong\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "made-home-keys-1",
+			"type": "file",
+			"file": "screens/home/art/home-keys/home-keys.webp",
+			"x": 1340,
+			"y": 1600,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-home-box-1",
+			"type": "file",
+			"file": "screens/home/art/home-box/home-box.webp",
+			"x": 1340,
+			"y": 2060,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-home-mirror-1",
+			"type": "file",
+			"file": "screens/home/art/home-mirror/home-mirror.webp",
+			"x": 1340,
+			"y": 2520,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-home-keys-cut-1",
+			"type": "file",
+			"file": "screens/home/art/home-keys-cut/home-keys-cut.webp",
+			"x": 2000,
+			"y": 1600,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-home-box-cut-1",
+			"type": "file",
+			"file": "screens/home/art/home-box-cut/home-box-cut.webp",
+			"x": 2000,
+			"y": 2060,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-home-mirror-cut-1",
+			"type": "file",
+			"file": "screens/home/art/home-mirror-cut/home-mirror-cut.webp",
+			"x": 2000,
+			"y": 2520,
+			"width": 240,
+			"height": 135
 		}
 	],
 	"edges": [
@@ -129,6 +243,96 @@
 			"fromNode": "home-background",
 			"fromSide": "right",
 			"toNode": "made-home-background-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-style-home-keys",
+			"fromNode": "krea-prop-green",
+			"toNode": "home-keys",
+			"label": "style"
+		},
+		{
+			"id": "e-home-keys-cut",
+			"fromNode": "home-keys",
+			"toNode": "home-keys-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "e-style-home-box",
+			"fromNode": "krea-prop-green",
+			"toNode": "home-box",
+			"label": "style"
+		},
+		{
+			"id": "e-home-box-cut",
+			"fromNode": "home-box",
+			"toNode": "home-box-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "e-style-home-mirror",
+			"fromNode": "krea-prop-green",
+			"toNode": "home-mirror",
+			"label": "style"
+		},
+		{
+			"id": "e-home-mirror-cut",
+			"fromNode": "home-mirror",
+			"toNode": "home-mirror-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "made-home-keys-1-edge",
+			"fromNode": "home-keys",
+			"fromSide": "right",
+			"toNode": "made-home-keys-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-home-box-1-edge",
+			"fromNode": "home-box",
+			"fromSide": "right",
+			"toNode": "made-home-box-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-home-mirror-1-edge",
+			"fromNode": "home-mirror",
+			"fromSide": "right",
+			"toNode": "made-home-mirror-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-home-keys-cut-1-edge",
+			"fromNode": "home-keys-cut",
+			"fromSide": "right",
+			"toNode": "made-home-keys-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-home-box-cut-1-edge",
+			"fromNode": "home-box-cut",
+			"fromSide": "right",
+			"toNode": "made-home-box-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-home-mirror-cut-1-edge",
+			"fromNode": "home-mirror-cut",
+			"fromSide": "right",
+			"toNode": "made-home-mirror-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"

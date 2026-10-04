@@ -45,3 +45,9 @@ replaceable by design and the voice is a single constructor argument.
 
 eSpeak NG remains installed as the fallback used when the Piper model cannot be
 loaded. Its GPL-3.0 terms continue to apply while it ships.
+
+## VNCCS (Visual Novel Character Creation Suite)
+
+- Source: https://github.com/AHEKOT/ComfyUI_VNCCS
+- License: MIT
+- Used: the method of its screen matte (`nodes/chroma_screen_matte.py`): unmixing edge pixels against the local actor colour and the screen colour, then removing the screen's share from their colour. Ported to JavaScript, in a simplified form, in `lib/composite.mjs` (`keyFull`). No code was copied as is.

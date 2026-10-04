@@ -696,6 +696,7 @@ The game's screens are built on one Obsidian Canvas, named in `Game.md` as `worl
 | An **arrow** from an object card to a ui note card inside the frame | Where that object's UI opens. If the ui card is outside the frame, the object's `panel` property is used. |
 | An **arrow** from an object or item card to an image card | **Click shape.** The object takes that picture's box and its shape: only the picture's solid pixels take clicks and show the hover glow; a click on its see-through part goes to what is behind. The object moves with the picture. An item's picture also goes when the item is picked up. |
 | `if: <condition>` on an image card | The picture shows only while the condition holds (set it in the editor's settings). |
+| `shade: 0..1` on an image card | Darkens the picture (1 is as drawn, 0 is black), so a prop sits in a dark room (set it in the editor's settings). |
 | `focus: [x, y]` on an image card | Where the picture sits inside its box, in percent (`[50, 50]` is the middle, the default). A picture fills its box (cover), so it slides only the way it sticks out. Set it with **Option-drag** in the editor (12.7). The click shape slides with it. |
 | **Cards outside screen groups** | Notes for people. The engine ignores them. |
 
@@ -707,6 +708,40 @@ Rules:
 - **The checker** reports a card that points to a missing file, and a card on a screen that is not an image, object, item, or ui note.
 - **A person or prop you click** (Arthur at his desk, a torch on a shelf): cut the picture out of a green screen (a `cutout` card), put it on the screen, put the object or item card on it, and draw an arrow from that card to the picture. The arrow label does not matter (`shape` is a good one).
 - **Screen notes still hold settings,** such as `title`, `objective`, and the overlay `ui`. A screen that is not on the world canvas falls back to its `ui` note and object `rect` values.
+
+### 7.3a Recorded voices (working now)
+
+A character with `voice:` in their note (a Kokoro voice on fal, such as `am_michael`, `am_liam`, `af_sky`, `am_onyx`) and an optional `voiceSpeed:` (default 1) speaks in that voice. `npm run voices:silver` (or `node scripts/voices.mjs` with `GAME_VAULT`) records every authored line once, about $0.02 per 1,000 characters, into `characters/<name>/voice/` as small MP3 files, listed in `<name>-voice.json`. `--dry-run` counts lines and cost without spending; `--character Arthur` does one character.
+
+- The game plays the recording when it shows that exact line, and the talking frames run while it plays.
+- Lines that change at play time (with the player's name) and narrated lines are not recorded; they use the live voice.
+- Change a line, the voice or the speed, run it again: only those lines are recorded again, and recordings no line uses are deleted.
+
+### 7.3c Moods and faces
+
+A line's tone is its portrait cue, so a character's own moods (warm, uneasy, cold…) can each have a face: a `## Cues` block in their portraits note maps a mood to a picture. With `restOnMood: true` in the portraits note, the character rests on the face of their current mood between lines (otherwise on the idle frame). `lib/emotions.json` (133 expressions in plain words, from VNCCS, MIT) gives mood prompts for the character template; edit recipes keep the likeness with a "keep" style that points at the reference picture instead of describing the face.
+
+### 7.3b Scenes and the story editor (working now)
+
+A **scene** is a timeline, like a Dialogic timeline: blocks read top to bottom. Scenes are made in the game (Cmd+E → **Story ✎**), not in Obsidian, and saved as `story/<id>.json` in the game folder. `js/engine/story.js` plays them; the vault check checks them.
+
+| Block | Does |
+| --- | --- |
+| Line | Someone says something: who (a character, or Elena), their mood (their face and talking loop follow it), the text. The player clicks **Continue** (or presses Enter). |
+| Narration | What happens, in the story's voice. |
+| Choice | Buttons for the player. Each option has its own branch of blocks, and can show only if a condition holds. |
+| If / else | Two branches, picked by a condition. |
+| Set | Changes a mood (state), a flag, a counter, an item, or the screen. Built from lists, not typed. |
+| Free talk | The player types and the AI answers (the character's actions), until a condition holds; then the scene goes on. Skipped if the condition already holds. |
+| Label / Jump | A place, and a jump to it. Renaming a label renames the jumps. |
+| End | Ends the scene: close the talk, or keep talking freely; an ending can end the game. |
+
+**The editor:**
+- Left: the scenes, a new scene, and the blocks to add. A block goes after the selected block, into the selected branch, or at the end.
+- Middle: the scene. Drag a block to move it, also into or out of a branch.
+- Right: the selected block's settings (people and moods from lists, conditions with suggestions and a check), or, with nothing selected, the scene's: its name, who it is with, **Starts when you click** (an object; it plays the first time, then they talk freely), and its problems.
+- **▶ Play from here** plays the scene from the selected block, saved or not. Undo, Redo, Save (Cmd+S), Delete.
+- A button or effect can also start a scene: `scene <id>`.
 
 ### 7.4 Make assets with AI on a canvas (working now)
 
@@ -740,7 +775,7 @@ prompt: warehouse car-park gate at dawn …
 | `style` | Holds `lora:` (`<url> @0.9`, one or a list), `prefix:`, `suffix:`, and `template:` (wraps the recipe prompt where it says `{prompt}`, for LoRAs trained on a fixed caption). An arrow from it adds these to a recipe. It is never run by itself. |
 | `image` | Text to image. `model:` `z-image` (Z-Image Turbo, about $0.004 a picture, best for empty pre-rendered rooms), `krea-2` (Krea 2 Turbo, about $0.006, best for 1990s-looking actors on a chroma-key screen), `flux-lora` (FLUX.1 [dev], takes FLUX.1 LoRAs, about $0.035) or `flux-2-lora` (FLUX.2 [dev], FLUX.2 LoRAs only). Also `size`, `seed`, `steps`, `guidance`, `width` (output scale). |
 | `edit` | Changes the pictures that point to it (the references), as its prompt says: the same person with a new mood, pose or angle. `model:` `qwen-edit` (Qwen Image Edit 2511, about $0.024, the default: kept Arthur's face best) or `flux2-edit` (FLUX.2 [dev] edit, about $0.021). A style card's `template` is a good place for "keep the same man, framing and green screen; only change {prompt}". Blinks are edits too: eyes half closed, eyes closed. |
-| `cutout` | No AI call, free. Keys the picture that points to it off its green or blue screen, trims it, and keeps it transparent (crunched with transparency kept), so a prop can be layered over a scene. `mirror: true` also writes `<name>-mirrored.webp`. `keyLow` and `keyHigh` (0–1, defaults 0.3 and 0.65) set how green a pixel must be to go see-through; raise them (`0.5`, `0.85`) when green light makes parts of the picture half see-through. `despill: strong` pulls the green tint off what is left, for chrome and other shiny things. Keep green out of the picture itself: a green lamp shade vanishes with the screen. The gate leaf, posts and call panel are cut-outs. Fed by an `animate` card instead, it keys every frame of the clip (one screen colour, one trim box) into a transparent limited animation: a walk cycle in place that the engine moves with `walk`, or a walk across the whole frame that `clip` plays (`arthur-cross-cut`, `dog-cross-cut`). |
+| `cutout` | No AI call, free. Keys the picture that points to it off its green or blue screen, trims it, and keeps it transparent (crunched with transparency kept), so a prop can be layered over a scene. `mirror: true` also writes `<name>-mirrored.webp`. The key works in three steps: a colour-difference matte, then edge unmixing (each edge pixel is split into the screen colour and the actor colour nearby, for soft, accurate hair and fabric edges), then colour cleaning (the screen's share is taken out of part-covered pixels, so no green fringe). The method is adapted from VNCCS (MIT; see THIRD_PARTY_NOTICES.md). `keyLow` and `keyHigh` (0–1, defaults 0.3 and 0.65) set how green a pixel must be to go see-through; raise them (`0.5`, `0.85`) when green light makes parts of the picture half see-through. `despill: strong` pulls the green tint off what is left, for chrome and other shiny things. Keep green out of the picture itself: a green lamp shade vanishes with the screen. The gate leaf, posts and call panel are cut-outs. Fed by an `animate` card instead, it keys every frame of the clip (one screen colour, one trim box) into a transparent limited animation: a walk cycle in place that the engine moves with `walk`, or a walk across the whole frame that `clip` plays (`arthur-cross-cut`, `dog-cross-cut`). |
 | `composite` | No AI call, free. With several `actor` arrows it makes one picture per actor, `<card>-<actor>.webp`, all with the same placement; `align: true` keys them together (one screen colour, one trim box) so moods and blinks line up exactly. An arrow labelled `room` (a picture of an empty room) and one labelled `actor` (an actor on a green or blue screen) come in. The runner keys the actor off the screen with a colour-difference key, trims them, and pastes them over the room with slightly wrong lighting and hard edges, like a 1990s FMV game. `shot` (`full` or `waist-up`), `height` and `x` (shares of the frame), and `seed` place the actor; `brightness`, `contrast`, `temperature`, `feather` and `shadow` override the seeded look. Crunch applies as for images. | If the `actor` arrow comes from an `animate` card, every frame of that card's clean clip is keyed (one screen colour read from the first frame, one trim box for all frames, so nothing flickers or jumps) and pasted over the still room; the result is a limited animation (`name.webp`, frames, `name.mp4`) with the animate card's frame count and speed and the composite card's crunch and colours. Animate the actor on the green screen, not the finished composite: the room then stays perfectly still, as in the original games.
 | `crop` | No AI call, free. Cuts a box out of the picture that points to it: `box: [x, y, w, h]` (in that picture's pixels, or a World.canvas card box when the picture is a scene picture, as `[482, 260, 323, 250]`), plus `bleed: 10` pixels all round. Used for the background layer of a talk portrait: the scene behind the character's click box. |
 | `animate` | Image to video with `model: h3-max-turbo` (about $0.13 for 5 s at 480p) or `minimax-h3` (about $0.25), then **limited animation**. An arrow from an image (a file card or an image recipe) is the first frame. An arrow labelled `end` is the last frame. With no `end`, the clip ends on its first frame, so it loops. |
@@ -1051,7 +1086,7 @@ Press **Cmd+E** in the desktop app (**Game → Edit screen**) to edit the screen
 - **Screen list** at the top of the panel: go to another screen to edit it (save or undo first).
 - **Screen settings** (nothing selected): the screen note's *Title*, *Objective* and *Overlay* (a UI note drawn over the whole screen). A screen with no note gets a **Make a screen note** button.
 - **Settings** for the selected part (each change can be undone, and is written on Save):
-  - **Picture:** which picture it shows, and *Show when* (a condition, saved as `if:` on its card).
+  - **Picture:** which picture it shows, *Show when* (a condition, saved as `if:` on its card), and *Shade*.
   - **Text card:** its text, and *Show when* (its first line `if …`).
   - **Exit:** its label, *Goes to* (the screen), and *Show when* (the arrow label `if …`).
   - **Object or item:** its note's `label`, `key`, `visible` (*Show when*, one condition per line) and `use` (*On click*, one effect per line). The note is shared, so this changes it on every screen.

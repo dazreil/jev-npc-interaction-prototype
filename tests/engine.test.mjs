@@ -363,6 +363,26 @@ test("a save can make a new note, but never over an existing file", async () => 
   }
 });
 
+test("the story editor saves and deletes scenes in story/, and nowhere else", async () => {
+  const { applyEdits } = await import("../lib/editor-save.mjs");
+  const { mkdtemp, readFile, rm, stat } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const vault = await mkdtemp(join(tmpdir(), "vault-"));
+  try {
+    const scene = { id: "hello", with: "Chloe", events: [{ id: "a", type: "line", text: "Hi." }], path: "story/hello.json" };
+    await applyEdits(vault, { scenes: { "story/hello.json": scene } });
+    const saved = JSON.parse(await readFile(join(vault, "story/hello.json"), "utf8"));
+    assert.deepEqual(saved, { id: "hello", with: "Chloe", events: [{ id: "a", type: "line", text: "Hi." }] }, "written without the compiler's path");
+    await assert.rejects(applyEdits(vault, { scenes: { "screens/x.json": scene } }), /Scenes live in story/);
+    await assert.rejects(applyEdits(vault, { scenes: { "story/bad.json": { nope: true } } }), /not a scene/);
+    await applyEdits(vault, { scenes: { "story/hello.json": null } });
+    await assert.rejects(stat(join(vault, "story/hello.json")), "null deletes it");
+  } finally {
+    await rm(vault, { recursive: true, force: true });
+  }
+});
+
 test("the screen editor can change one Properties value, such as an object's panel", async () => {
   const { editProps } = await import("../lib/editor-save.mjs");
   const block = ["---", "type: object", "panel:", "  - 40", "  - 20", "  - 560", "  - 320", "dim: \"#000\"", "---", "", "# Body"].join("\n");

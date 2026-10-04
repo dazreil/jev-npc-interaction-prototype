@@ -111,7 +111,7 @@
 			"y": 2800,
 			"width": 560,
 			"height": 360,
-			"text": "## miles-keep\nstyle\n# Holds Miles steady in edits: only the named part changes.\ntemplate: \"Keep the exact same person: same face, hair and clothes (Miles Parker, a hip NYC-born graphic designer in his early thirties, sharp undercut, vintage band t-shirt under a blazer, an easy grin). Keep the exact same framing, crop, camera position and pose, and the same flat, evenly lit chroma-key green screen background, lighting and camera quality. Only change {prompt}\"\n"
+			"text": "## miles-keep\nstyle\n# Holds Miles steady in edits: only the named part changes.\ntemplate: \"Keep the person in the reference image exactly as they are: the same identity, hair, clothes, framing, camera position and pose, and the same flat, evenly lit chroma-key green screen background. Change only {prompt}\"\n"
 		},
 		{
 			"id": "miles-friendly",
@@ -193,7 +193,8 @@
 			"y": 3700,
 			"width": 560,
 			"height": 340,
-			"text": "## miles-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat and unchanged\"\n"
+			"text": "## miles-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera, easy and charming, with small, natural mouth and head movements and a quick smile, locked-off static camera, the green screen background stays flat and unchanged\"",
+			"color": "4"
 		},
 		{
 			"id": "miles-friendly-talk",
@@ -272,7 +273,7 @@
 		{
 			"id": "talk-loop",
 			"type": "text",
-			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The night guard {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
+			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The person {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
 			"x": 0,
 			"y": 3700,
 			"width": 560,
@@ -476,15 +477,6 @@
 			"color": "4"
 		},
 		{
-			"id": "made-miles-actor-cut-1",
-			"type": "file",
-			"file": "characters/miles/art/miles-actor-cut/miles-actor-cut.webp",
-			"x": 1340,
-			"y": 6500,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "made-miles-backdrop-1",
 			"type": "file",
 			"file": "characters/miles/art/miles-backdrop/miles-backdrop.webp",
@@ -522,11 +514,151 @@
 			"height": 135
 		},
 		{
+			"id": "miles-talk-cut",
+			"type": "text",
+			"x": 700,
+			"y": 3280,
+			"width": 560,
+			"height": 320,
+			"text": "## miles-talk-cut\ncutout\nstatus: done\n# Free: every frame of the talking loop keyed off the green screen, for the talk portrait. Frame 01 is also the idle frame, so talking and resting line up.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "made-miles-talk-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-talk/miles-talk.webp",
+			"x": 1340,
+			"y": 3700,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-talk-2",
+			"type": "file",
+			"file": "characters/miles/art/miles-talk/miles-talk.mp4",
+			"x": 1600,
+			"y": 3700,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-miles-at-desk-cut-1",
 			"type": "file",
 			"file": "characters/miles/art/miles-at-desk-cut/miles-at-desk-cut.webp",
 			"x": 1940,
 			"y": 5000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-actor-cut-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-actor-cut/miles-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-talk-cut-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-talk-cut/miles-talk-cut.webp",
+			"x": 1340,
+			"y": 3280,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "miles-mood-source",
+			"type": "file",
+			"file": "characters/miles/art/miles-talk/miles-talk-06.webp",
+			"x": 0,
+			"y": 5800,
+			"width": 400,
+			"height": 300
+		},
+		{
+			"id": "miles-moods-note",
+			"type": "text",
+			"x": 0,
+			"y": 5600,
+			"width": 560,
+			"height": 160,
+			"text": "### Mood faces\nEach starts from the resting talk frame (frame 6), so it lines up with the talking loop. Expressions from the VNCCS emotion library (lib/emotions.json)."
+		},
+		{
+			"id": "miles-smitten-face",
+			"type": "text",
+			"x": 600,
+			"y": 5800,
+			"width": 560,
+			"height": 360,
+			"text": "## miles-smitten-face\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\n# The smitten face (our own wording; was VNCCS: shy-smile).\nprompt: \"the expression: they look charmed and a little bashful, with a faint crooked smile, eyes glancing down for a moment, and natural skin with no blush.\"",
+			"color": "4"
+		},
+		{
+			"id": "miles-smitten-face-cut",
+			"type": "text",
+			"x": 1300,
+			"y": 5800,
+			"width": 520,
+			"height": 260,
+			"text": "## miles-smitten-face-cut\ncutout\nstatus: done\n# Free: keyed off the green screen; the smitten face in the talk portrait.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "miles-irritated-face",
+			"type": "text",
+			"x": 600,
+			"y": 6220,
+			"width": 560,
+			"height": 360,
+			"text": "## miles-irritated-face\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\n# The irritated face (VNCCS: unimpressed).\nprompt: \"the expression: they looks unimpressed, with narrowed eyes and a flat closed mouth.\"",
+			"color": "4"
+		},
+		{
+			"id": "miles-irritated-face-cut",
+			"type": "text",
+			"x": 1300,
+			"y": 6220,
+			"width": 520,
+			"height": 260,
+			"text": "## miles-irritated-face-cut\ncutout\nstatus: done\n# Free: keyed off the green screen; the irritated face in the talk portrait.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "made-miles-irritated-face-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-irritated-face/miles-irritated-face.webp",
+			"x": 1240,
+			"y": 6220,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-irritated-face-cut-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-irritated-face-cut/miles-irritated-face-cut.webp",
+			"x": 1900,
+			"y": 6220,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-smitten-face-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-smitten-face/miles-smitten-face.webp",
+			"x": 1240,
+			"y": 5800,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-miles-smitten-face-cut-1",
+			"type": "file",
+			"file": "characters/miles/art/miles-smitten-face-cut/miles-smitten-face-cut.webp",
+			"x": 1900,
+			"y": 5800,
 			"width": 240,
 			"height": 135
 		}
@@ -1001,15 +1133,6 @@
 			"label": "cut out"
 		},
 		{
-			"id": "made-miles-actor-cut-1-edge",
-			"fromNode": "miles-actor-cut",
-			"fromSide": "right",
-			"toNode": "made-miles-actor-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "made-miles-backdrop-1-edge",
 			"fromNode": "miles-backdrop",
 			"fromSide": "right",
@@ -1042,10 +1165,124 @@
 			"label": "made"
 		},
 		{
+			"id": "e-miles-talk-cut",
+			"fromNode": "miles-talk",
+			"toNode": "miles-talk-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "made-miles-talk-1-edge",
+			"fromNode": "miles-talk",
+			"fromSide": "right",
+			"toNode": "made-miles-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-talk-2-edge",
+			"fromNode": "miles-talk",
+			"fromSide": "right",
+			"toNode": "made-miles-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-miles-at-desk-cut-1-edge",
 			"fromNode": "miles-at-desk-cut",
 			"fromSide": "right",
 			"toNode": "made-miles-at-desk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-actor-cut-1-edge",
+			"fromNode": "miles-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-miles-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-talk-cut-1-edge",
+			"fromNode": "miles-talk-cut",
+			"fromSide": "right",
+			"toNode": "made-miles-talk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-miles-smitten-face-src",
+			"fromNode": "miles-mood-source",
+			"toNode": "miles-smitten-face",
+			"label": "edit"
+		},
+		{
+			"id": "e-miles-smitten-face-keep",
+			"fromNode": "miles-keep",
+			"toNode": "miles-smitten-face",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-smitten-face-cut",
+			"fromNode": "miles-smitten-face",
+			"toNode": "miles-smitten-face-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "e-miles-irritated-face-src",
+			"fromNode": "miles-mood-source",
+			"toNode": "miles-irritated-face",
+			"label": "edit"
+		},
+		{
+			"id": "e-miles-irritated-face-keep",
+			"fromNode": "miles-keep",
+			"toNode": "miles-irritated-face",
+			"label": "style"
+		},
+		{
+			"id": "e-miles-irritated-face-cut",
+			"fromNode": "miles-irritated-face",
+			"toNode": "miles-irritated-face-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "made-miles-irritated-face-1-edge",
+			"fromNode": "miles-irritated-face",
+			"fromSide": "right",
+			"toNode": "made-miles-irritated-face-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-irritated-face-cut-1-edge",
+			"fromNode": "miles-irritated-face-cut",
+			"fromSide": "right",
+			"toNode": "made-miles-irritated-face-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-smitten-face-1-edge",
+			"fromNode": "miles-smitten-face",
+			"fromSide": "right",
+			"toNode": "made-miles-smitten-face-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-miles-smitten-face-cut-1-edge",
+			"fromNode": "miles-smitten-face-cut",
+			"fromSide": "right",
+			"toNode": "made-miles-smitten-face-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"

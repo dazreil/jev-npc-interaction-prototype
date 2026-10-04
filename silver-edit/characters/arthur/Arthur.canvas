@@ -111,7 +111,7 @@
 			"y": 2800,
 			"width": 560,
 			"height": 360,
-			"text": "## arthur-keep\nstyle\n# Holds Arthur steady in edits: only the named part changes.\ntemplate: \"Keep the exact same person: same face, hair and clothes (Arthur Thorne, publisher of Vellum & Vine, a tall man in his late forties, dark hair greying at the temples, rumpled tweed jacket, tired grief in his eyes). Keep the exact same framing, crop, camera position and pose, and the same flat, evenly lit chroma-key green screen background, lighting and camera quality. Only change {prompt}\"\n"
+			"text": "## arthur-keep\nstyle\n# Holds Arthur steady in edits: only the named part changes.\ntemplate: \"Keep the person in the reference image exactly as they are: the same identity, hair, clothes, framing, camera position and pose, and the same flat, evenly lit chroma-key green screen background. Change only {prompt}\"\n"
 		},
 		{
 			"id": "arthur-friendly",
@@ -193,7 +193,8 @@
 			"y": 3700,
 			"width": 560,
 			"height": 340,
-			"text": "## arthur-talk\nanimate\nstatus: idea\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat and unchanged\"\n"
+			"text": "## arthur-talk\nanimate\nstatus: done\nmodel: h3-max-turbo\nseconds: 5\nfrom: 0.5\nto: 4.5\nframes: 8\nfps: 8\npingpong: true\nprompt: \"talks into the camera, dry and a little guarded, with small, natural mouth and head movements, locked-off static camera, the green screen background stays flat and unchanged\"",
+			"color": "4"
 		},
 		{
 			"id": "arthur-friendly-talk",
@@ -272,7 +273,7 @@
 		{
 			"id": "talk-loop",
 			"type": "text",
-			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The night guard {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
+			"text": "## talk-loop\nstyle\n# For mood talking loops: keep the mood, keep the green screen still.\ntemplate: \"The person {prompt}, keeping exactly the same expression and mood, small natural mouth and head movements, locked-off static camera, the green screen background stays flat, evenly lit and unchanged\"\n",
 			"x": 0,
 			"y": 3700,
 			"width": 560,
@@ -495,15 +496,6 @@
 			"height": 135
 		},
 		{
-			"id": "made-arthur-actor-cut-1",
-			"type": "file",
-			"file": "characters/arthur/art/arthur-actor-cut/arthur-actor-cut.webp",
-			"x": 1340,
-			"y": 6500,
-			"width": 240,
-			"height": 135
-		},
-		{
 			"id": "made-arthur-at-desk-1",
 			"type": "file",
 			"file": "characters/arthur/art/arthur-at-desk/arthur-at-desk.webp",
@@ -513,11 +505,151 @@
 			"height": 135
 		},
 		{
+			"id": "arthur-talk-cut",
+			"type": "text",
+			"x": 700,
+			"y": 3280,
+			"width": 560,
+			"height": 320,
+			"text": "## arthur-talk-cut\ncutout\nstatus: done\n# Free: every frame of the talking loop keyed off the green screen, for the talk portrait. Frame 01 is also the idle frame, so talking and resting line up.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "made-arthur-talk-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-talk/arthur-talk.webp",
+			"x": 1340,
+			"y": 3700,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-talk-2",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-talk/arthur-talk.mp4",
+			"x": 1600,
+			"y": 3700,
+			"width": 240,
+			"height": 135
+		},
+		{
 			"id": "made-arthur-at-desk-cut-1",
 			"type": "file",
 			"file": "characters/arthur/art/arthur-at-desk-cut/arthur-at-desk-cut.webp",
 			"x": 1940,
 			"y": 5000,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-actor-cut-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-actor-cut/arthur-actor-cut.webp",
+			"x": 1340,
+			"y": 6500,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-talk-cut-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-talk-cut/arthur-talk-cut.webp",
+			"x": 1340,
+			"y": 3280,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "arthur-mood-source",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-talk/arthur-talk-04.webp",
+			"x": 0,
+			"y": 5800,
+			"width": 400,
+			"height": 300
+		},
+		{
+			"id": "arthur-moods-note",
+			"type": "text",
+			"x": 0,
+			"y": 5600,
+			"width": 560,
+			"height": 160,
+			"text": "### Mood faces\nEach starts from the resting talk frame (frame 2), so it lines up with the talking loop. Expressions from the VNCCS emotion library (lib/emotions.json)."
+		},
+		{
+			"id": "arthur-warm-face",
+			"type": "text",
+			"x": 600,
+			"y": 5800,
+			"width": 560,
+			"height": 360,
+			"text": "## arthur-warm-face\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\n# The warm face (VNCCS: light-smile).\nprompt: \"the expression: they has a faint gentle smile, with calm eyes and relaxed facial features.\"",
+			"color": "4"
+		},
+		{
+			"id": "arthur-warm-face-cut",
+			"type": "text",
+			"x": 1300,
+			"y": 5800,
+			"width": 520,
+			"height": 260,
+			"text": "## arthur-warm-face-cut\ncutout\nstatus: done\n# Free: keyed off the green screen; the warm face in the talk portrait.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "arthur-irritated-face",
+			"type": "text",
+			"x": 600,
+			"y": 6220,
+			"width": 560,
+			"height": 360,
+			"text": "## arthur-irritated-face\nedit\nstatus: done\nmodel: qwen-edit\nseed: 7\n# The irritated face (VNCCS: annoyed).\nprompt: \"the expression: they looks annoyed, with narrowed eyes, one eyebrow raised, and a flat closed mouth.\"",
+			"color": "4"
+		},
+		{
+			"id": "arthur-irritated-face-cut",
+			"type": "text",
+			"x": 1300,
+			"y": 6220,
+			"width": 520,
+			"height": 260,
+			"text": "## arthur-irritated-face-cut\ncutout\nstatus: done\n# Free: keyed off the green screen; the irritated face in the talk portrait.\ncrunch: 4\njpeg: 50",
+			"color": "4"
+		},
+		{
+			"id": "made-arthur-warm-face-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-warm-face/arthur-warm-face.webp",
+			"x": 1240,
+			"y": 5800,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-warm-face-cut-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-warm-face-cut/arthur-warm-face-cut.webp",
+			"x": 1900,
+			"y": 5800,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-irritated-face-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-irritated-face/arthur-irritated-face.webp",
+			"x": 1240,
+			"y": 6220,
+			"width": 240,
+			"height": 135
+		},
+		{
+			"id": "made-arthur-irritated-face-cut-1",
+			"type": "file",
+			"file": "characters/arthur/art/arthur-irritated-face-cut/arthur-irritated-face-cut.webp",
+			"x": 1900,
+			"y": 6220,
 			"width": 240,
 			"height": 135
 		}
@@ -1010,15 +1142,6 @@
 			"label": "made"
 		},
 		{
-			"id": "made-arthur-actor-cut-1-edge",
-			"fromNode": "arthur-actor-cut",
-			"fromSide": "right",
-			"toNode": "made-arthur-actor-cut-1",
-			"toSide": "left",
-			"toEnd": "arrow",
-			"label": "made"
-		},
-		{
 			"id": "made-arthur-at-desk-1-edge",
 			"fromNode": "arthur-at-desk",
 			"fromSide": "right",
@@ -1028,10 +1151,124 @@
 			"label": "made"
 		},
 		{
+			"id": "e-arthur-talk-cut",
+			"fromNode": "arthur-talk",
+			"toNode": "arthur-talk-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "made-arthur-talk-1-edge",
+			"fromNode": "arthur-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-talk-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-talk-2-edge",
+			"fromNode": "arthur-talk",
+			"fromSide": "right",
+			"toNode": "made-arthur-talk-2",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
 			"id": "made-arthur-at-desk-cut-1-edge",
 			"fromNode": "arthur-at-desk-cut",
 			"fromSide": "right",
 			"toNode": "made-arthur-at-desk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-actor-cut-1-edge",
+			"fromNode": "arthur-actor-cut",
+			"fromSide": "right",
+			"toNode": "made-arthur-actor-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-talk-cut-1-edge",
+			"fromNode": "arthur-talk-cut",
+			"fromSide": "right",
+			"toNode": "made-arthur-talk-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-arthur-warm-face-src",
+			"fromNode": "arthur-mood-source",
+			"toNode": "arthur-warm-face",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-warm-face-keep",
+			"fromNode": "arthur-keep",
+			"toNode": "arthur-warm-face",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-warm-face-cut",
+			"fromNode": "arthur-warm-face",
+			"toNode": "arthur-warm-face-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "e-arthur-irritated-face-src",
+			"fromNode": "arthur-mood-source",
+			"toNode": "arthur-irritated-face",
+			"label": "edit"
+		},
+		{
+			"id": "e-arthur-irritated-face-keep",
+			"fromNode": "arthur-keep",
+			"toNode": "arthur-irritated-face",
+			"label": "style"
+		},
+		{
+			"id": "e-arthur-irritated-face-cut",
+			"fromNode": "arthur-irritated-face",
+			"toNode": "arthur-irritated-face-cut",
+			"label": "cut out"
+		},
+		{
+			"id": "made-arthur-warm-face-1-edge",
+			"fromNode": "arthur-warm-face",
+			"fromSide": "right",
+			"toNode": "made-arthur-warm-face-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-warm-face-cut-1-edge",
+			"fromNode": "arthur-warm-face-cut",
+			"fromSide": "right",
+			"toNode": "made-arthur-warm-face-cut-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-irritated-face-1-edge",
+			"fromNode": "arthur-irritated-face",
+			"fromSide": "right",
+			"toNode": "made-arthur-irritated-face-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "made-arthur-irritated-face-cut-1-edge",
+			"fromNode": "arthur-irritated-face-cut",
+			"fromSide": "right",
+			"toNode": "made-arthur-irritated-face-cut-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"

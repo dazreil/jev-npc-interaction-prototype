@@ -14,6 +14,8 @@ fallbackAction: "[[MILES_JOKE]]"
 tree: "[[miles-tree.canvas]]"
 lines: "[[miles-lines]]"
 portraits: "[[miles-portraits]]"
+voice: "am_liam"
+voiceSpeed: 1.05
 ---
 
 # Miles Parker

@@ -14,6 +14,8 @@ fallbackAction: "[[ARTHUR_TALK_SHOP]]"
 tree: "[[arthur-tree.canvas]]"
 lines: "[[arthur-lines]]"
 portraits: "[[arthur-portraits]]"
+voice: "am_michael"
+voiceSpeed: 0.92
 ---
 
 # Arthur Thorne

@@ -8,10 +8,10 @@ Every link points to a real note or asset. Every file name is unique. Every char
 ## Stats
 | Thing | Count |
 | --- | --- |
-| Notes | 81 |
+| Notes | 84 |
 | Characters | 4 |
 | Actions | 21 |
 | Profiles | 4 |
-| Authored lines (about) | 90 |
+| Authored lines (about) | 155 |
 | Events | 2 |
 | Detector tests | 16 |

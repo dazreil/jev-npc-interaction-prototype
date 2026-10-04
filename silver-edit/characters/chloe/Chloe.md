@@ -14,6 +14,8 @@ fallbackAction: "[[CHLOE_TALK_VESPERA]]"
 tree: "[[chloe-tree.canvas]]"
 lines: "[[chloe-lines]]"
 portraits: "[[chloe-portraits]]"
+voice: "af_sky"
+voiceSpeed: 1
 ---
 
 # Chloe Miller

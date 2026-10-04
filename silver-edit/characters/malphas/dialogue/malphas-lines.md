@@ -6,7 +6,7 @@ character: "[[Malphas]]"
 # Malphas — other lines
 
 ## opening
-- There you are, little witch. You look so tired.
+- There you are, little witch. You took your time. Come into the light, where I can see how tired you are.
 
 ## name-acknowledgement
 - [[playerName]]. As if I could forget.

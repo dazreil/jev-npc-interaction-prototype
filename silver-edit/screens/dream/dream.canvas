@@ -94,6 +94,25 @@
 			"y": 600,
 			"width": 240,
 			"height": 135
+		},
+		{
+			"id": "dream-velvet",
+			"type": "text",
+			"x": 700,
+			"y": 1440,
+			"width": 560,
+			"height": 420,
+			"text": "## dream-velvet\nedit\nstatus: done\nmodel: qwen-edit\nsize: 1280x720\nseed: 42\n# The velvet void: the metal lamp goes, velvet folds come in behind.\nprompt: \"Remove the metal spotlight lamp at the top completely: the cold silver light now falls from darkness above, with no lamp. Behind everything, add huge heavy folds of black velvet like endless theatre curtains, softly lit at the edges, fading into darkness. Keep the floating silver silk ribbons, the dark floor, the pool of light in the middle, the camera and the framing exactly the same. No people.\"",
+			"color": "4"
+		},
+		{
+			"id": "made-dream-velvet-1",
+			"type": "file",
+			"file": "screens/dream/art/dream-velvet/dream-velvet.webp",
+			"x": 1340,
+			"y": 1440,
+			"width": 240,
+			"height": 135
 		}
 	],
 	"edges": [
@@ -129,6 +148,21 @@
 			"fromNode": "dream-background",
 			"fromSide": "right",
 			"toNode": "made-dream-background-1",
+			"toSide": "left",
+			"toEnd": "arrow",
+			"label": "made"
+		},
+		{
+			"id": "e-dream-velvet",
+			"fromNode": "dream-background",
+			"toNode": "dream-velvet",
+			"label": "edit"
+		},
+		{
+			"id": "made-dream-velvet-1-edge",
+			"fromNode": "dream-velvet",
+			"fromSide": "right",
+			"toNode": "made-dream-velvet-1",
 			"toSide": "left",
 			"toEnd": "arrow",
 			"label": "made"
