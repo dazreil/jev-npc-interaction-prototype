@@ -16,7 +16,7 @@ async function withRoot(run) {
   try {
     await run(root);
   } finally {
-    for (const name of ["TYPESAFE_API_KEY", "FAL_KEY", "REPLICATE_API_TOKEN", "OPENAI_API_KEY", "GEMINI_API_KEY", "ELEVENLABS_API_KEY"]) {
+    for (const name of ["TYPESAFE_API_KEY", "FAL_KEY", "REPLICATE_API_TOKEN", "OPENAI_API_KEY", "GEMINI_API_KEY", "ELEVENLABS_API_KEY", "RETRODIFFUSION_API_KEY"]) {
       if (saved[name] === undefined) delete process.env[name];
       else process.env[name] = saved[name];
     }
@@ -131,6 +131,63 @@ test("the Jev key test: a wrong key is refused, a good one is told the empty req
     setKey(root, "jev", "ts-wrong");
     await withFetch(() => new Response("{}", { status: 401 }), async () => {
       assert.equal((await testKey(root, "jev")).ok, false);
+    });
+  });
+});
+
+
+test("RetroDiffusion key check is free and status keeps the token private", async () => {
+  await withRoot(async (root) => {
+    setKey(root, "retrodiffusion", "rdpk-test");
+    const status = keyStatus(root).find((entry) => entry.id === "retrodiffusion");
+    assert.equal(status.hasKey, true);
+    assert.ok(!JSON.stringify(status).includes("rdpk-test"));
+    await withFetch(() => json({ balance: 1 }), async (calls) => {
+      assert.equal((await testKey(root, "retrodiffusion")).ok, true);
+      assert.equal(calls[0].url, "https://api.retrodiffusion.ai/v2/inferences/credits");
+      assert.equal(calls[0].init.headers["X-RD-Token"], "rdpk-test");
+      assert.equal(calls[0].init.method, undefined);
+    });
+    await withFetch(() => json({}, 401), async () => assert.equal((await testKey(root, "retrodiffusion")).ok, false));
+  });
+});
+
+test("RetroDiffusion submits once, polls, and decodes native pixel art", async () => {
+  await withRoot(async (root) => {
+    setKey(root, "retrodiffusion", "rdpk-test");
+    await withFetch((url) => url.endsWith("/inferences") ? json({ task_id: "task-1", status: "accepted" }) : json({ status: "succeeded", result: { base64_images: [PNG.toString("base64")] } }), async (calls) => {
+      assert.deepEqual((await makePicture(root, "rd-pro", { prompt: "a detective", size: "1024x768", seed: 42, images: [picture] })).bytes, PNG);
+      assert.equal(calls.length, 2);
+      assert.deepEqual(JSON.parse(calls[0].init.body), { prompt: "a detective", prompt_style: "rd_pro__default", width: 256, height: 192, num_images: 1, seed: 42, reference_images: [PNG.toString("base64")] });
+      const admission = calls[0].init.headers["Idempotency-Key"];
+      assert.ok(admission);
+      const saved = JSON.parse(await readFile(join(root, "build", "retrodiffusion-jobs", `${admission}.json`), "utf8"));
+      assert.equal(saved.task_id, "task-1");
+      assert.ok(!JSON.stringify(saved).includes("rdpk-test"));
+      assert.equal(calls[1].url, "https://api.retrodiffusion.ai/v2/inferences/tasks/task-1");
+    });
+  });
+});
+
+test("RetroDiffusion edits support hosted output and failed jobs never resubmit", async () => {
+  await withRoot(async (root) => {
+    setKey(root, "retrodiffusion", "rdpk-test");
+    await withFetch((url) => url.endsWith("/inferences") ? json({ task_id: "edit-1" }) : json({ status: "succeeded", result: { base64_images: [], output_urls: ["https://example.com/art.png"] } }), async (calls) => {
+      assert.deepEqual(await makePicture(root, "rd-pro-edit", { prompt: "a hat", images: [picture], size: "128x128" }), { url: "https://example.com/art.png" });
+      assert.equal(JSON.parse(calls[0].init.body).input_image, PNG.toString("base64"));
+    });
+    await withFetch((url) => url.endsWith("/inferences") ? json({ task_id: "failed-1" }) : json({ status: "failed", error: { code: "inference_failed" } }), async (calls) => {
+      await assert.rejects(makePicture(root, "rd-fast", { prompt: "x" }), /inference_failed/);
+      assert.equal(calls.filter((call) => call.init.method === "POST").length, 1);
+    });
+    await withFetch(() => json({}, 402), async () => {
+      await assert.rejects(makePicture(root, "rd-plus", { prompt: "x" }), /402/);
+    });
+    await withFetch(() => { throw new Error("must not submit"); }, async (calls) => {
+      await assert.rejects(makePicture(root, "rd-pro-edit", { prompt: "x" }), /arrow/);
+      await assert.rejects(makePicture(root, "rd-fast", { prompt: "x", images: [picture] }), /choose rd-pro/);
+      await assert.rejects(makePicture(root, "rd-fast", { prompt: "x", size: "16x16" }), /at least 64px/);
+      assert.equal(calls.length, 0);
     });
   });
 });

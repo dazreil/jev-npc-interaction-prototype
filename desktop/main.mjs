@@ -4,17 +4,56 @@
 // game page.
 //
 //   npm run app
-import { BrowserWindow, Menu, app, ipcMain, protocol, shell } from "electron";
+import { BrowserWindow, Menu, app, dialog, ipcMain, protocol, shell } from "electron";
 import { watch } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, extname, join, normalize } from "node:path";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { dirname, extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readApiKey } from "../lib/env.mjs";
 import { MAX_REQUEST_BYTES, jevStatus, parseJevBody, proxyJevDecision } from "../lib/jev-proxy.mjs";
 import { applyEdits } from "../lib/editor-save.mjs";
-import { VAULT_DIR, VAULT_URL_PREFIX, compileVault } from "../scripts/compile-vault.mjs";
+
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+// Select the game before importing the compiler: its vault paths are also
+// used by the editor and asset tools. Remember the choice between launches.
+const selectionFile = join(app.getPath("userData"), "selected-game.json");
+if (!process.env.GAME_VAULT) {
+  try {
+    const saved = JSON.parse(await readFile(selectionFile, "utf8"));
+    await readFile(join(ROOT, saved.folder, "Game.md"), "utf8");
+    process.env.GAME_VAULT = saved.folder;
+  } catch { /* First launch (or a removed game): use the default game. */ }
+}
+const { VAULT_DIR, VAULT_URL_PREFIX, compileVault } = await import("../scripts/compile-vault.mjs");
+const games = [];
+for (const entry of await readdir(ROOT, { withFileTypes: true })) {
+  if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+  try {
+    const text = await readFile(join(ROOT, entry.name, "Game.md"), "utf8");
+    const title = text.match(/^title:\s*(.+)$/m)?.[1]?.replace(/^["']|["']$/g, "") ?? entry.name;
+    games.push({ folder: entry.name, title });
+  } catch { /* Only game folders appear in the picker. */ }
+}
+games.sort((a, b) => a.title.localeCompare(b.title));
+async function selectGame(folder) {
+  if (resolve(ROOT, folder) === VAULT_DIR) return;
+  const choice = await dialog.showMessageBox(mainWindow, {
+    type: "question", buttons: ["Switch game", "Cancel"], defaultId: 0, cancelId: 1,
+    message: `Open ${games.find((game) => game.folder === folder)?.title ?? folder}?`,
+    detail: "The app will restart. Save any unfinished editor changes first."
+  });
+  if (choice.response !== 0) return;
+  try {
+    await mkdir(dirname(selectionFile), { recursive: true });
+    await writeFile(selectionFile, JSON.stringify({ folder }));
+    process.env.GAME_VAULT = folder;
+    app.relaunch();
+    app.quit();
+  } catch (error) {
+    dialog.showErrorBox("Could not switch games", error.message);
+  }
+}
 const SERVED = ["player/", "js/", "data/", VAULT_URL_PREFIX, "assets/fonts/", "assets/encounter/", "assets/vendor/"];
 const MIME = {
   ".mp3": "audio/mpeg",
@@ -84,6 +123,11 @@ function buildMenu() {
       {
         label: "Game",
         submenu: [
+          { label: "Open game", submenu: games.map((game) => ({
+            label: game.title, type: "radio", checked: resolve(ROOT, game.folder) === VAULT_DIR,
+            click: () => selectGame(game.folder)
+          })) },
+          { type: "separator" },
           { label: `Restart ${game}`, accelerator: "CmdOrCtrl+R", click: () => mainWindow?.reload() },
           { label: "Edit screen", accelerator: "CmdOrCtrl+E", click: () => mainWindow?.webContents.send("toggle-editor") },
           { role: "togglefullscreen" },
@@ -194,4 +238,4 @@ app.whenReady().then(async () => {
   }
 });
 
-app.on("mainWindow-all-closed", () => app.quit());
+app.on("window-all-closed", () => app.quit());

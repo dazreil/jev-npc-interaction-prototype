@@ -28,7 +28,8 @@
     "app:silver": "GAME_VAULT=silver-edit electron desktop/main.mjs",
     "workbench:silver": "GAME_VAULT=silver-edit node scripts/workbench.mjs",
     "app:smoke": "ENGINE_SMOKE_TEST=1 electron desktop/main.mjs",
-    "assets": "node scripts/assets.mjs"
+    "assets": "node scripts/assets.mjs",
+    "app:install-launcher": "node scripts/install-mac-launcher.mjs"
   },
   "dependencies": {
     "@echogarden/espeak-ng-emscripten": "0.3.5",

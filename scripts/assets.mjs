@@ -12,19 +12,23 @@
 // recipe. They are saved beside the canvas: a character's, scene's, or item's
 // own canvas (characters/arthur/Arthur.canvas) saves into its art/ folder;
 // the shared Assets.canvas saves into assets/generated/.
+import { execFile } from "node:child_process";
 import { watch } from "node:fs";
 import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, isAbsolute, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import { readEnv } from "../lib/env.mjs";
 import { VAULT_DIR } from "./compile-vault.mjs";
 import { animationSettings, applyResult, buildRequest, compositeOverrides, crunchSettings, latestOutput, readRecipes, recipePrompt } from "../lib/asset-canvas.mjs";
 import { SERVICES, SERVICE_MODELS, keyFor, makePicture } from "../lib/services.mjs";
-import { readLoras, readModels, resolveLora } from "../lib/library.mjs";
+import { readLoras, readModels, readWorkflow, resolveLora } from "../lib/library.mjs";
 import { chooseParameters, composite, key, keyFrames, seeded } from "../lib/composite.mjs";
 import { download, runFal } from "../lib/fal.mjs";
+
+const execFileAsync = promisify(execFile);
 import { crunch, crunchRgba, cropImage, ensureMinSize, extractFrames, finishFrames, makeLimitedAnimation, mediaSize, mirrorImage, toJpeg, toPng, toWebp } from "../lib/limited-animation.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -457,7 +461,8 @@ async function runRecipe(recipe, canvas) {
   }
   // A model on another service (Replicate, OpenAI, Google): the same prompt
   // and reference pictures go there, and the picture comes back the same way.
-  const other = added?.service === "replicate" ? added : SERVICE_MODELS[recipe.fields.model];
+  // A ComfyUI workflow (Comfy Cloud) goes the same way, with its workflow file.
+  const other = added?.service === "comfy" ? { ...added, model: `workflow ${added.id}`, workflow: readWorkflow(VAULT, added) } : added?.service === "replicate" ? added : SERVICE_MODELS[recipe.fields.model];
   if (other) {
     const wanted = recipe.kind === "animate" ? "video" : recipe.kind;
     if (other.kind !== wanted) throw new Error(`${recipe.fields.model} is a ${other.kind} model; this is a ${recipe.kind} card`);
@@ -470,12 +475,20 @@ async function runRecipe(recipe, canvas) {
     }
     await update(recipe.nodeId, { status: "running" });
     console.log(`[${recipe.name}] ${SERVICES[other.service].name} ${other.model} …`);
-    const result = await makePicture(ROOT, recipe.fields.model, { prompt, images: references, size: recipe.fields.size, seed: recipe.fields.seed, model: added ?? null, loras });
+    const result = await makePicture(ROOT, recipe.fields.model, { prompt, images: references, size: recipe.fields.size, seed: recipe.fields.seed, model: added ? other : null, loras });
     await mkdir(sourceDir(recipe.name), { recursive: true });
     if (recipe.kind === "animate") {
       // A clip: kept as the clean original, then made a limited animation.
-      if (!result.url) throw new Error("the service returned no clip");
-      const clip = await download(result.url, sourcePath(recipe.name, "mp4"));
+      if (!result.url && !result.bytes) throw new Error("the service returned no clip");
+      let clip = sourcePath(recipe.name, "mp4");
+      if (result.url) clip = await download(result.url, clip);
+      else if (result.ext && result.ext !== ".mp4") {
+        // A workflow can save a webm or gif: made an mp4 like the other services' clips.
+        const raw = join(sourceDir(recipe.name), `${recipe.name}.source-download${result.ext}`);
+        await writeFile(raw, result.bytes);
+        await execFileAsync("ffmpeg", ["-y", "-loglevel", "error", "-i", raw, "-pix_fmt", "yuv420p", "-movflags", "+faststart", clip]);
+        await rm(raw, { force: true });
+      } else await writeFile(clip, result.bytes);
       const { animation, frames, video } = await finishAnimation(recipe, clip);
       await update(recipe.nodeId, { status: "done", files: [vaultPath(animation), vaultPath(video)] });
       console.log(`[${recipe.name}] done → ${vaultPath(animation)} + ${frames.length} frames`);

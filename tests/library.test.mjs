@@ -58,3 +58,15 @@ test("a model or LoRA is checked before it is saved", async () => {
     await rm(vault, { recursive: true, force: true });
   }
 });
+
+test("FLUX 3: aspect ratio and resolution instead of a size, and its safety setting", () => {
+  const canvas = { nodes: [
+    { id: "a", type: "file", file: "x.png" },
+    { id: "e", type: "text", text: "## e\nedit\nmodel: flux-3-edit\nsafety: 4\nprompt: add rain" },
+    { id: "i", type: "text", text: "## i\nimage\nmodel: flux-3\nsize: 832x1248\nprompt: a pool" }
+  ], edges: [{ id: "1", fromNode: "a", toNode: "e" }] };
+  const [edit, image] = readRecipes(canvas);
+  assert.deepEqual(buildRequest(edit, { resolveImage: () => "data:x" }), { endpoint: "blackforestlabs/flux-3/edit-image", input: { prompt: "add rain", resolution: "1k", output_format: "png", safety_tolerance: 4, image_urls: ["data:x"], aspect_ratio: "auto" } });
+  assert.equal(buildRequest(image).input.aspect_ratio, "2:3", "832x1248 is 2:3");
+  assert.equal(buildRequest(image).input.safety_tolerance, undefined, "fal's default unless the card sets it");
+});

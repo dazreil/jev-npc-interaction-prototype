@@ -113,7 +113,7 @@ export function createCharactersEditor({ session, host, reloadVault, onClose = (
     if (!host?.studio) return fail("Making art works in the desktop app (npm run app).");
     if (!refinish && !FREE.has(card.kind)) {
       const price = cost(card);
-      const ask = `Make ${card.name} with ${card.model ?? "the default model"}${price ? `, about $${price.toFixed(3)}` : ""}? This calls fal and costs money.`;
+      const ask = `Make ${card.name} with ${card.model ?? "the default model"}${price ? `, about $${price.toFixed(3)}` : ""}? This calls the selected AI service and costs money.`;
       if (!confirm(ask)) return;
     }
     busy.add(card.name);
@@ -311,7 +311,7 @@ export function createCharactersEditor({ session, host, reloadVault, onClose = (
       importInto(name, true);
     });
     return el("div", {}, [
-      el("p", { className: "story-hint", textContent: `${canvasPath()} · Make calls fal and costs money (it asks first, with the price). Cut-outs, crops, composites and Redo finish are free. An imported picture becomes the card's result, so the cards that build on it work as usual.` }),
+      el("p", { className: "story-hint", textContent: `${canvasPath()} · Make calls the selected AI service and costs money (it asks first, with the price). Cut-outs, crops, composites and Redo finish are free. An imported picture becomes the card's result, so the cards that build on it work as usual.` }),
       el("div", { className: "story-row" }, [newName, importNew]),
       el("div", { className: "art-grid" }, cards().map(tile))
     ]);
@@ -392,6 +392,12 @@ export function createCharactersEditor({ session, host, reloadVault, onClose = (
       ]);
       select.onchange = () => saveCard(card, { model: select.value });
       rows.push(field("Model", select));
+      // FLUX 3's own safety setting: 0 strictest … 4 most permissive (fal's default is 2).
+      if (modelFor(card.model)?.shape === "flux3") {
+        const safety = el("select", {}, [["", "2 (fal's default)"], ...["0", "1", "3", "4"].map((value) => [value, value])].map(([value, label]) => el("option", { value, textContent: label, selected: String(card.fields.safety ?? "") === value })));
+        safety.onchange = () => saveCard(card, { safety: safety.value === "" ? null : Number(safety.value) });
+        rows.push(field("Safety tolerance (0 strictest, 4 most permissive)", safety));
+      }
     }
     if (["image", "edit", "animate"].includes(card.kind)) {
       const prompt = el("textarea", { rows: 4, value: card.prompt });

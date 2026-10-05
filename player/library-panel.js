@@ -132,6 +132,22 @@ export function createLibraryPanel({ session, host, reloadVault, onClose = () =>
     const m = editing;
     const isNew = !added().some((model) => model.id === m.originalId);
     const params = el("textarea", { rows: 3, value: m.params ? JSON.stringify(m.params, null, 1) : "", placeholder: '{ "num_inference_steps": 28 }' });
+    const comfy = m.service === "comfy";
+    // A ComfyUI workflow: pasted or read from a file, exported with Export (API).
+    const workflow = el("textarea", { rows: 6, value: m.workflowText ?? "", placeholder: m.workflow && typeof m.workflow === "string" ? `Kept: ${m.workflow}. Paste a new one to replace it.` : '{ "3": { "class_type": "KSampler", "inputs": { … } }, … }' });
+    workflow.oninput = () => (editing.workflowText = workflow.value);
+    const workflowFile = el("input", { type: "file", accept: ".json,application/json" });
+    workflowFile.onchange = async () => {
+      const file = workflowFile.files?.[0];
+      if (!file) return;
+      editing.workflowText = workflow.value = await file.text();
+    };
+    const inputs = { ...(m.inputs ?? {}) };
+    const inputField = (name, label, hint) => {
+      const input = el("input", { value: inputs[name] ?? "", placeholder: "found by the app", spellcheck: false });
+      input.oninput = () => (editing.inputs = { ...(editing.inputs ?? {}), [name]: input.value.trim() });
+      return field(label, input, hint);
+    };
     const saveIt = () => {
       let parsed = null;
       try {
@@ -139,25 +155,57 @@ export function createLibraryPanel({ session, host, reloadVault, onClose = () =>
       } catch {
         return fail("Extra inputs must be JSON, such as { \"steps\": 28 }.");
       }
-      const model = Object.fromEntries(Object.entries({ ...m, params: parsed }).filter(([key, value]) => key !== "originalId" && value !== "" && value !== null && value !== undefined));
-      if (model.service === "fal") delete model.model;
-      if (model.service === "replicate") delete model.endpoint;
+      let graph = null;
+      if (comfy && m.workflowText?.trim()) {
+        try {
+          graph = JSON.parse(m.workflowText);
+        } catch {
+          return fail("The workflow is not JSON. In ComfyUI, use Workflow → Export (API).");
+        }
+        if (graph.nodes && graph.links) return fail("This is the normal workflow file. In ComfyUI, use Workflow → Export (API) instead.");
+      }
+      const model = Object.fromEntries(Object.entries({ ...m, params: comfy ? null : parsed }).filter(([key, value]) => !["originalId", "workflowText", "section"].includes(key) && value !== "" && value !== null && value !== undefined));
+      if (graph) model.workflow = graph;
+      if (model.inputs) model.inputs = Object.fromEntries(Object.entries(model.inputs).filter(([, value]) => value));
+      if (model.service !== "replicate") delete model.model;
+      if (model.service !== "fal") delete model.endpoint;
+      if (comfy) delete model.loras;
+      if (!comfy) {
+        delete model.workflow;
+        delete model.inputs;
+      }
       const list = added().filter((item) => item.id !== m.originalId).map(strip);
       saveList("models", [...list, model]);
     };
     return el("div", { className: "library-form" }, [
       el("h3", { textContent: isNew ? "Add a model" : `Edit ${m.originalId}` }),
       field("Id (what cards use as model:)", bound("id", { placeholder: "flux-dev-ultra" })),
-      field("Service", choice("service", [["fal", "fal"], ["replicate", "Replicate"]], render)),
-      field("Makes", choice("kind", [["image", "pictures"], ["edit", "edits of a picture"], ["video", "video from a picture"], ["voice", "voices"]], render)),
+      field("Service", choice("service", [["fal", "fal"], ["replicate", "Replicate"], ["comfy", "Comfy Cloud (a ComfyUI workflow)"]], () => {
+        if (editing.service === "comfy" && editing.kind === "voice") editing.kind = "image";
+        render();
+      })),
+      field("Makes", choice("kind", [["image", "pictures"], ["edit", "edits of a picture"], ["video", "video from a picture"], ...(comfy ? [] : [["voice", "voices"]])], render)),
       m.service === "fal"
         ? field("fal endpoint", bound("endpoint", { placeholder: "fal-ai/flux/dev" }), "From the model's fal page: the part after fal.ai/models/.")
-        : field("Replicate model", bound("model", { placeholder: "black-forest-labs/flux-dev (or owner/name:version)" })),
+        : m.service === "replicate"
+          ? field("Replicate model", bound("model", { placeholder: "black-forest-labs/flux-dev (or owner/name:version)" }))
+          : el("div", {}, [
+            field("Workflow (API format)", workflow, "In ComfyUI: Workflow → Export (API). Paste it here, or pick the file below. It is saved as library/workflows/<id>.json."),
+            workflowFile,
+            el("p", { className: "story-hint", textContent: "Where the card's values go, as node id.input (the node numbers are in the exported file). Leave a box empty and the app finds it: the prompt box wired to the sampler, the first Load Image, the seed, the empty latent's size." }),
+            inputField("prompt", "Prompt goes to", "Such as 6.text"),
+            m.kind === "image" ? null : inputField("image", "Input picture goes to", "A Load Image node, such as 10.image. The card's picture is uploaded first."),
+            inputField("seed", "Seed goes to", "Such as 3.seed. A random seed is used when the card has none."),
+            inputField("width", "Width goes to", "Such as 5.width. From the card's size."),
+            inputField("height", "Height goes to", "Such as 5.height."),
+            inputField("output", "Result node (optional)", "The Save Image node to keep, if the workflow saves more than one."),
+            el("p", { className: "story-hint", textContent: "Runs on Comfy Cloud: it needs a Comfy key (Keys tab) and a paid Comfy Cloud plan. Custom nodes must be ones Comfy Cloud has." })
+          ]),
       field(m.kind === "voice" ? "Cost per 1,000 characters ($)" : `Cost per ${m.kind === "video" ? "second" : "picture"} ($)`, bound("cost", { type: "number", min: 0, step: 0.001 })),
-      m.kind === "edit" || m.kind === "video" ? field("Picture input name", bound("imageField", { placeholder: m.service === "fal" ? (m.kind === "edit" ? "image_urls" : "image_url") : m.kind === "edit" ? "input_image" : "start_image" }), "The model's field for the input picture, if it is not the usual one.") : null,
+      !comfy && (m.kind === "edit" || m.kind === "video") ? field("Picture input name", bound("imageField", { placeholder: m.service === "fal" ? (m.kind === "edit" ? "image_urls" : "image_url") : m.kind === "edit" ? "input_image" : "start_image" }), "The model's field for the input picture, if it is not the usual one.") : null,
       m.kind === "voice" ? field("Text input name", bound("textField", { placeholder: "text" })) : null,
       m.kind === "voice" ? field("Voice input name", bound("voiceField", { placeholder: "voice" })) : null,
-      m.kind === "image" ? el("label", { className: "story-field check" }, [
+      m.kind === "image" && !comfy ? el("label", { className: "story-field check" }, [
         (() => {
           const box = el("input", { type: "checkbox", checked: Boolean(m.loras) });
           box.onchange = () => (editing.loras = box.checked);
@@ -165,7 +213,7 @@ export function createLibraryPanel({ session, host, reloadVault, onClose = () =>
         })(),
         el("span", { textContent: m.service === "fal" ? "Takes LoRAs (a loras list, like fal's FLUX LoRA models)" : "Takes a LoRA (lora_weights / lora_scale)" })
       ]) : null,
-      field("Extra inputs (JSON)", params, "Sent with every call, such as steps or guidance."),
+      comfy ? null : field("Extra inputs (JSON)", params, "Sent with every call, such as steps or guidance."),
       el("div", { className: "story-row" }, [button("Save model", saveIt, { className: "primary" }), button("Cancel", () => { editing = null; render(); })])
     ]);
   }
